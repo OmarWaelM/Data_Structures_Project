@@ -131,6 +131,8 @@
     <ClInclude Include="Car.h" />
     <ClInclude Include="Hospital.h" />
     <ClInclude Include="LinkedQueue.h" />
+    <ClInclude Include="ModifiedPriQ.h" />
+    <ClInclude Include="ModifiedQ.h" />
     <ClInclude Include="Node.h" />
     <ClInclude Include="Organizer.h" />
     <ClInclude Include="Patient.h" />
@@ -138,6 +140,7 @@
     <ClInclude Include="priQueue.h" />
     <ClInclude Include="QueueADT.h" />
     <ClInclude Include="StackADT.h" />
+    <ClInclude Include="UI.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Car.cpp" />
@@ -145,6 +148,7 @@
     <ClCompile Include="Organizer.cpp" />
     <ClCompile Include="Patient.cpp" />
     <ClCompile Include="Source.cpp" />
+    <ClCompile Include="UI.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

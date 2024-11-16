@@ -1,5 +1,5 @@
 #include <iostream>
-#include "priQueue.h"
+#include "Organizer.h"
 using namespace std;
 
 int main() 
