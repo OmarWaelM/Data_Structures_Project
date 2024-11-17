@@ -30,9 +30,6 @@
     <ClInclude Include="Patient.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="LinkedQueue.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="StackADT.h">
       <Filter>ADT</Filter>
     </ClInclude>
@@ -51,6 +48,18 @@
     <ClInclude Include="priQueue.h">
       <Filter>ADT</Filter>
     </ClInclude>
+    <ClInclude Include="LinkedQueue.h">
+      <Filter>ADT</Filter>
+    </ClInclude>
+    <ClInclude Include="UI.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ModifiedPriQ.h">
+      <Filter>ADT</Filter>
+    </ClInclude>
+    <ClInclude Include="ModifiedQ.h">
+      <Filter>ADT</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Hospital.cpp">
@@ -67,6 +76,9 @@
     </ClCompile>
     <ClCompile Include="Source.cpp">
       <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="UI.cpp">
+      <Filter>Header Files</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>
