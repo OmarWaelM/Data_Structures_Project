@@ -9,6 +9,7 @@
 #include "ModifiedPriQ.h"
 
 using namespace std;
+#include<iostream>
 
 struct CancellationReq
 {
@@ -33,6 +34,33 @@ private:
 
 public:
 	//Member Functions
+        //Constructor
+        Organizer();
+
+        //Adding a Back Car based on its priority
+        void AddBackCar(const string& Car, int Priority);
+
+       //Removing the highest priority from the Back_Cars queue
+       bool RemoveBackCar(string& Car);
+
+       //Adding a Hospital to the hospital list
+       void AddHospital(const string& Hospital_Name);
+
+       //Printing out the hospitals in the hospital list
+       void PrintHospitals()const;
+
+      //Adding an entry to the finished list
+      void AddFinished(const string& Finished_Entry);
+
+     //Removing an entry from the finished list
+     bool RemoveFinished(string& Finished_Entry);
+
+     //Print items in Finished List
+     void DisplayFinishedList()const;
+
+
+
+     ~Organizer();
 
 
 
