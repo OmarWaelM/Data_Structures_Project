@@ -44,7 +44,8 @@ Single Node Case:
 
 #include "Node.h"
 #include "QueueADT.h"
-
+#include <iostream>
+using namespace std;
 template <typename T>
 class LinkedQueue:public QueueADT<T>
 {
