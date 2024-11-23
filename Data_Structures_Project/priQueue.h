@@ -1,6 +1,39 @@
 #pragma once
-#include "priNode.h"
 
+
+template < typename T>
+class priNode
+{
+private :
+	T item;		// A data item
+	int pri;	//priority of the item
+	priNode<T>* next; // Pointer to next node
+public :
+	priNode(const T& r_Item, int PRI)
+	{
+		setItem(r_Item, PRI);
+		next = nullptr;
+	}
+	void setItem(const T& r_Item, int PRI)
+	{
+		item = r_Item;
+		pri = PRI;
+	}
+	void setNext(priNode<T>* nextNodePtr)
+	{		next = nextNodePtr; 	}
+	
+	T getItem(int& PRI) const
+	{
+		PRI = pri;
+		return item;
+	}
+	
+	priNode<T>* getNext() const 
+	{		return next;	}
+	
+	int getPri() const
+	{		return pri; 	}
+}; // end Node
 
 //This class impelements the priority queue as a sorted list (Linked List)
 //The item with highest priority is at the front of the queue
