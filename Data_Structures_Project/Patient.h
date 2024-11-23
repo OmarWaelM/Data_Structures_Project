@@ -9,11 +9,12 @@ class Patient
 private:
 	//Patient data members
 	patientType ptype;
+	int patientPri;
 	int reqTime;
 	int pickupTime;
 	int nearestHospital;
 	int distToHospital;
 public:
 	patientType getPatientType();
-
+	int getPatientPriority();
 };
