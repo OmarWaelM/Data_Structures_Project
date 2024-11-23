@@ -26,8 +26,8 @@ private:
 	LinkedQueue<Patient*> FinishedList;
 	priQueue<Car*> BackCars;
 	ModifiedPriQ<Car*> OutCars;	
-	Hospital* HospitalList;
-
+	Hospital HospitalList;
+	int* DistancesMatrix;
 	//General data members
 	int timeStep;
 	UI GUI;
