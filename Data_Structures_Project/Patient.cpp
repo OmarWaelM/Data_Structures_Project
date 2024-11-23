@@ -14,7 +14,7 @@ Patient::Patient(int id, int requestTime, int hospital, int dist, patientType ty
 
 patientType Patient::getPatientType()
 {
-	return patientType();
+	return pType;
 }
 
 int Patient::getPatientPriority()

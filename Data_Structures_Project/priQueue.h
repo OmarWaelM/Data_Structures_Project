@@ -1,5 +1,5 @@
 #pragma once
-
+#include <iostream>
 
 template < typename T>
 class priNode
@@ -100,4 +100,19 @@ public:
     bool isEmpty() const {
         return head == nullptr;
     }
+
+    friend ostream& operator << <T>(ostream& os, priQueue<T>& q);
 };
+
+template <typename T>
+ostream& operator <<(ostream& os, priQueue<T>& q)
+{
+    int i;
+    priNode<T>* current = q.head;
+    while (current)
+    {
+        os << *current->getItem(i) << " ";
+        current = current->getNext();
+    }
+    return os;
+}

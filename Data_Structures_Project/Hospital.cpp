@@ -33,9 +33,9 @@ void Hospital::assignPatientToCar(Patient* patient, Car* car)
 ostream& operator <<(ostream& os, Hospital& h)
 {
 	os << "==============	  Hospital #" << h.hospitalID << " data   ==============" << endl;
-	os << h.EPList.getCount() << " EP requests: " << endl;
-	os << h.SPList.getCount() << " SP requests: " << endl;
-	os << h.NPList.getCount() << " NP requests: " << endl;	
+	os << h.EPList.getCount() << " EP requests: " << h.EPList << endl;
+	os << h.SPList.getCount() << " SP requests: " << h.SPList << endl;
+	os << h.NPList.getCount() << " NP requests: " << h.NPList << endl;	
 	os << "Free Cars: " << h.SCList.getCount() << " SCars, " << h.NCList.getCount() << " NCars" << endl;
 	os << "==============	Hospital #" << h.hospitalID << " data end  =============" << endl;
 	return os;

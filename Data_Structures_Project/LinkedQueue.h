@@ -40,6 +40,9 @@ Single Node Case:
 
 #ifndef LINKED_QUEUE_
 #define LINKED_QUEUE_
+#include <iostream>
+
+using namespace std;
 
 template < typename T>
 class Node
@@ -119,6 +122,8 @@ public :
 	bool peek(T& frntEntry)  const;	
 	int getCount() { return count; }
 	~LinkedQueue();
+
+	friend ostream& operator << <T>(ostream& os, LinkedQueue& q);
 
 	//copy constructor
 	LinkedQueue(const LinkedQueue<T> & LQ);
@@ -259,6 +264,18 @@ LinkedQueue<T>::LinkedQueue(const LinkedQueue<T> & LQ)
 		NodePtr = NodePtr->getNext();
 		count++;
 	}	
+}
+
+template <typename T>
+ostream& operator <<(ostream& os, LinkedQueue<T>& q)
+{
+	Node<T>* current = q.frontPtr;
+	while (current)
+	{
+		os << *current->getItem() << " ";
+		current = current->getNext();
+	}
+	return os;
 }
 
 #endif
