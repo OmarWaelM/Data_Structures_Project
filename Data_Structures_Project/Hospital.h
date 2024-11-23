@@ -1,10 +1,11 @@
 #pragma once
+#include "UI.h"
 #include "Patient.h"
 #include "Car.h"
-#include "Organizer.h"
 #include "LinkedQueue.h"
 #include "priQueue.h"
 #include "ModifiedQ.h"
+#include "ModifiedPriQ.h"
 
 class Hospital
 {
@@ -19,7 +20,8 @@ private:
 
 public:
 	//Member Function
-
+	void assignPatientToList(Patient* patient);
+	void assignPatientToCar(Patient* patient, Car* car);
 
 };
 

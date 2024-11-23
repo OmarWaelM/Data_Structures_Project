@@ -41,14 +41,73 @@ Single Node Case:
 #ifndef LINKED_QUEUE_
 #define LINKED_QUEUE_
 
-
-#include "Node.h"
-#include "QueueADT.h"
-
-template <typename T>
-class LinkedQueue:public QueueADT<T>
+template < typename T>
+class Node
 {
 private :
+	T item; // A data item
+	Node<T>* next; // Pointer to next node
+public :
+	Node();
+	Node( const T & r_Item);	
+	Node( const T & r_Item, Node<T>* nextNodePtr);
+	void setItem( const T & r_Item);
+	void setNext(Node<T>* nextNodePtr);
+	T getItem() const ;
+	Node<T>* getNext() const ;
+}; // end Node
+
+template < typename T>
+Node<T>::Node() 
+{
+	next = nullptr;
+} 
+
+template < typename T>
+Node<T>::Node( const T& r_Item)
+{
+	item = r_Item;
+	next = nullptr;
+} 
+
+template < typename T>
+Node<T>::Node( const T& r_Item, Node<T>* nextNodePtr)
+{
+	item = r_Item;
+	next = nextNodePtr;
+}
+template < typename T>
+void Node<T>::setItem( const T& r_Item)
+{
+	item = r_Item;
+} 
+
+template < typename T>
+void Node<T>::setNext(Node<T>* nextNodePtr)
+{
+	next = nextNodePtr;
+} 
+
+template < typename T>
+T Node<T>::getItem() const
+{
+	return item;
+} 
+
+template < typename T>
+Node<T>* Node<T>::getNext() const
+{
+	return next;
+} 
+
+
+
+
+template <typename T>
+class LinkedQueue
+{
+private :
+	
 	Node<T>* backPtr;
 	Node<T>* frontPtr;
 public :
@@ -58,6 +117,9 @@ public :
 	bool dequeue(T& frntEntry);  
 	bool peek(T& frntEntry)  const;	
 	~LinkedQueue();
+
+	//copy constructor
+	LinkedQueue(const LinkedQueue<T> & LQ);
 };
 /////////////////////////////////////////////////////////////////////////////////////////
 
@@ -140,12 +202,9 @@ bool LinkedQueue<T>:: dequeue(T& frntEntry)
 	delete nodeToDeletePtr;
 
 	return true;
+
 }
-
-
-
 /////////////////////////////////////////////////////////////////////////////////////////
-
 /*
 Function: peek
 copies the front of this queue to the passed param. The operation does not modify the queue.
@@ -153,7 +212,6 @@ copies the front of this queue to the passed param. The operation does not modif
 Input: None.
 Output: The front of the queue.
 */
-
 template <typename T>
 bool LinkedQueue<T>:: peek(T& frntEntry) const 
 {
@@ -165,21 +223,38 @@ bool LinkedQueue<T>:: peek(T& frntEntry) const
 
 }
 ///////////////////////////////////////////////////////////////////////////////////
-
+/*
+Function: destructor
+removes all nodes from the queue by dequeuing them
+*/
 template <typename T>
 LinkedQueue<T>::~LinkedQueue()
 {
-	//Note that the cout statements here is just for learning purpose
-	//They should be normally removed from the destructor
-	cout<<"\nStarting LinkedQueue destructor...";
-	cout<<"\nFreeing all nodes in the queue...";
-
 	//Free all nodes in the queue
 	T temp;
 	while(dequeue(temp));
-	
-	cout<<"\n Is LinkedQueue Empty now?? ==> "<<boolalpha<<isEmpty();
-	cout<<"\nEnding LinkedQueue destructor..."<<endl;
+}
+/////////////////////////////////////////////////////////////////////////////////////////
+/*
+Function: Copy constructor
+To avoid shallow copy, 
+copy constructor is provided
+
+Input: LinkedQueue<T>: The Queue to be copied
+Output: none
+*/
+
+template <typename T>
+LinkedQueue<T>::LinkedQueue(const LinkedQueue<T> & LQ)
+{	
+	frontPtr = backPtr = nullptr;
+	Node<T>* NodePtr = LQ.frontPtr;	//start at the front node in LQ
+	while (NodePtr)
+	{
+		enqueue(NodePtr->getItem());	//get data of each node and enqueue it in this queue 
+		NodePtr = NodePtr->getNext();
+	}	
 }
 
 #endif
+

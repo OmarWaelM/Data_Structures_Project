@@ -1,12 +1,20 @@
 #pragma once
+enum patientType{
+	SP,
+	NP,
+	EP
+};
 class Patient
 {
 private:
 	//Patient data members
-	char type;
+	patientType ptype;
+	int patientPri;
 	int reqTime;
 	int pickupTime;
 	int nearestHospital;
 	int distToHospital;
+public:
+	patientType getPatientType();
+	int getPatientPriority();
 };
-
