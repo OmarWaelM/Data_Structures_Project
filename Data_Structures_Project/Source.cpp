@@ -1,13 +1,16 @@
 #include <iostream>
-#include "Organizer.h"
-#include "UI.h"
-#include "Patient.h"
-#include "Car.h"
-#include "Hospital.h"
+#include <Windows.h>
 #include "LinkedQueue.h"
 #include "priQueue.h"
 #include "ModifiedQ.h"
 #include "ModifiedPriQ.h"
+#include "Patient.h"
+#include "Car.h"
+#include "Hospital.h"
+#include "UI.h"
+#include "Organizer.h"
+
+
 using namespace std;
 
 int main() 
@@ -34,7 +37,6 @@ int main()
 	C1.AssignPatient(&P1);
 	cout << H1 << endl;
 	*/
-	UI ui1;
-	ui1.Start();
+
 	return 0;
 }

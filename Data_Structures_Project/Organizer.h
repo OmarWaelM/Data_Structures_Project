@@ -1,6 +1,7 @@
-#pragma once
+#ifndef ORGANIZER_H
+#define ORGANIZER_H
 using namespace std;
-
+#include "UI.h"
 struct CancellationReq
 {
 	int PID;
@@ -16,7 +17,7 @@ private:
 	LinkedQueue<Patient*> FinishedList;
 	priQueue<Car*> BackCars;
 	ModifiedPriQ<Car*> OutCars;	
-	Hospital* HospitalList;
+	Hospital** HospitalList;
 	int* DistancesMatrix;
 	//General data members
 	int timeStep;
@@ -34,7 +35,7 @@ public:
     //void readCancellationList(ofstream& of);
 
     Hospital* getHospital(int ID) { return HospitalList[ID]; }
-    LinkedQueue<Patient*> getFinishedList() { return &FinishedList; }
+    LinkedQueue<Patient*>* getFinishedList() { return &FinishedList; }
 
     /*
     //Adding a Back Car based on its priority
@@ -66,3 +67,17 @@ public:
 
 };
 
+
+
+Organizer::Organizer()
+{
+    GUI.Start(this);
+
+    HospitalList = new Hospital*[5];
+    //test
+    for (int i = 0; i < 5; i++) {
+
+    }
+}
+
+#endif
