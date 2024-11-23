@@ -1,4 +1,5 @@
-#pragma once
+#ifndef HOSPITAL_H
+#define HOSPITAL_H
 
 class Hospital
 {
@@ -16,8 +17,8 @@ private:
 
 public:
 	//Member Function
-	Hospital(int id);
-
+	Hospital() {}
+	void setID(int id) { hospitalID = id; }
 	void addCarToList(Car* car);
 	void addPatientToList(Patient* patient);
 	void assignPatientToCar(Patient* patient, Car* car);
@@ -25,13 +26,6 @@ public:
 	friend ostream& operator <<(ostream& os, Hospital& h);
 
 };
-
-
-
-Hospital::Hospital(int id)
-{
-	hospitalID = id;
-}
 
 void Hospital::addCarToList(Car* car)
 {
@@ -67,3 +61,5 @@ ostream& operator <<(ostream& os, Hospital& h)
 	os << "==============	Hospital #" << h.hospitalID << " data end  =============" << endl;
 	return os;
 }
+
+#endif

@@ -15,7 +15,7 @@ private:
 	UI_MODE mode;
 	Organizer* org;
 public:
-	UI(Organizer* or):mode(INTERACTIVE), org(or) {}
+	UI(Organizer* organizer):mode(SILENT), org(organizer) {}
 	void Start();
 	void Output();
 	void printPage(int hospitalID);
@@ -23,8 +23,9 @@ public:
 };
 
 
-void UI::Start(Organizer* org)
+void UI::Start()
 {
+	//Choosing mode
 	mode = SILENT;
 	printf("\033c");
 	cout << "Choose the mode you would like to use:" << endl;
@@ -61,6 +62,12 @@ void UI::Start(Organizer* org)
 			cout << endl;
 		}
 	}
+	//Getting file input name
+	printf("\033c");
+	string name;
+	cout << "Please enter the name of the file you would like to open: ";
+	cin >> name;
+	cout << "Opening file " << name << "...";
 }
 
 void UI::Output()

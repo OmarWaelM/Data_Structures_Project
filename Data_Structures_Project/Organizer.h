@@ -2,6 +2,9 @@
 #define ORGANIZER_H
 using namespace std;
 #include "UI.h"
+
+class UI;
+
 struct CancellationReq
 {
 	int PID;
@@ -17,7 +20,7 @@ private:
 	LinkedQueue<Patient*> FinishedList;
 	priQueue<Car*> BackCars;
 	ModifiedPriQ<Car*> OutCars;	
-	Hospital** HospitalList;
+	Hospital* HospitalList;
 	int* DistancesMatrix;
 	//General data members
 	int timeStep;
@@ -34,7 +37,7 @@ public:
     //void readPatientList(ofstream& of);
     //void readCancellationList(ofstream& of);
 
-    Hospital* getHospital(int ID) { return HospitalList[ID]; }
+    Hospital* getHospital(int ID) { return &HospitalList[ID]; }
     LinkedQueue<Patient*>* getFinishedList() { return &FinishedList; }
 
     /*
@@ -63,21 +66,17 @@ public:
 
     ~Organizer();
 
-
-
 };
 
 
 
-Organizer::Organizer()
+Organizer::Organizer():GUI(this)
 {
-    GUI.Start(this);
-
-    HospitalList = new Hospital*[5];
-    //test
-    for (int i = 0; i < 5; i++) {
-
-    }
+    GUI.Start();
 }
 
+Organizer::~Organizer()
+{
+    delete[] HospitalList;
+}
 #endif

@@ -1,5 +1,6 @@
 #include <iostream>
 #include <Windows.h>
+#include <string>
 #include "LinkedQueue.h"
 #include "priQueue.h"
 #include "ModifiedQ.h"
@@ -7,9 +8,8 @@
 #include "Patient.h"
 #include "Car.h"
 #include "Hospital.h"
-#include "UI.h"
 #include "Organizer.h"
-
+#include "UI.h"
 
 using namespace std;
 
@@ -37,6 +37,6 @@ int main()
 	C1.AssignPatient(&P1);
 	cout << H1 << endl;
 	*/
-
+	Organizer Org;
 	return 0;
 }
