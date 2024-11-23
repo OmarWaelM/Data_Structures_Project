@@ -19,7 +19,8 @@ private:
 
 public:
 	//Member Function
-
+	void assignPatientToList(Patient* patient);
+	void assignPatientToCar(Patient* patient, Car* car);
 
 };
 
