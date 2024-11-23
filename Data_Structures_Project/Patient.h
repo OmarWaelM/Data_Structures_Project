@@ -3,10 +3,16 @@ class Patient
 {
 private:
 	//Patient data members
-	char type;
+	enum patientType {
+		SP,
+		NP,
+		EP
+	};
 	int reqTime;
 	int pickupTime;
 	int nearestHospital;
 	int distToHospital;
-};
+public:
+	patientType getPatientType();
 
+};
