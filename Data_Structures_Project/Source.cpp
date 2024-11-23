@@ -1,9 +1,18 @@
 #include <iostream>
 #include "Organizer.h"
+#include "UI.h"
+#include "Patient.h"
+#include "Car.h"
+#include "Hospital.h"
+#include "LinkedQueue.h"
+#include "priQueue.h"
+#include "ModifiedQ.h"
+#include "ModifiedPriQ.h"
 using namespace std;
 
 int main() 
 {
+	/*
 	int x;
 	cout << "before clear" << endl;
 	cin >> x;
@@ -24,6 +33,8 @@ int main()
 
 	C1.AssignPatient(&P1);
 	cout << H1 << endl;
-
+	*/
+	UI ui1;
+	ui1.Start();
 	return 0;
 }

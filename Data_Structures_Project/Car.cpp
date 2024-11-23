@@ -1,4 +1,12 @@
+#include "Organizer.h"
+#include "UI.h"
+#include "Patient.h"
 #include "Car.h"
+#include "Hospital.h"
+#include "LinkedQueue.h"
+#include "priQueue.h"
+#include "ModifiedQ.h"
+#include "ModifiedPriQ.h"
 #include <iostream>
 
 using namespace std;

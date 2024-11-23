@@ -1,11 +1,4 @@
 #pragma once
-#include "UI.h"
-#include "Patient.h"
-#include "Car.h"
-#include "LinkedQueue.h"
-#include "priQueue.h"
-#include "ModifiedQ.h"
-#include "ModifiedPriQ.h"
 
 class Hospital
 {

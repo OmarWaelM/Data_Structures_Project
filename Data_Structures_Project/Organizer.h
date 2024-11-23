@@ -1,15 +1,5 @@
 #pragma once
-#include "UI.h"
-#include "Patient.h"
-#include "Car.h"
-#include "Hospital.h"
-#include "LinkedQueue.h"
-#include "priQueue.h"
-#include "ModifiedQ.h"
-#include "ModifiedPriQ.h"
-
 using namespace std;
-#include<iostream>
 
 struct CancellationReq
 {
@@ -26,7 +16,7 @@ private:
 	LinkedQueue<Patient*> FinishedList;
 	priQueue<Car*> BackCars;
 	ModifiedPriQ<Car*> OutCars;	
-	Hospital HospitalList;
+	Hospital* HospitalList;
 	int* DistancesMatrix;
 	//General data members
 	int timeStep;
@@ -34,9 +24,19 @@ private:
 
 public:
     //Member Functions
+    
     //Constructor
     Organizer();
 
+    //void readHospitalData(ofstream& of);
+    //void readCarData(ofstream& of);
+    //void readPatientList(ofstream& of);
+    //void readCancellationList(ofstream& of);
+
+    Hospital* getHospital(int ID) { return HospitalList[ID]; }
+    LinkedQueue<Patient*> getFinishedList() { return &FinishedList; }
+
+    /*
     //Adding a Back Car based on its priority
     void AddBackCar(const string& Car, int Priority);
 
@@ -52,15 +52,15 @@ public:
     //Adding an entry to the finished list
     void AddFinished(const string& Finished_Entry);
 
-     //Removing an entry from the finished list
-     bool RemoveFinished(string& Finished_Entry);
+    //Removing an entry from the finished list
+    bool RemoveFinished(string& Finished_Entry);
 
-     //Print items in Finished List
-     void DisplayFinishedList()const;
+    //Print items in Finished List
+    void DisplayFinishedList()const;
 
+    */
 
-
-     ~Organizer();
+    ~Organizer();
 
 
 

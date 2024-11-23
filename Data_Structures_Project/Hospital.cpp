@@ -1,9 +1,16 @@
 #include "Hospital.h"
+#include "Organizer.h"
+#include "UI.h"
+#include "Patient.h"
+#include "Car.h"
+#include "LinkedQueue.h"
+#include "priQueue.h"
+#include "ModifiedQ.h"
+#include "ModifiedPriQ.h"
 
 Hospital::Hospital(int id)
 {
 	hospitalID = id;
-
 }
 
 void Hospital::addCarToList(Car* car)
