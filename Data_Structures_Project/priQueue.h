@@ -41,13 +41,18 @@ template <typename T>
 class priQueue
 {
     priNode<T>* head;
+    int count;  // number of items in queue
 public:
-    priQueue() : head(nullptr) {}
+    priQueue() : head(nullptr), count(0) {}
 
     ~priQueue() {
         T tmp;
         int p;
         while (dequeue(tmp,p));
+    }
+
+    int getCount() {
+        return count;
     }
 
     //insert the new node in its correct position according to its priority
@@ -58,6 +63,7 @@ public:
             
             newNode->setNext(head);
             head = newNode;
+            count++;
             return;
         }
        
@@ -66,7 +72,8 @@ public:
             current = current->getNext();
         }
         newNode->setNext( current->getNext());
-        current->setNext( newNode);        
+        current->setNext( newNode);
+        count++;
     }
 
     bool dequeue(T& topEntry, int& pri) {
@@ -77,6 +84,7 @@ public:
         priNode<T>* temp = head;
         head = head->getNext();
         delete temp;
+        count--;
         return true;
     }
 

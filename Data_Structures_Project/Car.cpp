@@ -50,7 +50,7 @@ bool  Car::AssignPatient(Patient* p)
 }
 
 
-ostream& operator <<(ostream& os, Car car)
+ostream& operator <<(ostream& os, Car& car)
 {
 	if (car.cType == SC)
 		os << 'S';

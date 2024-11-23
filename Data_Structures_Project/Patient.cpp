@@ -37,7 +37,7 @@ int Patient::getNearestHospital()
 	return nearestHospital;
 }
 
-ostream& operator <<(ostream& os,  Patient patient)
+ostream& operator <<(ostream& os,  Patient& patient)
 {
 	os << patient.patientID;
 	return os;

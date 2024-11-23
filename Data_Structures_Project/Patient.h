@@ -29,5 +29,5 @@ public:
 	int getDistance();
 	int getNearestHospital();
 
-	friend ostream& operator <<(ostream& os, Patient patient);
+	friend ostream& operator <<(ostream& os, Patient& patient);
 };

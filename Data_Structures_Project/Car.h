@@ -29,6 +29,6 @@ public:
 
 	bool AssignPatient(Patient* p);
 
-	friend ostream& operator <<(ostream& os, Car car);
+	friend ostream& operator <<(ostream& os, Car& car);
 };
 
