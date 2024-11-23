@@ -1,14 +1,16 @@
 #pragma once
 #include "Patient.h"
 
+
+enum carType {
+	NC,
+	SC
+};
 class Car
 {
 private:
 	//Car data members
-	enum carType {
-		NC,
-		SC
-	};
+	carType ctype;
 	int speed;
 	char status;
 	Patient* assignedPatient;

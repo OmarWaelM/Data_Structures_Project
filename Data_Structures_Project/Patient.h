@@ -1,13 +1,14 @@
 #pragma once
+enum patientType{
+	SP,
+	NP,
+	EP
+};
 class Patient
 {
 private:
 	//Patient data members
-	enum patientType {
-		SP,
-		NP,
-		EP
-	};
+	patientType ptype;
 	int reqTime;
 	int pickupTime;
 	int nearestHospital;
