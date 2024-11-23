@@ -1,6 +1,5 @@
 #pragma once
 
-
 template < typename T>
 class priNode
 {
@@ -41,13 +40,18 @@ template <typename T>
 class priQueue
 {
     priNode<T>* head;
+    int count;  // number of items in queue
 public:
-    priQueue() : head(nullptr) {}
+    priQueue() : head(nullptr), count(0) {}
 
     ~priQueue() {
         T tmp;
         int p;
         while (dequeue(tmp,p));
+    }
+
+    int getCount() {
+        return count;
     }
 
     //insert the new node in its correct position according to its priority
@@ -58,6 +62,7 @@ public:
             
             newNode->setNext(head);
             head = newNode;
+            count++;
             return;
         }
        
@@ -66,7 +71,8 @@ public:
             current = current->getNext();
         }
         newNode->setNext( current->getNext());
-        current->setNext( newNode);        
+        current->setNext( newNode);
+        count++;
     }
 
     bool dequeue(T& topEntry, int& pri) {
@@ -77,6 +83,7 @@ public:
         priNode<T>* temp = head;
         head = head->getNext();
         delete temp;
+        count--;
         return true;
     }
 
@@ -92,4 +99,19 @@ public:
     bool isEmpty() const {
         return head == nullptr;
     }
+
+    friend ostream& operator << <T>(ostream& os, priQueue<T>& q);
 };
+
+template <typename T>
+ostream& operator <<(ostream& os, priQueue<T>& q)
+{
+    int i;
+    priNode<T>* current = q.head;
+    while (current)
+    {
+        os << *current->getItem(i) << " ";
+        current = current->getNext();
+    }
+    return os;
+}

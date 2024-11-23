@@ -1,15 +1,9 @@
-#pragma once
-#include "UI.h"
-#include "Patient.h"
-#include "Car.h"
-#include "Hospital.h"
-#include "LinkedQueue.h"
-#include "priQueue.h"
-#include "ModifiedQ.h"
-#include "ModifiedPriQ.h"
-
+#ifndef ORGANIZER_H
+#define ORGANIZER_H
 using namespace std;
-#include<iostream>
+#include "UI.h"
+
+class UI;
 
 struct CancellationReq
 {
@@ -26,43 +20,63 @@ private:
 	LinkedQueue<Patient*> FinishedList;
 	priQueue<Car*> BackCars;
 	ModifiedPriQ<Car*> OutCars;	
-	Hospital HospitalList;
+	Hospital* HospitalList;
 	int* DistancesMatrix;
 	//General data members
 	int timeStep;
 	UI GUI;
 
 public:
-	//Member Functions
-        //Constructor
-        Organizer();
+    //Member Functions
+    
+    //Constructor
+    Organizer();
 
-        //Adding a Back Car based on its priority
-        void AddBackCar(const string& Car, int Priority);
+    //void readHospitalData(ofstream& of);
+    //void readCarData(ofstream& of);
+    //void readPatientList(ofstream& of);
+    //void readCancellationList(ofstream& of);
 
-       //Removing the highest priority from the Back_Cars queue
-       bool RemoveBackCar(string& Car);
+    Hospital* getHospital(int ID) { return &HospitalList[ID]; }
+    LinkedQueue<Patient*>* getFinishedList() { return &FinishedList; }
 
-       //Adding a Hospital to the hospital list
-       void AddHospital(const string& Hospital_Name);
+    /*
+    //Adding a Back Car based on its priority
+    void AddBackCar(const string& Car, int Priority);
 
-       //Printing out the hospitals in the hospital list
-       void PrintHospitals()const;
+    //Removing the highest priority from the Back_Cars queue
+    bool RemoveBackCar(string& Car);
 
-      //Adding an entry to the finished list
-      void AddFinished(const string& Finished_Entry);
+    //Adding a Hospital to the hospital list
+    void AddHospital(const string& Hospital_Name);
 
-     //Removing an entry from the finished list
-     bool RemoveFinished(string& Finished_Entry);
+    //Printing out the hospitals in the hospital list
+    void PrintHospitals()const;
 
-     //Print items in Finished List
-     void DisplayFinishedList()const;
+    //Adding an entry to the finished list
+    void AddFinished(const string& Finished_Entry);
 
+    //Removing an entry from the finished list
+    bool RemoveFinished(string& Finished_Entry);
 
+    //Print items in Finished List
+    void DisplayFinishedList()const;
 
-     ~Organizer();
+    */
 
-
+    ~Organizer();
 
 };
 
+
+
+Organizer::Organizer():GUI(this)
+{
+    GUI.Start();
+}
+
+Organizer::~Organizer()
+{
+    delete[] HospitalList;
+}
+#endif
