@@ -2,11 +2,16 @@
 #define ORGANIZER_H
 using namespace std;
 #include "UI.h"
+#include "Hospital.h"
+#include "Patient.h"
+#include "Car.h"
+#include "LinkedQueue.h"
+#include "priQueue.h"
+#include "ModifiedPriQ.h"
 
 using namespace std;
 #include<iostream>
 #include <string>
-#include <utility>
 #include <fstream>
 
 struct CancellationReq
@@ -24,11 +29,21 @@ private:
 	LinkedQueue<Patient*> FinishedList;
 	priQueue<Car*> BackCars;
 	ModifiedPriQ<Car*> OutCars;	
-	Hospital* HospitalList;
-	int* DistancesMatrix;
+	Hospital** HospitalList; //An array of pointers to hospitals
 	//General data members
 	int timeStep;
 	UI GUI;
+
+	int numHospitals;
+	int speedScars, speedNcars;
+	int** distanceMatrix;
+	int* scarsPerHospital;
+	int* ncarsPerHospital;
+	int numRequests;
+	string* patientRequests;
+	int numCancellations;
+	string* cancellations;
+
 
 public:
 	//Member Functions
@@ -38,8 +53,20 @@ public:
 
     void processInputFile(const string& filename);
 
-    Hospital* getHospital(int ID) { return &HospitalList[ID]; }
+	Hospital* getHospital(int ID)
+	{
+		// Ensure ID is within bounds
+		if (ID < 0 || ID >= numHospitals) {
+			return nullptr;  // Return nullptr if ID is invalid
+		}
+		return HospitalList[ID];  // Return the pointer to the hospital object at index ID
+	}
     LinkedQueue<Patient*>* getFinishedList() { return &FinishedList; }
+	// Getter for hospital list (if needed)
+	Hospital** getHospitalList() { return HospitalList; }
+
+	// Getter for number of hospitals
+	int getNumHospitals() { return numHospitals; }
 
     //Adding a Back Car based on its priority
     void AddBackCar(const string& Car, int Priority);
@@ -94,15 +121,13 @@ void Organizer::processInputFile(const string& filename)
     }
 
 	//Read the number of hospitals (the first line)
-	int numHospitals;
 	inputFile >> numHospitals;
 
 	//Read the speeds of SCars and Ncars (the second line)
-	int speedScars, speedNcars;
 	inputFile >> speedScars >> speedNcars;
 
 	// Read the hospital matrix (numHospitals x numHospitals)
-	int** distanceMatrix = new int* [numHospitals];
+	distanceMatrix = new int* [numHospitals];
 	for (int i = 0; i < numHospitals; ++i)
 	{
 		distanceMatrix[i] = new int[numHospitals];
@@ -116,116 +141,71 @@ void Organizer::processInputFile(const string& filename)
 	}
 
 	// Read the number of SCars and NCars available for each Hospital
-	int* scarsPerHospital = new int[numHospitals];  // SCars
-	int* ncarsPerHospital = new int[numHospitals];  // NCars
+	scarsPerHospital = new int[numHospitals];  // SCars
+	ncarsPerHospital = new int[numHospitals];  // NCars
 	for (int i = 0; i < numHospitals; i++)
 	{
 		inputFile >> scarsPerHospital[i] >> ncarsPerHospital[i];
 	}
 
 	// Read number of patient requests
-	int numRequests;
 	inputFile >> numRequests;
 
 	// Read each request and store it in a dynamic array
-	string* patientRequests = new string[numRequests];
+	patientRequests = new string[numRequests];
 	for (int i = 0; i < numRequests; i++)
 	{
 		getline(inputFile, patientRequests[i]);
 	}
 
 	// Read number of cancellations
-	int numCancellations;
 	inputFile >> numCancellations;
 
-	string* cancellations = new string[numCancellations];
+	cancellations = new string[numCancellations];
 	for (int i = 0; i < numCancellations; i++)
 	{
 		getline(inputFile, cancellations[i]);
 	}
-
 	inputFile.close();
 
-	// Writing Hospital Data
-	ofstream hospitalFile("HospitalData.txt");
-	if (hospitalFile.is_open())
-	{
-		hospitalFile << numHospitals << endl;
-
-		// Writing distanceMatrix
-		for (int i = 0; i < numHospitals; ++i)
-		{
-			for (int j = 0; j < numHospitals; ++j)
-			{
-				hospitalFile << distanceMatrix[i][j] << " ";
-			}
-			hospitalFile << endl;
-		}
-
-		// Writing scarsPerHospital and ncarsPerHospital
-		for (int i = 0; i < numHospitals; ++i)
-		{
-			hospitalFile << scarsPerHospital[i] << " " << ncarsPerHospital[i] << endl;
-		}
-
-		readHospitalData(hospitalFile);
-		hospitalFile.close();
-	}
-
-	// Writing Car Data
-	ofstream carFile("CarData.txt");
-	if (carFile.is_open())
-	{
-		carFile << speedScars << " " << speedNcars << endl;
-		readCarData(carFile);
-		carFile.close();
-	}
-
-	// Writing Patient Requests
-	ofstream patientFile("PatientRequests.txt");
-	if (patientFile.is_open())
-	{
-		patientFile << numRequests << endl; // Number of requests
-
-		// Writing patient requests
-		for (int i = 0; i < numRequests; ++i) {
-			patientFile << patientRequests[i] << endl;
-		}
-
-		readPatientRequests(patientFile);
-		patientFile.close();
-	}
-
-	// Writing Cancellation Requests
-	ofstream cancellationFile("CancellationRequests.txt");
-	if (cancellationFile.is_open())
-	{
-		cancellationFile << numCancellations << endl;
-
-		// Writing cancellation requests
-		for (int i = 0; i < numCancellations; ++i)
-		{
-			cancellationFile << cancellations[i] << endl;
-		}
-
-		readCancellationRequests(cancellationFile);
-		cancellationFile.close();
-	}
-
-	// Cleanup dynamically allocated memory
-	for (int i = 0; i < numHospitals; ++i) {
-		delete[] distanceMatrix[i];
-	}
-	delete[] distanceMatrix;
-	delete[] scarsPerHospital;
-	delete[] ncarsPerHospital;
-	delete[] patientRequests;
-	delete[] cancellations;
 }
 
-void Organizer::readHospitalData(ifstream& hFile)
+void Organizer::readHospitalData()
 {
+	// Dynamically allocate an array of pointers to Hospital objects
+	HospitalList = new Hospital * [numHospitals];
 
+	static int carID = 1; //For the Car ID's
+
+	for (int i = 0; i < numHospitals; ++i)
+	{
+		// Creates a new Hospital object for each hospital
+		HospitalList[i] = new Hospital();
+
+		// Sets the hospital ID
+		HospitalList[i]->setID(i + 1);
+
+		// Reads the number of SCars and NCars for this hospital
+		int scars, ncars;
+		scars = scarsPerHospital[i];
+		ncars = ncarsPerHospital[i];
+
+		// Adds SCars to the hospital's SCList and NCars to the NCList
+		// For each SCar, add it to the SCList
+		for (int j = 0; j < scars; ++j) 
+		{
+			Car* car = new Car(carID++, i + 1, SC, speedScars);
+			HospitalList[i]->addCarToList(car);  // Adds to SCList or NCList based on car type
+		}
+
+		// For each NCar, add it to the NCList
+		for (int j = 0; j < ncars; ++j) {
+			Car* car = new Car(carID++, i + 1, NC, speedNcars);
+			HospitalList[i]->addCarToList(car);  // Adds to SCList or NCList based on car type
+		}
+
+		HospitalList[i]->setDistanceMatrix(distanceMatrix, numHospitals);
+	}
 }
 
 void Organizer::readCarData(ifstream& cFile)
@@ -250,6 +230,21 @@ Organizer::~Organizer()
 
 Organizer::~Organizer()
 {
-    delete[] HospitalList;
+	// Cleanup dynamically allocated memory
+	for (int i = 0; i < numHospitals; ++i)
+	{
+		delete[] distanceMatrix[i];
+	}
+	delete[] distanceMatrix;
+	delete[] scarsPerHospital;
+	delete[] ncarsPerHospital;
+	delete[] patientRequests;
+	delete[] cancellations;
+	// Cleanup for the hospitalArray
+	for (int i = 0; i < numHospitals; ++i)
+	{
+		delete HospitalList[i];  // Delete each individual Hospital object
+	}
+	delete[] HospitalList;  // Delete the array of Hospital pointers
 }
 #endif

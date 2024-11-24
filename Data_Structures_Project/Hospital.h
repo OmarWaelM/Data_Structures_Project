@@ -1,5 +1,6 @@
 #ifndef HOSPITAL_H
 #define HOSPITAL_H
+#include "ModifiedPriQ.h"
 
 class Hospital
 {
@@ -7,18 +8,22 @@ private:
 	//Lists used in hospital class
 	LinkedQueue<Patient*> SPList;
 	priQueue<Patient*> EPList;
-	ModifiedQ<Patient*> NPList;
+	ModifiedPriQ<Patient*> NPList;
 
 	LinkedQueue<Car*> SCList;
 	LinkedQueue<Car*> NCList;
 
 	//General data memebers
 	int hospitalID;
+	int** distanceMatrix;  // 2D array to store the distance matrix for the hospital
 
 public:
 	//Member Function
 	Hospital() {}
 	void setID(int id) { hospitalID = id; }
+	void setDistanceMatrix(int** matrix, int size);
+	int getHospitalID() { return hospitalID; }
+	int** getDistanceMatrix() { return distanceMatrix; }
 	void addCarToList(Car* car);
 	void addPatientToList(Patient* patient);
 	void assignPatientToCar(Patient* patient, Car* car);
@@ -49,6 +54,23 @@ void Hospital::assignPatientToCar(Patient* patient, Car* car)
 {
 }
 
+void Hospital::setDistanceMatrix(int** matrix, int size)
+{
+	// Allocate memory for the matrix
+	distanceMatrix = new int* [size];
+	for (int i = 0; i < size; ++i)
+	{
+		distanceMatrix[i] = new int[size];  // Allocate memory for each row
+	}
+
+	// Copy data from the input matrix
+	for (int i = 0; i < size; ++i)
+	{
+		for (int j = 0; j < size; ++j) {
+			distanceMatrix[i][j] = matrix[i][j];  // Assign each value
+		}
+	}
+}
 
 //this can be changed i made it to look like the description
 ostream& operator <<(ostream& os, Hospital& h)
