@@ -208,24 +208,19 @@ void Organizer::readHospitalData()
 	}
 }
 
-void Organizer::readCarData(ifstream& cFile)
+void Organizer::readCarData()
 {
     
 }
 
-void Organizer::readPatientRequests(ifstream& pFile)
+void Organizer::readPatientRequests()
 {
    
 }
 
-void Organizer::readCancellationRequests(ifstream& cFile)
+void Organizer::readCancellationRequests()
 {
     
-}
-
-Organizer::~Organizer()
-{
-    delete[] HospitalList;
 }
 
 Organizer::~Organizer()
