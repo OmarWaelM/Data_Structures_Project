@@ -15,18 +15,25 @@ private:
 
 	//General data memebers
 	int hospitalID;
+	int scCount;           // Number of SCars
+	int ncCount;           // Number of NCars
 	int** distanceMatrix;  // 2D array to store the distance matrix for the hospital
 
 public:
 	//Member Function
 	Hospital() {}
 	void setID(int id) { hospitalID = id; }
+	int getHospitalID() const { return hospitalID; }
+	void setSCarsCount(int count) { scCount = count; }
+	void setNCarsCount(int count) { ncCount = count; }
+	int getSCarsCount() const { return scCount; } // Getter for SCars count
+	int getNCarsCount() const { return ncCount; } // Getter for NCars count
 	void setDistanceMatrix(int** matrix, int size);
-	int getHospitalID() { return hospitalID; }
 	int** getDistanceMatrix() { return distanceMatrix; }
 	void addCarToList(Car* car);
 	void addPatientToList(Patient* patient);
 	void assignPatientToCar(Patient* patient, Car* car);
+
 
 	friend ostream& operator <<(ostream& os, Hospital& h);
 

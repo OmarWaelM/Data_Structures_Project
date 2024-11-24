@@ -206,6 +206,9 @@ void Organizer::readHospitalData()
 		scars = scarsPerHospital[i];
 		ncars = ncarsPerHospital[i];
 
+		HospitalList[i]->setSCarsCount(scars);
+		HospitalList[i]->setNCarsCount(ncars);
+
 		// Adds SCars to the hospital's SCList and NCars to the NCList
 		// For each SCar, add it to the SCList
 		for (int j = 0; j < scars; ++j) 
@@ -221,6 +224,28 @@ void Organizer::readHospitalData()
 		}
 
 		HospitalList[i]->setDistanceMatrix(distanceMatrix, numHospitals);
+	}
+}
+
+void Organizer::PrintHospitals() const
+{
+	// Check if HospitalList is initialized
+	if (!HospitalList)
+	{
+		cout << "No hospitals available to display.\n";
+		return;
+	}
+
+	// Iterate through the HospitalList and print details of each hospital
+	for (int i = 0; i < numHospitals; ++i)
+	{
+		cout << "Hospital " << i + 1 << ":\n";
+
+		// Access and display hospital details
+		cout << "  Hospital ID: " << HospitalList[i]->getHospitalID() << "\n";
+		cout << "  SCars: " << HospitalList[i]->getSCarsCount() << "\n";
+		cout << "  NCars: " << HospitalList[i]->getNCarsCount() << "\n";
+		cout << "----------------------------------------\n";
 	}
 }
 
