@@ -13,6 +13,7 @@ using namespace std;
 #include<iostream>
 #include <string>
 #include <fstream>
+#include <iomanip>
 
 struct CancellationReq
 {
@@ -247,6 +248,18 @@ void Organizer::PrintHospitals() const
 		cout << "  NCars: " << HospitalList[i]->getNCarsCount() << "\n";
 		cout << "----------------------------------------\n";
 	}
+
+	cout << "\nDistance Matrix:\n";
+	for (int i = 0; i < numHospitals; ++i)
+	{
+		for (int j = 0; j < numHospitals; ++j)
+		{
+			// Adjust width for uniform spacing
+			cout << setw(5) << distanceMatrix[i][j] << " ";
+		}
+		cout << "\n";
+	}
+	cout << "----------------------------------------\n";
 }
 
 void Organizer::readCarData()
