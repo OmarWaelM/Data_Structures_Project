@@ -41,6 +41,8 @@ Single Node Case:
 #ifndef LINKED_QUEUE_
 #define LINKED_QUEUE_
 
+using namespace std;
+
 template < typename T>
 class Node
 {
@@ -110,13 +112,17 @@ private :
 	
 	Node<T>* backPtr;
 	Node<T>* frontPtr;
+	int count;
 public :
 	LinkedQueue();	
 	bool isEmpty() const ;
 	bool enqueue(const T& newEntry);
 	bool dequeue(T& frntEntry);  
 	bool peek(T& frntEntry)  const;	
+	int getCount() { return count; }
 	~LinkedQueue();
+
+	friend ostream& operator << <T>(ostream& os, LinkedQueue& q);
 
 	//copy constructor
 	LinkedQueue(const LinkedQueue<T> & LQ);
@@ -134,7 +140,7 @@ LinkedQueue<T>::LinkedQueue()
 {
 	backPtr=nullptr;
 	frontPtr=nullptr;
-
+	count=0;
 }
 /////////////////////////////////////////////////////////////////////////////////////////
 
@@ -170,7 +176,8 @@ bool LinkedQueue<T>::enqueue( const T& newEntry)
 	else
 		backPtr->setNext(newNodePtr); // The queue was not empty
 
-	backPtr = newNodePtr; // New node is the last node now
+	backPtr = newNodePtr;// New node is the last node now
+	count++;
 	return true ;
 } // end enqueue
 
@@ -200,7 +207,7 @@ bool LinkedQueue<T>:: dequeue(T& frntEntry)
 		
 	// Free memory reserved for the dequeued node
 	delete nodeToDeletePtr;
-
+	count--;
 	return true;
 
 }
@@ -247,13 +254,27 @@ Output: none
 template <typename T>
 LinkedQueue<T>::LinkedQueue(const LinkedQueue<T> & LQ)
 {	
+	count = 1;
 	frontPtr = backPtr = nullptr;
 	Node<T>* NodePtr = LQ.frontPtr;	//start at the front node in LQ
 	while (NodePtr)
 	{
 		enqueue(NodePtr->getItem());	//get data of each node and enqueue it in this queue 
 		NodePtr = NodePtr->getNext();
+		count++;
 	}	
+}
+
+template <typename T>
+ostream& operator <<(ostream& os, LinkedQueue<T>& q)
+{
+	Node<T>* current = q.frontPtr;
+	while (current)
+	{
+		os << *current->getItem() << " ";
+		current = current->getNext();
+	}
+	return os;
 }
 
 #endif

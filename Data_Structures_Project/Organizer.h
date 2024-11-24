@@ -1,12 +1,7 @@
-#pragma once
+#ifndef ORGANIZER_H
+#define ORGANIZER_H
+using namespace std;
 #include "UI.h"
-#include "Patient.h"
-#include "Car.h"
-#include "Hospital.h"
-#include "LinkedQueue.h"
-#include "priQueue.h"
-#include "ModifiedQ.h"
-#include "ModifiedPriQ.h"
 
 using namespace std;
 #include<iostream>
@@ -30,7 +25,7 @@ private:
 	LinkedQueue<Patient*> FinishedList;
 	priQueue<Car*> BackCars;
 	ModifiedPriQ<Car*> OutCars;	
-	Hospital HospitalList;
+	Hospital* HospitalList;
 	int* DistancesMatrix;
 	//General data members
 	int timeStep;
@@ -234,3 +229,8 @@ Organizer::~Organizer()
     delete[] HospitalList;
 }
 
+Organizer::~Organizer()
+{
+    delete[] HospitalList;
+}
+#endif
