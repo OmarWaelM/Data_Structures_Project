@@ -75,7 +75,7 @@ public:
     bool RemoveBackCar(string& Car);
 
     //Adding a Hospital to the hospital list
-    void AddHospital(const int Hospital_ID, int index);
+    void AddHospital(const int Hospital_ID);
 
     //Printing out the hospitals in the hospital list
     void PrintHospitals()const;
@@ -170,8 +170,10 @@ void Organizer::processInputFile(const string& filename)
 
 }
 
-void Organizer::AddHospital(const int Hospital_ID, int index)
+void Organizer::AddHospital(const int Hospital_ID)
 {
+	int index = Hospital_ID - 1;
+
 	// Ensure the index is within bounds
 	if (index < 0 || index >= numHospitals) 
 	{
@@ -197,7 +199,7 @@ void Organizer::readHospitalData()
 
 	for (int i = 0; i < numHospitals; ++i)
 	{
-		AddHospital(i + 1, i);  // Add hospital with ID = i + 1 at index i
+		AddHospital(i + 1);  // Add hospital with ID = i + 1 at index i
 
 		// Reads the number of SCars and NCars for this hospital
 		int scars, ncars;
