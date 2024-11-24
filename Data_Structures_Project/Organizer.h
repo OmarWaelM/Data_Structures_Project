@@ -33,7 +33,7 @@ public:
     
     //Constructor
     Organizer();
-
+    void Simulator();
     //void readHospitalData(ofstream& of);
     //void readCarData(ofstream& of);
     //void readPatientList(ofstream& of);
@@ -72,7 +72,13 @@ public:
 
 Organizer::Organizer()
 {
+}
+
+Organizer::Simulator()
+{
+    timeStep = 0;
     GUI.Start();
+
 }
 
 Organizer::~Organizer()
