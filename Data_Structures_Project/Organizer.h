@@ -8,6 +8,7 @@ class UI;
 struct CancellationReq
 {
 	int PID;
+    int hospitalID;
 	int CancellationTimestep;
 };
 
@@ -21,6 +22,7 @@ private:
 	priQueue<Car*> BackCars;
 	ModifiedPriQ<Car*> OutCars;	
 	Hospital* HospitalList;
+    int numberOfHospitals;
 	int* DistancesMatrix;
 	//General data members
 	int timeStep;
@@ -31,15 +33,13 @@ public:
     
     //Constructor
     Organizer();
-
+    void Simulator();
     //void readHospitalData(ofstream& of);
     //void readCarData(ofstream& of);
     //void readPatientList(ofstream& of);
     //void readCancellationList(ofstream& of);
 
-    Hospital* getHospital(int ID) { return &HospitalList[ID]; }
-    LinkedQueue<Patient*>* getFinishedList() { return &FinishedList; }
-
+    
     /*
     //Adding a Back Car based on its priority
     void AddBackCar(const string& Car, int Priority);
@@ -70,9 +70,15 @@ public:
 
 
 
-Organizer::Organizer():GUI(this)
+Organizer::Organizer()
 {
+}
+
+Organizer::Simulator()
+{
+    timeStep = 0;
     GUI.Start();
+
 }
 
 Organizer::~Organizer()
