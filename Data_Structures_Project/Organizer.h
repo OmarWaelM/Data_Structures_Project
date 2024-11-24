@@ -224,7 +224,7 @@ void Organizer::readHospitalData()
 
 void Organizer::readCarData()
 {
-    
+
 }
 
 void Organizer::readPatientRequests()
