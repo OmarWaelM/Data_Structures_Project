@@ -1,9 +1,7 @@
 #ifndef UI_H
 #define UI_H
 using namespace std;
-
-class Organizer;
-
+#include <conio.h>
 enum UI_MODE {
 	SILENT,
 	INTERACTIVE,
@@ -13,13 +11,13 @@ class UI
 {
 private:
 	UI_MODE mode;
-	Organizer* org;
+	string inFileName;
+	string outFileName;
+
 public:
-	UI(Organizer* organizer):mode(SILENT), org(organizer) {}
+	UI():mode(SILENT) {}
 	void Start();
-	void Output();
-	void printPage(int hospitalID);
-	
+	void Output(int timestep, Hospital** h, int nOfHosp, priQueue<Car*>* backCars, ModifiedPriQ<Car*>* outCars, LinkedQueue<Patient*>* finished);
 };
 
 
@@ -28,7 +26,7 @@ void UI::Start()
 	//Choosing mode
 	mode = SILENT;
 	printf("\033c");
-	cout << "Choose the mode you would like to use:" << endl;
+	cout << "Choose the mode you would like to use (Use Arrow Keys):" << endl;
 	cout << "SILENT		";
 	cout << "<----";
 	cout << endl;
@@ -41,7 +39,7 @@ void UI::Start()
 		{
 			mode = SILENT;
 			printf("\033c");
-			cout << "Choose the mode you would like to use:" << endl;
+			cout << "Choose the mode you would like to use (Use Arrow Keys):" << endl;
 			cout << "SILENT		";
 			cout << "<----";
 			cout << endl;
@@ -53,7 +51,7 @@ void UI::Start()
 		{
 			mode = INTERACTIVE;
 			printf("\033c");
-			cout << "Choose the mode you would like to use:" << endl;
+			cout << "Choose the mode you would like to use (Use Arrow Keys):" << endl;
 			cout << "SILENT			";
 
 			cout << endl;
@@ -62,22 +60,31 @@ void UI::Start()
 			cout << endl;
 		}
 	}
-	//Getting file input name
+	//Getting input file name
 	printf("\033c");
-	string name;
 	cout << "Please enter the name of the file you would like to open: ";
-	cin >> name;
-	cout << "Opening file " << name << "...";
+	cin >> inFileName;
+	//Getting output file name
+	printf("\033c");
+	cout << "Please enter the name of the file you would like to save to: " << endl;
+	cin >> outFileName;
+	printf("\033c");
 }
 
-void UI::Output()
+void UI::Output(int timestep, Hospital** h, int nOfHosp, priQueue<Car*>* backCars, ModifiedPriQ<Car*>* outCars, LinkedQueue<Patient*>* finished)
 {
-
-}
-
-void UI::printPage(int hospitalID)
-{
-
+	for (int i = 0; i < nOfHosp; i++)
+	{
+		cout << "Current Timestep: " << timestep << endl;
+		cout << *h[i];
+		cout << "-------------------------------------------------" << endl;
+		cout << outCars->getCount() << " ==> Out cars: " << *outCars << endl;
+		cout << backCars->getCount() << " <== Back cars: " << *backCars << endl;
+		cout << "-------------------------------------------------" << endl;
+		cout << finished->getCount() << " finished patients: " << *finished << endl;
+		cout << "Press any key to display next hospital" << endl;
+		_getch();
+	}
 }
 
 #endif
