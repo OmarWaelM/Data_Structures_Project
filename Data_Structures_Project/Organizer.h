@@ -75,7 +75,7 @@ public:
     bool RemoveBackCar(string& Car);
 
     //Adding a Hospital to the hospital list
-    void AddHospital(const string& Hospital_Name);
+    void AddHospital(const int Hospital_ID, int index);
 
     //Printing out the hospitals in the hospital list
     void PrintHospitals()const;
@@ -92,16 +92,16 @@ public:
     /***** Input file member functions *****/
 
     //Reads hospital distance data
-    void readHospitalData(ifstream& inputfile);
+    void readHospitalData();
 
     // Reads the available car data
-    void readCarData(ifstream& inputfile);
+    void readCarData();
 
     // Reads patient request list
-    void readPatientRequests(ifstream& inputfile);
+    void readPatientRequests();
 
     //// Reads request cancellation list
-    void readCancellationRequests(ifstream& inputfile);
+    void readCancellationRequests();
 
     ~Organizer();
 
@@ -170,6 +170,24 @@ void Organizer::processInputFile(const string& filename)
 
 }
 
+void Organizer::AddHospital(const int Hospital_ID, int index)
+{
+	// Ensure the index is within bounds
+	if (index < 0 || index >= numHospitals) 
+	{
+		return;
+	}
+
+	// Create a new Hospital object
+	Hospital* newHospital = new Hospital();
+
+	// Set the Hospital ID
+	newHospital->setID(Hospital_ID);
+
+	// Add the new Hospital to the HospitalList at the specified index
+	HospitalList[index] = newHospital;
+}
+
 void Organizer::readHospitalData()
 {
 	// Dynamically allocate an array of pointers to Hospital objects
@@ -179,11 +197,7 @@ void Organizer::readHospitalData()
 
 	for (int i = 0; i < numHospitals; ++i)
 	{
-		// Creates a new Hospital object for each hospital
-		HospitalList[i] = new Hospital();
-
-		// Sets the hospital ID
-		HospitalList[i]->setID(i + 1);
+		AddHospital(i + 1, i);  // Add hospital with ID = i + 1 at index i
 
 		// Reads the number of SCars and NCars for this hospital
 		int scars, ncars;
