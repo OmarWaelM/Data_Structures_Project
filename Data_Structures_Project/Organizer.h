@@ -29,11 +29,11 @@ private:
 	LinkedQueue<Patient*> FinishedList;
 	priQueue<Car*> BackCars;
 	ModifiedPriQ<Car*> OutCars;	
-	Hospital** HospitalList; //An array of pointers to hospitals
 	//General data members
 	int timeStep;
 	UI GUI;
 
+	Hospital** HospitalList; //An array of pointers to hospitals
 	int numHospitals;
 	int speedScars, speedNcars;
 	int** distanceMatrix;
