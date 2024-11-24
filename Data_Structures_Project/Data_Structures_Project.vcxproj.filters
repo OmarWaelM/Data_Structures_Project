@@ -30,21 +30,6 @@
     <ClInclude Include="Patient.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="StackADT.h">
-      <Filter>ADT</Filter>
-    </ClInclude>
-    <ClInclude Include="QueueADT.h">
-      <Filter>ADT</Filter>
-    </ClInclude>
-    <ClInclude Include="Node.h">
-      <Filter>ADT</Filter>
-    </ClInclude>
-    <ClInclude Include="ArrayStack.h">
-      <Filter>ADT</Filter>
-    </ClInclude>
-    <ClInclude Include="priNode.h">
-      <Filter>ADT</Filter>
-    </ClInclude>
     <ClInclude Include="priQueue.h">
       <Filter>ADT</Filter>
     </ClInclude>
