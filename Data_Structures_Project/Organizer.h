@@ -56,7 +56,7 @@ public:
 	Hospital* getHospital(int ID)
 	{
 		// Ensure ID is within bounds
-		if (ID < 0 || ID >= numHospitals) {
+		if (ID < 0 || ID > numHospitals) {
 			return nullptr;  // Return nullptr if ID is invalid
 		}
 		return HospitalList[ID];  // Return the pointer to the hospital object at index ID
@@ -66,13 +66,13 @@ public:
 	Hospital** getHospitalList() { return HospitalList; }
 
 	// Getter for number of hospitals
-	int getNumHospitals() { return numHospitals; }
+	int getNumHospitals() const { return numHospitals; }
 
     //Adding a Back Car based on its priority
-    void AddBackCar(const string& Car, int Priority);
+    //void AddBackCar(const string& Car, int Priority);
 
     //Removing the highest priority from the Back_Cars queue
-    bool RemoveBackCar(string& Car);
+    //bool RemoveBackCar(string& Car);
 
     //Adding a Hospital to the hospital list
     void AddHospital(const int Hospital_ID);
@@ -81,13 +81,13 @@ public:
     void PrintHospitals()const;
 
     //Adding an entry to the finished list
-    void AddFinished(const string& Finished_Entry);
+    //void AddFinished(const string& Finished_Entry);
 
     //Removing an entry from the finished list
-    bool RemoveFinished(string& Finished_Entry);
+	//bool RemoveFinished(string& Finished_Entry);
 
     //Print items in Finished List
-    void DisplayFinishedList()const;
+    //void DisplayFinishedList()const;
 
     /***** Input file member functions *****/
 
