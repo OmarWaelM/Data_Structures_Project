@@ -5,7 +5,6 @@ using namespace std;
 
 using namespace std;
 #include<iostream>
-#include <vector>
 #include <string>
 #include <utility>
 #include <fstream>
@@ -102,8 +101,12 @@ void Organizer::processInputFile(const string& filename)
 	int speedScars, speedNcars;
 	inputFile >> speedScars >> speedNcars;
 
-	//Read the hospital matrix (numHospitals x numHospitals)
-	vector<vector<int>> distanceMatrix(numHospitals, vector<int>(numHospitals));
+	// Read the hospital matrix (numHospitals x numHospitals)
+	int** distanceMatrix = new int* [numHospitals];
+	for (int i = 0; i < numHospitals; ++i)
+	{
+		distanceMatrix[i] = new int[numHospitals];
+	}
 	for (int i = 0; i < numHospitals; i++)
 	{
 		for (int j = 0; j < numHospitals; j++)
@@ -112,21 +115,20 @@ void Organizer::processInputFile(const string& filename)
 		}
 	}
 
-	//Read the number of Scars and Ncars available for each Hospital
-	vector<pair<int, int>> carsPerHospital(numHospitals); // Pair {SCars, NCars}
+	// Read the number of SCars and NCars available for each Hospital
+	int* scarsPerHospital = new int[numHospitals];  // SCars
+	int* ncarsPerHospital = new int[numHospitals];  // NCars
 	for (int i = 0; i < numHospitals; i++)
 	{
-		inputFile >> carsPerHospital[i].first >> carsPerHospital[i].second;
+		inputFile >> scarsPerHospital[i] >> ncarsPerHospital[i];
 	}
 
 	// Read number of patient requests
 	int numRequests;
 	inputFile >> numRequests;
 
-	// Read each request and store it in a vector
-	vector<string> patientRequests(numRequests);
-	inputFile.ignore();
-
+	// Read each request and store it in a dynamic array
+	string* patientRequests = new string[numRequests];
 	for (int i = 0; i < numRequests; i++)
 	{
 		getline(inputFile, patientRequests[i]);
@@ -136,8 +138,7 @@ void Organizer::processInputFile(const string& filename)
 	int numCancellations;
 	inputFile >> numCancellations;
 
-	vector<string> cancellations(numCancellations);
-	inputFile.ignore();
+	string* cancellations = new string[numCancellations];
 	for (int i = 0; i < numCancellations; i++)
 	{
 		getline(inputFile, cancellations[i]);
@@ -152,16 +153,21 @@ void Organizer::processInputFile(const string& filename)
 		hospitalFile << numHospitals << endl;
 
 		// Writing distanceMatrix
-		for (int i = 0; i < numHospitals; ++i) {
-			for (int j = 0; j < numHospitals; ++j) {
+		for (int i = 0; i < numHospitals; ++i)
+		{
+			for (int j = 0; j < numHospitals; ++j)
+			{
 				hospitalFile << distanceMatrix[i][j] << " ";
 			}
 			hospitalFile << endl;
 		}
-		// Writing carsPerHospital
-		for (int i = 0; i < numHospitals; ++i) {
-			hospitalFile << carsPerHospital[i].first << " " << carsPerHospital[i].second << endl;
+
+		// Writing scarsPerHospital and ncarsPerHospital
+		for (int i = 0; i < numHospitals; ++i)
+		{
+			hospitalFile << scarsPerHospital[i] << " " << ncarsPerHospital[i] << endl;
 		}
+
 		readHospitalData(hospitalFile);
 		hospitalFile.close();
 	}
@@ -179,12 +185,13 @@ void Organizer::processInputFile(const string& filename)
 	ofstream patientFile("PatientRequests.txt");
 	if (patientFile.is_open())
 	{
-		patientFile << patientRequests.size() << endl; //Number of requests
+		patientFile << numRequests << endl; // Number of requests
 
 		// Writing patient requests
-		for (int i = 0; i < patientRequests.size(); ++i) {
+		for (int i = 0; i < numRequests; ++i) {
 			patientFile << patientRequests[i] << endl;
 		}
+
 		readPatientRequests(patientFile);
 		patientFile.close();
 	}
@@ -193,15 +200,27 @@ void Organizer::processInputFile(const string& filename)
 	ofstream cancellationFile("CancellationRequests.txt");
 	if (cancellationFile.is_open())
 	{
-		cancellationFile << cancellations.size() << endl;
+		cancellationFile << numCancellations << endl;
 
 		// Writing cancellation requests
-		for (int i = 0; i < cancellations.size(); ++i) {
+		for (int i = 0; i < numCancellations; ++i)
+		{
 			cancellationFile << cancellations[i] << endl;
 		}
+
 		readCancellationRequests(cancellationFile);
 		cancellationFile.close();
 	}
+
+	// Cleanup dynamically allocated memory
+	for (int i = 0; i < numHospitals; ++i) {
+		delete[] distanceMatrix[i];
+	}
+	delete[] distanceMatrix;
+	delete[] scarsPerHospital;
+	delete[] ncarsPerHospital;
+	delete[] patientRequests;
+	delete[] cancellations;
 }
 
 void Organizer::readHospitalData(ifstream& hFile)
