@@ -38,5 +38,6 @@ int main()
 	cout << H1 << endl;
 	*/
 	Organizer Org;
+	Org.Simulator();
 	return 0;
 }

@@ -74,7 +74,7 @@ Organizer::Organizer()
 {
 }
 
-Organizer::Simulator()
+void Organizer::Simulator()
 {
     timeStep = 0;
     GUI.Start();
@@ -83,6 +83,6 @@ Organizer::Simulator()
 
 Organizer::~Organizer()
 {
-    delete[] HospitalList;
+    delete HospitalList;
 }
 #endif

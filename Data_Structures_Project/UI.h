@@ -2,6 +2,7 @@
 #define UI_H
 using namespace std;
 #include <conio.h>
+
 enum UI_MODE {
 	SILENT,
 	INTERACTIVE,
@@ -13,7 +14,6 @@ private:
 	UI_MODE mode;
 	string inFileName;
 	string outFileName;
-
 public:
 	UI():mode(SILENT) {}
 	void Start();
