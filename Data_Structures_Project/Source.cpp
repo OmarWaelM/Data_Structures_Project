@@ -1,4 +1,4 @@
-#include <iostream>
+/*#include <iostream>
 #include <Windows.h>
 #include <string>
 #include "LinkedQueue.h"
@@ -36,7 +36,7 @@ int main()
 
 	C1.AssignPatient(&P1);
 	cout << H1 << endl;
-	*/
+
 	Organizer Org;
 	return 0;
-}
+} */

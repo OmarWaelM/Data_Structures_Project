@@ -283,7 +283,7 @@ void Organizer::PrintHospitals() const
 		cout << "----------------------------------------\n";
 	}
 
-	cout << "\nDistance Matrix:\n";
+	cout << "Distance Matrix:\n";
 	for (int i = 0; i < numHospitals; ++i)
 	{
 		for (int j = 0; j < numHospitals; ++j)
