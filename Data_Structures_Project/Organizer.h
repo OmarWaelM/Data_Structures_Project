@@ -117,8 +117,9 @@ public:
 
 	// Functions for handling Out Cars
 	//void handleCancellations();
-	void handleCarMovements();
+	//void handleCarMovements();
 
+	~Organizer();
 
 	~Organizer();
 };
@@ -320,7 +321,6 @@ void Organizer::handleCarMovements()
 
 	}
 }
-
 
 Organizer::~Organizer()
 {
