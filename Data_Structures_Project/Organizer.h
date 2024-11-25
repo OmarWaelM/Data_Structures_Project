@@ -1,21 +1,9 @@
 #ifndef ORGANIZER_H
 #define ORGANIZER_H
-using namespace std;
+#include "Car.h"
 #include "UI.h"
 #include "Hospital.h"
-#include "Patient.h"
-#include "Car.h"
-#include "LinkedQueue.h"
-#include "priQueue.h"
-#include "ModifiedPriQ.h"
-
 using namespace std;
-#include<iostream>
-#include <string>
-#include <fstream>
-#include <iomanip>
-
-class UI;
 
 struct CancellationReq
 {
@@ -123,8 +111,9 @@ public:
 
 };
 
-Organizer::Organizer() :GUI(this)
+Organizer::Organizer() :GUI()
 {
+	timeStep = 0;
 	GUI.Start();
 	filename = GUI.getInputFileName();
 }
@@ -189,8 +178,6 @@ void Organizer::processInputFile()
 
 void Organizer::Simulator()
 {
-    timeStep = 0;
-    GUI.Start();
 }  
 
 void Organizer::AddHospital(const int Hospital_ID)
@@ -301,25 +288,25 @@ void Organizer::readCancellationRequests()
 
 void Organizer::handleCarMovements()
 {
-    Car* car;
+	Car* car;
+	int cp;
+	// Process OutCars: move cars to BackCars if they have arrived
+	while (!OutCars.isEmpty() && OutCars.peek(car, cp) && car->getArrivalTime() == timeStep) {
+		int priority;
+		OutCars.dequeue(car, priority);
+		car->pickupPatient(); // Perform patient pickup
+		BackCars.enqueue(car, car->getPriority());
+	}
 
-    // Process OutCars: move cars to BackCars if they have arrived
-    while (!OutCars.isEmpty() && OutCars.peek(car) && car->getArrivalTime() == timeStep) {
-        int priority;
-        OutCars.dequeue(car, priority);
-        car->pickupPatient(); // Perform patient pickup
-        BackCars.enqueue(car, car->getPriority());
-    }
+	// Process BackCars: return cars to hospitals if they have completed their task
+	int priority;
+	while (!BackCars.isEmpty() && BackCars.peek(car, priority) && car->getReturnTime() == timeStep) {
+		BackCars.dequeue(car, priority);
+		// Handle returning the car to its hospital
+		// HospitalList[car->getHospitalID()].handleReturningCar(car);
 
-    // Process BackCars: return cars to hospitals if they have completed their task
-    int priority;
-    while (!BackCars.isEmpty() && BackCars.peek(car, priority) && car->getReturnTime() == timeStep) {
-        BackCars.dequeue(car, priority);
-        // Handle returning the car to its hospital
-        // HospitalList[car->getHospitalID()].handleReturningCar(car);
-
-    }
-
+	}
+}
 
 Organizer::~Organizer()
 {

@@ -2,12 +2,6 @@
 #define UI_H
 using namespace std;
 
-#include <conio.h>
-#include <iostream>
-#include <fstream>
-#include <sstream>
-#include <string>
-
 enum UI_MODE {
 	SILENT,
 	INTERACTIVE,
@@ -23,11 +17,10 @@ private:
 public:
 	UI() :mode(SILENT){}
 	void Start();
-	bool fileExists(string& filename);
+	bool fileExists(const string& filename);
 	void setInputFileName(string& filename);
 	string getInputFileName();
 	void Output(int timestep, Hospital** h, int nOfHosp, priQueue<Car*>* backCars, ModifiedPriQ<Car*>* outCars, LinkedQueue<Patient*>* finished);
-
 };
 
 
