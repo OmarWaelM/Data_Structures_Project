@@ -47,6 +47,8 @@ Car::Car(int id, int hosp, carType type, int spd)
 	cType = type;
 	speed = spd;
 	assignedPatient = nullptr;
+	arrivalTime = 0;
+	priority = 0;
 	distToHospital = 0;
 	distToPatient = 0;
 	returnTime = 0;

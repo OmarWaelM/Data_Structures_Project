@@ -22,7 +22,7 @@ private:
 
 public:
 	//Member Function
-	Hospital(): hospitalID(0), scCount(0), ncCount(0), distanceMatrix(nullptr) {}
+	Hospital();
 	void setID(int id) { hospitalID = id; }
 	int getHospitalID() const { return hospitalID; }
 	void setSCarsCount(int count) { scCount = count; }
@@ -36,9 +36,11 @@ public:
 	void assignPatientToCar(Patient* patient, Car* car);
 
 
-	friend ostream& operator <<(ostream& os, Hospital& h);
+	// friend ostream& operator <<(ostream& os, Hospital& h);
 
 };
+
+Hospital::Hospital(): distanceMatrix(nullptr), hospitalID(0), scCount(0), ncCount(0) {}
 
 void Hospital::addCarToList(Car* car)
 {
@@ -81,7 +83,7 @@ void Hospital::setDistanceMatrix(int** matrix, int size)
 }
 
 //this can be changed i made it to look like the description
-ostream& operator <<(ostream& os, Hospital& h)
+/*ostream& operator <<(ostream& os, Hospital& h)
 {
 	os << "==============	  Hospital #" << h.hospitalID << " data   ==============" << endl;
 	os << h.EPList.getCount() << " EP requests: " << h.EPList << endl;
@@ -90,6 +92,6 @@ ostream& operator <<(ostream& os, Hospital& h)
 	os << "Free Cars: " << h.SCList.getCount() << " SCars, " << h.NCList.getCount() << " NCars" << endl;
 	os << "==============	Hospital #" << h.hospitalID << " data end  =============" << endl;
 	return os;
-}
+} */
 
 #endif
