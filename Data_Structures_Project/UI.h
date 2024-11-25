@@ -94,7 +94,7 @@ void UI::Start()
 }
 
 //Checks whether the filename inserted by the user exists or not
-bool UI::fileExists(const string& filename)
+bool UI::fileExists(string& filename)
 {
 	ifstream file;
 	file.open(filename + ".txt", ios::in);

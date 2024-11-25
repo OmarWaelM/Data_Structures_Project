@@ -1,4 +1,5 @@
 #pragma once
+#include "Patient.h"
 
 enum carType {
 	NC,

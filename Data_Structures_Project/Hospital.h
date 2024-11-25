@@ -1,6 +1,7 @@
 #ifndef HOSPITAL_H
 #define HOSPITAL_H
 #include "ModifiedPriQ.h"
+#include "ModifiedQ.h"
 
 class Hospital
 {
@@ -8,7 +9,7 @@ private:
 	//Lists used in hospital class
 	LinkedQueue<Patient*> SPList;
 	priQueue<Patient*> EPList;
-	ModifiedPriQ<Patient*> NPList;
+	ModifiedQ<Patient*> NPList;
 
 	LinkedQueue<Car*> SCList;
 	LinkedQueue<Car*> NCList;
