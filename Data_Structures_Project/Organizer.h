@@ -122,7 +122,20 @@ public:
 	~Organizer();
 };
 
-Organizer::Organizer() :GUI()
+Organizer::Organizer() :
+	GUI(),
+	timeStep(0),
+	HospitalList(nullptr),
+	numHospitals(0),
+	speedScars(0),
+	speedNcars(0),
+	distanceMatrix(nullptr),
+	scarsPerHospital(nullptr),
+	ncarsPerHospital(nullptr),
+	numRequests(0),
+	patientRequests(nullptr),
+	numCancellations(0),
+	cancellations(nullptr)
 {
 	GUI.Start();
 	filename = GUI.getInputFileName();

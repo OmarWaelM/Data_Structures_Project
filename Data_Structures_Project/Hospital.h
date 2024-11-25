@@ -22,7 +22,7 @@ private:
 
 public:
 	//Member Function
-	Hospital() {}
+	Hospital(): hospitalID(0), scCount(0), ncCount(0), distanceMatrix(nullptr) {}
 	void setID(int id) { hospitalID = id; }
 	int getHospitalID() const { return hospitalID; }
 	void setSCarsCount(int count) { scCount = count; }

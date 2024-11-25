@@ -2,6 +2,12 @@
 #define UI_H
 using namespace std;
 
+#include "Hospital.h"
+#include "Car.h"
+#include "Patient.h"
+#include "ModifiedPriQ.h"
+#include "LinkedQueue.h"
+#include "priQueue.h"
 #include <conio.h>
 #include <iostream>
 #include <fstream>
