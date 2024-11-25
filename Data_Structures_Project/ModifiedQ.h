@@ -3,12 +3,13 @@ template <typename T>
 class ModifiedQ : public LinkedQueue<T>
 {
 public:
-	ModifiedQ(const LinkedQueue<T>& LQ);
+
+	void cancelNPRequest(Patient* patient);
 	
 };
 
 template<typename T>
- ModifiedQ<T>::ModifiedQ(const LinkedQueue<T>& LQ)
+ void ModifiedQ<T>::cancelNPRequest(Patient* patient)
 {
-	 
+
 }

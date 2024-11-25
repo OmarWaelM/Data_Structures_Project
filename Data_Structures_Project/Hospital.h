@@ -21,7 +21,7 @@ public:
 	void setID(int id) { hospitalID = id; }
 	void addCarToList(Car* car);
 	void addPatientToList(Patient* patient);
-	Car* assignPatientToCar(Patient* patient);
+	bool assignPatientToCar(Patient* patient);
 
 	friend ostream& operator <<(ostream& os, Hospital& h);
 
@@ -45,7 +45,7 @@ void Hospital::addPatientToList(Patient* patient)
 		EPList.enqueue(patient, patient->getPatientPriority());
 }
 
-Car* Hospital::assignPatientToCar(Patient* p)
+bool Hospital::assignPatientToCar(Patient* p)
 {
 	Car* ambulance = nullptr;
 	Patient* patient = nullptr;
@@ -55,12 +55,14 @@ Car* Hospital::assignPatientToCar(Patient* p)
 		NPList.dequeue(patient);
 		NCList.dequeue(ambulance);
 		ambulance->AssignPatient(patient);
+		return true;
 	}
 	else if (p->getPatientType() == SP && SCList.getCount() != 0)
 	{
 		SPList.dequeue(patient);
 		SCList.dequeue(ambulance);
 		ambulance->AssignPatient(patient);
+		return true;
 	}
 	else if (p->getPatientType() == EP)
 	{
@@ -69,6 +71,7 @@ Car* Hospital::assignPatientToCar(Patient* p)
 			NCList.dequeue(ambulance);
 			EPList.dequeue(patient,x);
 			ambulance->AssignPatient(patient);
+
 		}
 		else if (SCList.getCount() != 0)
 		{
@@ -76,9 +79,10 @@ Car* Hospital::assignPatientToCar(Patient* p)
 			EPList.dequeue(patient, x);
 			ambulance->AssignPatient(patient);
 		}
+		return true;
 	}
 	
-	return ambulance;
+	return false;
 }
 
 
