@@ -117,9 +117,7 @@ public:
 
 	// Functions for handling Out Cars
 	//void handleCancellations();
-	//void handleCarMovements();
-
-	~Organizer();
+	void handleCarMovements();
 
 	~Organizer();
 };
@@ -303,9 +301,10 @@ void Organizer::readCancellationRequests()
 void Organizer::handleCarMovements()
 {
 	Car* car;
-
+	int cp;
 	// Process OutCars: move cars to BackCars if they have arrived
-	while (!OutCars.isEmpty() && OutCars.peek(car) && car->getArrivalTime() == timeStep) {
+	while (!OutCars.isEmpty() && OutCars.peek(car,cp) && car->getArrivalTime() == timeStep)
+	{
 		int priority;
 		OutCars.dequeue(car, priority);
 		car->pickupPatient(); // Perform patient pickup
@@ -314,7 +313,8 @@ void Organizer::handleCarMovements()
 
 	// Process BackCars: return cars to hospitals if they have completed their task
 	int priority;
-	while (!BackCars.isEmpty() && BackCars.peek(car, priority) && car->getReturnTime() == timeStep) {
+	while (!BackCars.isEmpty() && BackCars.peek(car, priority) && car->getReturnTime() == timeStep)
+	{
 		BackCars.dequeue(car, priority);
 		// Handle returning the car to its hospital
 		// HospitalList[car->getHospitalID()].handleReturningCar(car);
