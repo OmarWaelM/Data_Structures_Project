@@ -33,6 +33,7 @@ private:
 	//General data members
 	int timeStep;
 	UI GUI;
+	string filename;
 
 	Hospital** HospitalList; //An array of pointers to hospitals
 	int numHospitals;
@@ -52,7 +53,7 @@ public:
     //Constructor
     Organizer();
 
-    void processInputFile(const string& filename);
+    void processInputFile();
 
 	Hospital* getHospital(int ID)
 	{
@@ -110,12 +111,14 @@ public:
 
 Organizer::Organizer() :GUI(this)
 {
-    GUI.Start();
+	GUI.Start();
+	filename = GUI.getInputFileName();
 }
 
-void Organizer::processInputFile(const string& filename)
+void Organizer::processInputFile()
 {
-    ifstream inputFile(filename);
+	ifstream inputFile;
+	inputFile.open(filename + ".txt", ios::in);
     if (!inputFile.is_open())
     {
         return;

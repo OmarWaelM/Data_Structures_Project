@@ -1,7 +1,6 @@
 #ifndef UI_H
 #define UI_H
 using namespace std;
-#include "Organizer.h"
 
 #include <iostream>
 #include <fstream>
@@ -17,19 +16,20 @@ class UI
 {
 private:
 	UI_MODE mode;
-	Organizer* org;
+	string fileName;
 public:
-	UI(Organizer* organizer) :mode(SILENT), org(organizer) {}
-	void Start(Organizer& organizer);
-	bool fileExists(const string& filename);
-	void sendInputFile(const string& filename, Organizer& organizer);
+	UI() :mode(SILENT){}
+	void Start();
+	bool fileExists(string& filename);
+	void setInputFileName(string& filename);
+	string getInputFileName();
 	void Output();
 	void printPage(int hospitalID);
 
 };
 
 
-void UI::Start(Organizer& organizer)
+void UI::Start()
 {
 	//Choosing mode
 	mode = SILENT;
@@ -82,9 +82,8 @@ void UI::Start(Organizer& organizer)
 		if (fileExists(name))
 		{
 			cout << "Opening file " << name << "...";
-
-			// Pass the file name to sendInputFile
-			sendInputFile(name, organizer);
+			setInputFileName(name);
+			
 			break;
 		}
 		else
@@ -97,14 +96,19 @@ void UI::Start(Organizer& organizer)
 //Checks whether the filename inserted by the user exists or not
 bool UI::fileExists(const string& filename)
 {
-	ifstream file(filename);
+	ifstream file;
+	file.open(filename + ".txt", ios::in);
 	return file.is_open(); // Return true if the file can be opened, false otherwise
 }
 //Sends the input file name to the Organizer
-void UI::sendInputFile(const string& filename, Organizer& organizer)
+void UI::setInputFileName(string& filename)
 {
-	// Pass the file name to the Organizer to process it
-	organizer.processInputFile(filename);
+	fileName = filename;
+}
+
+string UI::getInputFileName()
+{
+	return fileName;
 }
 
 void UI::Output()
