@@ -2,11 +2,18 @@
 #define UI_H
 using namespace std;
 
+#include "Hospital.h"
+#include "Car.h"
+#include "Patient.h"
+#include "ModifiedPriQ.h"
+#include "LinkedQueue.h"
+#include "priQueue.h"
 #include <conio.h>
 #include <iostream>
 #include <fstream>
 #include <sstream>
 #include <string>
+#include "WinUser.h"
 
 enum UI_MODE {
 	SILENT,
@@ -26,7 +33,7 @@ public:
 	bool fileExists(string& filename);
 	void setInputFileName(string& filename);
 	string getInputFileName();
-	void Output(int timestep, Hospital** h, int nOfHosp, priQueue<Car*>* backCars, ModifiedPriQ<Car*>* outCars, LinkedQueue<Patient*>* finished);
+	//void Output(int timestep, Hospital** h, int nOfHosp, priQueue<Car*>* backCars, ModifiedPriQ<Car*>* outCars, LinkedQueue<Patient*>* finished);
 
 };
 
@@ -100,7 +107,7 @@ void UI::Start()
 }
 
 //Checks whether the filename inserted by the user exists or not
-bool UI::fileExists(const string& filename)
+bool UI::fileExists(string& filename)
 {
 	ifstream file;
 	file.open(filename + ".txt", ios::in);
@@ -117,7 +124,7 @@ string UI::getInputFileName()
 	return fileName;
 }
 
-void UI::Output(int timestep, Hospital** h, int nOfHosp, priQueue<Car*>* backCars, ModifiedPriQ<Car*>* outCars, LinkedQueue<Patient*>* finished)
+/*void UI::Output(int timestep, Hospital** h, int nOfHosp, priQueue<Car*>* backCars, ModifiedPriQ<Car*>* outCars, LinkedQueue<Patient*>* finished)
 {
 	for (int i = 0; i < nOfHosp; i++)
 	{
@@ -131,6 +138,6 @@ void UI::Output(int timestep, Hospital** h, int nOfHosp, priQueue<Car*>* backCar
 		cout << "Press any key to display next hospital" << endl;
 		_getch();
 	}
-}
+} */
 
 #endif
