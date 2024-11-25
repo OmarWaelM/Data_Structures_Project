@@ -61,7 +61,7 @@ public:
   
     // Functions for managing Back Cars:
     //Adding a Back Car based on its priority
-    void AddBackCar(const string& Car, int Priority);
+    //void AddBackCar(const string& Car, int Priority);
   
   //Removing the highest priority from the Back_Cars queue
     //bool RemoveBackCar(string& Car);
@@ -116,8 +116,8 @@ public:
     void readCancellationRequests();
   
       // Functions for handling Out Cars
-      void handleCancellations();
-      void handleCarMovements();
+      //void handleCancellations();
+      //void handleCarMovements();
 
     ~Organizer();
 
@@ -301,25 +301,25 @@ void Organizer::readCancellationRequests()
 
 void Organizer::handleCarMovements()
 {
-    Car* car;
+	Car* car;
 
-    // Process OutCars: move cars to BackCars if they have arrived
-    while (!OutCars.isEmpty() && OutCars.peek(car) && car->getArrivalTime() == timeStep) {
-        int priority;
-        OutCars.dequeue(car, priority);
-        car->pickupPatient(); // Perform patient pickup
-        BackCars.enqueue(car, car->getPriority());
-    }
+	// Process OutCars: move cars to BackCars if they have arrived
+	while (!OutCars.isEmpty() && OutCars.peek(car) && car->getArrivalTime() == timeStep) {
+		int priority;
+		OutCars.dequeue(car, priority);
+		car->pickupPatient(); // Perform patient pickup
+		BackCars.enqueue(car, car->getPriority());
+	}
 
-    // Process BackCars: return cars to hospitals if they have completed their task
-    int priority;
-    while (!BackCars.isEmpty() && BackCars.peek(car, priority) && car->getReturnTime() == timeStep) {
-        BackCars.dequeue(car, priority);
-        // Handle returning the car to its hospital
-        // HospitalList[car->getHospitalID()].handleReturningCar(car);
+	// Process BackCars: return cars to hospitals if they have completed their task
+	int priority;
+	while (!BackCars.isEmpty() && BackCars.peek(car, priority) && car->getReturnTime() == timeStep) {
+		BackCars.dequeue(car, priority);
+		// Handle returning the car to its hospital
+		// HospitalList[car->getHospitalID()].handleReturningCar(car);
 
-    }
-
+	}
+}
 
 Organizer::~Organizer()
 {
