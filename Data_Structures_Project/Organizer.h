@@ -20,7 +20,7 @@ class UI;
 struct CancellationReq
 {
 	int PID;
-    int hospitalID;
+	int hospitalID;
 	int CancellationTimestep;
 };
 
@@ -32,8 +32,8 @@ private:
 	LinkedQueue<CancellationReq> CancellationList;
 	LinkedQueue<Patient*> FinishedList;
 	priQueue<Car*> BackCars;
-	ModifiedPriQ<Car*> OutCars;	
-  
+	ModifiedPriQ<Car*> OutCars;
+
 	//General data members
 	int timeStep;
 	UI GUI;
@@ -53,30 +53,30 @@ private:
 
 public:
 	//Member Functions
-    
-    //Constructor
-    Organizer();
-  void processInputFile();
-  void Simulator();
-  
-    // Functions for managing Back Cars:
-    //Adding a Back Car based on its priority
-    void AddBackCar(const string& Car, int Priority);
-  
-  //Removing the highest priority from the Back_Cars queue
-    //bool RemoveBackCar(string& Car);
-  
-  LinkedQueue<Patient*>* getFinishedList() { return &FinishedList; }
 
-  //Functions for managing hospital list:
-  
-  // Getter for hospital list (if needed)
+	//Constructor
+	Organizer();
+	void processInputFile();
+	void Simulator();
+
+	// Functions for managing Back Cars:
+	//Adding a Back Car based on its priority
+	//void AddBackCar(const string& Car, int Priority);
+
+    //Removing the highest priority from the Back_Cars queue
+	//bool RemoveBackCar(string& Car);
+
+	LinkedQueue<Patient*>* getFinishedList() { return &FinishedList; }
+
+	//Functions for managing hospital list:
+
+	// Getter for hospital list (if needed)
 	Hospital** getHospitalList() { return HospitalList; }
 
 	// Getter for number of hospitals
 	int getNumHospitals() const { return numHospitals; }
-  
-  Hospital* getHospital(int ID)
+
+	Hospital* getHospital(int ID)
 	{
 		// Ensure ID is within bounds
 		if (ID < 0 || ID > numHospitals) {
@@ -84,46 +84,46 @@ public:
 		}
 		return HospitalList[ID];  // Return the pointer to the hospital object at index ID
 	}
-  
-  //Adding a Hospital to the hospital list
-  void AddHospital(const int Hospital_ID);
-  
-  //Printing out the hospitals in the hospital list
-  void PrintHospitals()const;
 
-    // functions for managing finished lists
-    //Adding an entry to the finished list
-    //void AddFinished(const string& Finished_Entry);
+	//Adding a Hospital to the hospital list
+	void AddHospital(const int Hospital_ID);
 
-    //Removing an entry from the finished list
+	//Printing out the hospitals in the hospital list
+	void PrintHospitals()const;
+
+	// functions for managing finished lists
+	//Adding an entry to the finished list
+	//void AddFinished(const string& Finished_Entry);
+
+	//Removing an entry from the finished list
 	//bool RemoveFinished(string& Finished_Entry);
 
-    //Print items in Finished List
-    //void DisplayFinishedList()const;
+	//Print items in Finished List
+	//void DisplayFinishedList()const;
 
-    /***** Input file member functions *****/
+	/***** Input file member functions *****/
 
-    //Reads hospital distance data
-    void readHospitalData();
+	//Reads hospital distance data
+	void readHospitalData();
 
-    // Reads the available car data
-    void readCarData();
-  
-   // Reads patient request list
-    void readPatientRequests();
+	// Reads the available car data
+	void readCarData();
 
-    //// Reads request cancellation list
-    void readCancellationRequests();
-  
-      // Functions for handling Out Cars
-      //void handleCancellations();
-	  void handleCarMovements();
+	// Reads patient request list
+	void readPatientRequests();
+
+	//// Reads request cancellation list
+	void readCancellationRequests();
+
+	// Functions for handling Out Cars
+	//void handleCancellations();
+	void handleCarMovements();
 
 
-	  ~Organizer();
+	~Organizer();
 };
 
-Organizer::Organizer() :GUI(this)
+Organizer::Organizer() :GUI()
 {
 	GUI.Start();
 	filename = GUI.getInputFileName();
@@ -133,10 +133,10 @@ void Organizer::processInputFile()
 {
 	ifstream inputFile;
 	inputFile.open(filename + ".txt", ios::in);
-    if (!inputFile.is_open())
-    {
-        return;
-    }
+	if (!inputFile.is_open())
+	{
+		return;
+	}
 
 	//Read the number of hospitals (the first line)
 	inputFile >> numHospitals;
@@ -157,7 +157,7 @@ void Organizer::processInputFile()
 			inputFile >> distanceMatrix[i][j];
 		}
 	}
-  // Read the number of SCars and NCars available for each Hospital
+	// Read the number of SCars and NCars available for each Hospital
 	scarsPerHospital = new int[numHospitals];  // SCars
 	ncarsPerHospital = new int[numHospitals];  // NCars
 	for (int i = 0; i < numHospitals; i++)
@@ -187,18 +187,18 @@ void Organizer::processInputFile()
 
 }
 
-Organizer::Simulator()
+void Organizer::Simulator()
 {
-    timeStep = 0;
-    GUI.Start();
-}  
+	timeStep = 0;
+	GUI.Start();
+}
 
 void Organizer::AddHospital(const int Hospital_ID)
 {
 	int index = Hospital_ID - 1;
 
 	// Ensure the index is within bounds
-	if (index < 0 || index >= numHospitals) 
+	if (index < 0 || index >= numHospitals)
 	{
 		return;
 	}
@@ -234,7 +234,7 @@ void Organizer::readHospitalData()
 
 		// Adds SCars to the hospital's SCList and NCars to the NCList
 		// For each SCar, add it to the SCList
-		for (int j = 0; j < scars; ++j) 
+		for (int j = 0; j < scars; ++j)
 		{
 			Car* car = new Car(carID++, i + 1, SC, speedScars);
 			HospitalList[i]->addCarToList(car);  // Adds to SCList or NCList based on car type
@@ -291,34 +291,35 @@ void Organizer::readCarData()
 
 void Organizer::readPatientRequests()
 {
-   
+
 }
 
 void Organizer::readCancellationRequests()
 {
-  
-}   
+
+}
 
 void Organizer::handleCarMovements()
 {
-    Car* car;
+	Car* car;
 
-    // Process OutCars: move cars to BackCars if they have arrived
-    while (!OutCars.isEmpty() && OutCars.peek(car) && car->getArrivalTime() == timeStep) {
-        int priority;
-        OutCars.dequeue(car, priority);
-        car->pickupPatient(); // Perform patient pickup
-        BackCars.enqueue(car, car->getPriority());
-    }
+	// Process OutCars: move cars to BackCars if they have arrived
+	while (!OutCars.isEmpty() && OutCars.peek(car) && car->getArrivalTime() == timeStep) {
+		int priority;
+		OutCars.dequeue(car, priority);
+		car->pickupPatient(); // Perform patient pickup
+		BackCars.enqueue(car, car->getPriority());
+	}
 
-    // Process BackCars: return cars to hospitals if they have completed their task
-    int priority;
-    while (!BackCars.isEmpty() && BackCars.peek(car, priority) && car->getReturnTime() == timeStep) {
-        BackCars.dequeue(car, priority);
-        // Handle returning the car to its hospital
-        // HospitalList[car->getHospitalID()].handleReturningCar(car);
+	// Process BackCars: return cars to hospitals if they have completed their task
+	int priority;
+	while (!BackCars.isEmpty() && BackCars.peek(car, priority) && car->getReturnTime() == timeStep) {
+		BackCars.dequeue(car, priority);
+		// Handle returning the car to its hospital
+		// HospitalList[car->getHospitalID()].handleReturningCar(car);
 
-    }
+	}
+}
 
 
 Organizer::~Organizer()
