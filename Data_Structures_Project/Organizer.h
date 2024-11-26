@@ -13,6 +13,7 @@ using namespace std;
 #include<iostream>
 #include <string>
 #include <fstream>
+#include <sstream>
 #include <iomanip>
 
 class UI;
@@ -28,7 +29,7 @@ class Organizer
 {
 private:
 	//Lists used in orgranizer class
-	LinkedQueue<Patient*> AllPatientsList;
+	LinkedQueue<Patient*> patientQueue;  // Patient queue (list of pointers to patients)
 	LinkedQueue<CancellationReq> CancellationList;
 	LinkedQueue<Patient*> FinishedList;
 	priQueue<Car*> BackCars;
@@ -105,9 +106,6 @@ public:
 
 	//Reads hospital distance data
 	void readHospitalData();
-
-	// Reads the available car data
-	void readCarData();
 
 	// Reads patient request list
 	void readPatientRequests();
@@ -296,16 +294,42 @@ void Organizer::PrintHospitals() const
 	cout << "----------------------------------------\n";
 }
 
-void Organizer::readCarData()
-{
-
-
-
-} 
-
 void Organizer::readPatientRequests()
 {
+	for (int i = 0; i < numRequests; i++)
+	{
+		stringstream ss(patientRequests[i]);
+		string type;
+		int requestTime, patientID, nearestHospitalID, distanceToHospital, caseSeverity;
 
+		ss >> type; // Read the type of patient (NP, SP, EP)
+		Patient* patient = nullptr; // Pointer to a Patient object 
+
+		if (type == "NP")
+		{
+			ss >> requestTime >> patientID >> nearestHospitalID >> distanceToHospital;
+
+			// Dynamically create a Normal Patient (NP)
+			patient = new Patient(patientID, requestTime, nearestHospitalID, distanceToHospital, NP);
+		}
+		else if (type == "SP")
+		{
+			ss >> requestTime >> patientID >> nearestHospitalID >> distanceToHospital;
+
+			// Dynamically create a Special Patient (SP)
+			patient = new Patient(patientID, requestTime, nearestHospitalID, distanceToHospital, SP);
+		}
+		else if (type == "EP")
+		{
+            ss >> requestTime >> patientID >> nearestHospitalID >> distanceToHospital >> caseSeverity;
+
+            // Dynamically create an Emergency Patient (EP) with case severity
+            patient = new Patient(patientID, requestTime, nearestHospitalID, distanceToHospital, EP, caseSeverity);
+        }
+
+		// Enqueue the patient pointer into the queue
+		patientQueue.enqueue(patient);
+	}
 }
 
 void Organizer::readCancellationRequests()
@@ -356,6 +380,14 @@ Organizer::~Organizer()
 		delete HospitalList[i];  // Delete each individual Hospital object
 	}
 	delete[] HospitalList;  // Delete the array of Hospital pointers
+
+	// Dequeue all patients and delete each dynamically allocated Patient object
+	Patient* tempPatient;
+	while (!patientQueue.isEmpty())
+	{
+		patientQueue.dequeue(tempPatient);
+		delete tempPatient;  // Free the memory allocated for the Patient object
+	}
 }
 
 
