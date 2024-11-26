@@ -1,7 +1,6 @@
 #ifndef UI_H
 #define UI_H
 using namespace std;
-
 #include "Hospital.h"
 #include "Car.h"
 #include "Patient.h"
@@ -30,10 +29,11 @@ private:
 public:
 	UI() :mode(SILENT){}
 	void Start();
-	bool fileExists(string& filename);
+	bool fileExists(const string& filename);
 	void setInputFileName(string& filename);
 	string getInputFileName();
-	//void Output(int timestep, Hospital** h, int nOfHosp, priQueue<Car*>* backCars, ModifiedPriQ<Car*>* outCars, LinkedQueue<Patient*>* finished);
+  
+	void Output(int timestep, Hospital** h, int nOfHosp, priQueue<Car*>* backCars, ModifiedPriQ<Car*>* outCars, LinkedQueue<Patient*>* finished);
 
 };
 
@@ -124,7 +124,7 @@ string UI::getInputFileName()
 	return fileName;
 }
 
-/*void UI::Output(int timestep, Hospital** h, int nOfHosp, priQueue<Car*>* backCars, ModifiedPriQ<Car*>* outCars, LinkedQueue<Patient*>* finished)
+void UI::Output(int timestep, Hospital** h, int nOfHosp, priQueue<Car*>* backCars, ModifiedPriQ<Car*>* outCars, LinkedQueue<Patient*>* finished)
 {
 	for (int i = 0; i < nOfHosp; i++)
 	{
@@ -138,6 +138,6 @@ string UI::getInputFileName()
 		cout << "Press any key to display next hospital" << endl;
 		_getch();
 	}
-} */
+}
 
 #endif
