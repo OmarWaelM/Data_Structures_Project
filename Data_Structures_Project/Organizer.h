@@ -40,6 +40,8 @@ public:
     Hospital* getHospital(int ID) { return &HospitalList[ID]; }
     LinkedQueue<Patient*>* getFinishedList() { return &FinishedList; }
 
+    Hospital* getNearestHospital(Patient* EP);
+    bool addEPtoHospital(Patient* EP);
     /*
     //Adding a Back Car based on its priority
     void AddBackCar(const string& Car, int Priority);
@@ -74,6 +76,26 @@ Organizer::Organizer():GUI(this)
 {
     GUI.Start();
 }
+
+
+Hospital* Organizer::getNearestHospital(Patient* EP)
+{
+    return nullptr;
+}
+
+bool Organizer::addEPtoHospital(Patient* EP)
+{
+    Hospital* hospital = EP->getNearestHospital();
+    if (!(hospital->assignPatientToCar()))
+    {
+        //get the shortest hospital list
+        //get nearest hospital to the current one
+        return true;
+    }
+    return false;
+}
+
+
 
 Organizer::~Organizer()
 {

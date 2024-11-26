@@ -27,7 +27,6 @@ public:
 	int getPatientID();
 	int getDistance();
 	int getNearestHospital();
-
 	friend ostream& operator <<(ostream& os, Patient& patient);
 };
 
@@ -68,6 +67,7 @@ int Patient::getNearestHospital()
 {
 	return nearestHospital;
 }
+
 
 ostream& operator <<(ostream& os, Patient& patient)
 {

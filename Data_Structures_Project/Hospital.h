@@ -22,7 +22,7 @@ public:
 	void addCarToList(Car* car);
 	void addPatientToList(Patient* patient);
 	bool assignPatientToCar(Patient* patient);
-
+	
 	friend ostream& operator <<(ostream& os, Hospital& h);
 
 };
