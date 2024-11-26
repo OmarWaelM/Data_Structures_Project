@@ -22,7 +22,7 @@ public:
 	void addCarToList(Car* car);
 	void addPatientToList(Patient* patient);
 	bool assignPatientToCar(Patient* patient);
-	
+	void cancelNPRequest(Patient* NP);
 	friend ostream& operator <<(ostream& os, Hospital& h);
 
 };
@@ -83,6 +83,11 @@ bool Hospital::assignPatientToCar(Patient* p)
 	}
 	
 	return false;
+}
+
+void Hospital::cancelNPRequest(Patient* NP)
+{
+	NPList.cancelRequest(NP);
 }
 
 
