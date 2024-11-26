@@ -89,7 +89,7 @@ public:
 	//Adding a Hospital to the hospital list
 	void AddHospital(const int Hospital_ID);
 
-	//Printing out the hospitals in the hospital list
+	//Printing out the hospitals' information as shown in the sample output file
 	void printHospitals()const;
 
 	// functions for managing finished lists
@@ -106,6 +106,8 @@ public:
 
 	//Reads hospital distance data
 	void readHospitalData();
+	//Printing out the hospitals in the hospital list
+	void PrintHospitalsList()const;
 
 	// Reads patient request list
 	void readPatientRequests();
@@ -138,6 +140,12 @@ Organizer::Organizer() :
 	GUI.Start();
 	filename = GUI.getInputFileName();
 }
+
+/***** FILE LOADING FUNCTION *****/
+
+/* The processInputFile function loads, reads and processes the input file 
+containing data related to the hospitals, patient requests, and cancellations.
+It then calls the respective functions to store the data in appropriate data structures */
 
 void Organizer::processInputFile()
 {
@@ -195,6 +203,7 @@ void Organizer::processInputFile()
 	}
 	inputFile.close();
 
+	// Call functions to process the loaded data and create our program's data structures
 	readHospitalData();
 	readPatientRequests();
 	readCancellationRequests();
@@ -349,6 +358,40 @@ void Organizer::handleCarMovements()
 		// HospitalList[car->getHospitalID()].handleReturningCar(car);
 
 	}
+}
+
+void Organizer::PrintHospitalsList() const
+{
+	// Check if HospitalList is initialized
+	if (!HospitalList)
+	{
+		cout << "No hospitals available to display.\n";
+		return;
+	}
+
+	// Iterate through the HospitalList and print details of each hospital
+	for (int i = 0; i < numHospitals; ++i)
+	{
+		cout << "Hospital " << i + 1 << ":\n";
+
+		// Access and display hospital details
+		cout << "  Hospital ID: " << HospitalList[i]->getHospitalID() << "\n";
+		cout << "  SCars: " << HospitalList[i]->getSCarsCount() << "\n";
+		cout << "  NCars: " << HospitalList[i]->getNCarsCount() << "\n";
+		cout << "----------------------------------------\n";
+	}
+
+	cout << "\nDistance Matrix:\n";
+	for (int i = 0; i < numHospitals; ++i)
+	{
+		for (int j = 0; j < numHospitals; ++j)
+		{
+			// Adjust width for uniform spacing
+			cout << setw(5) << distanceMatrix[i][j] << " ";
+		}
+		cout << "\n";
+	}
+	cout << "----------------------------------------\n";
 }
 
 Organizer::~Organizer()
