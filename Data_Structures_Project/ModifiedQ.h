@@ -1,5 +1,4 @@
 #pragma once
-class LinkedQueue;
 template <typename T>
 class ModifiedQ : public LinkedQueue<T>
 {
@@ -15,24 +14,31 @@ template<typename T>
 
 	 Node<T>* nodeToDeletePtr = frontPtr;
 
-	 if (nodeToDeletePtr->getItem() == entry)
+	 if (frontPtr->getItem() == entry)
 	 {
-		 frontPtr = nodeToDeletePtr->getNext();
+		 frontPtr = frontPtr->getNext();
+		 if (frontPtr == nullptr)  
+			 backPtr = nullptr;
 		 delete nodeToDeletePtr;
+		 count--;
 		 return true;
 	 }
 
-	 while (nodeToDeletePtr->getNext()->getItem() != entry)
+	 while (nodeToDeletePtr->getNext() != nullptr && nodeToDeletePtr->getNext()->getItem() != entry)
 		{
 			nodeToDeletePtr = nodeToDeletePtr->getNext();
 		}
+	 if (nodeToDeletePtr->getNext()!=nullptr)
+	 {
+		 Node<T>* entryToDelete = nodeToDeletePtr->getNext();
+		 nodeToDeletePtr->setNext(entryToDelete->getNext());
 
-	 Node<T>* entryToDelete = nodeToDeletePtr->getNext();
-	 nodeToDeletePtr->setNext(entryToDelete->getNext());
+		 if (entryToDelete == backPtr)
+			 backPtr = entryToDelete;
+		 delete entryToDelete;
+		 count--;
+		 return true;
+	 }
 	 
-	 if (entryToDelete == backPtr)
-		 backPtr = entryToDelete;
-
-	 delete nodeToDeletePtr;
-	 return true;
+	 return false;
  }
