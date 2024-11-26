@@ -44,28 +44,28 @@ public:
     
     //Constructor
     Organizer();
-  void processInputFile();
-  void Simulator();
+	void processInputFile();
+	void Simulator();
   
     // Functions for managing Back Cars:
     //Adding a Back Car based on its priority
     void AddBackCar(const string& Car, int Priority);
   
-  //Removing the highest priority from the Back_Cars queue
+	//Removing the highest priority from the Back_Cars queue
     //bool RemoveBackCar(string& Car);
   
-  LinkedQueue<Patient*>* getFinishedList() { return &FinishedList; }
+	LinkedQueue<Patient*>* getFinishedList() { return &FinishedList; }
 
-  //Functions for managing hospital list:
+	//Functions for managing hospital list:
   
-  // Getter for hospital list (if needed)
+	//Getter for hospital list (if needed)
 	Hospital** getHospitalList() { return HospitalList; }
 
 	// Getter for number of hospitals
 	int getNumHospitals() const { return numHospitals; }
   
-  Hospital* getHospital(int ID)
-	{
+	Hospital* getHospital(int ID)
+		{
 		// Ensure ID is within bounds
 		if (ID < 0 || ID > numHospitals) {
 			return nullptr;  // Return nullptr if ID is invalid
@@ -73,19 +73,17 @@ public:
 		return HospitalList[ID];  // Return the pointer to the hospital object at index ID
 	}
   
-  //Adding a Hospital to the hospital list
-  void AddHospital(const int Hospital_ID);
+	//Adding a Hospital to the hospital list
+	void AddHospital(const int Hospital_ID);
   
-  //Printing out the hospitals in the hospital list
-  void PrintHospitals()const;
+	//Printing out the hospitals in the hospital list
+	void PrintHospitals()const;
 
     // functions for managing finished lists
     //Adding an entry to the finished list
     //void AddFinished(const string& Finished_Entry);
-
     //Removing an entry from the finished list
 	//bool RemoveFinished(string& Finished_Entry);
-
     //Print items in Finished List
     //void DisplayFinishedList()const;
 
@@ -97,26 +95,42 @@ public:
     // Reads the available car data
     void readCarData();
   
-   // Reads patient request list
+	// Reads patient request list
     void readPatientRequests();
 
-    //// Reads request cancellation list
+    // Reads request cancellation list
     void readCancellationRequests();
   
-      // Functions for handling Out Cars
-      void handleCancellations();
-      void handleCarMovements();
+	// Functions for handling Out Cars
+    void handleCancellations();
+    void handleCarMovements();
 
     ~Organizer();
 
 };
 
-Organizer::Organizer() :GUI()
+Organizer::Organizer():
+	timeStep(0),
+	HospitalList(nullptr),
+	numHospitals(0),
+	speedScars(0),
+	speedNcars(0),
+	distanceMatrix(nullptr),
+	scarsPerHospital(nullptr),
+	ncarsPerHospital(nullptr),
+	numRequests(0),
+	patientRequests(nullptr),
+	numCancellations(0),
+	cancellations(nullptr)
 {
-	timeStep = 0;
 	GUI.Start();
 	filename = GUI.getInputFileName();
 }
+
+void Organizer::Simulator()
+{
+	processInputFile();
+}  
 
 void Organizer::processInputFile()
 {
@@ -146,7 +160,7 @@ void Organizer::processInputFile()
 			inputFile >> distanceMatrix[i][j];
 		}
 	}
-  // Read the number of SCars and NCars available for each Hospital
+	// Read the number of SCars and NCars available for each Hospital
 	scarsPerHospital = new int[numHospitals];  // SCars
 	ncarsPerHospital = new int[numHospitals];  // NCars
 	for (int i = 0; i < numHospitals; i++)
@@ -176,9 +190,6 @@ void Organizer::processInputFile()
 
 }
 
-void Organizer::Simulator()
-{
-}  
 
 void Organizer::AddHospital(const int Hospital_ID)
 {
@@ -289,22 +300,20 @@ void Organizer::readCancellationRequests()
 void Organizer::handleCarMovements()
 {
 	Car* car;
-	int cp;
+	int priority;
 	// Process OutCars: move cars to BackCars if they have arrived
-	while (!OutCars.isEmpty() && OutCars.peek(car, cp) && car->getArrivalTime() == timeStep) {
-		int priority;
+	while (!OutCars.isEmpty() && OutCars.peek(car, priority) && car->getArrivalTime() == timeStep) {
+		
 		OutCars.dequeue(car, priority);
 		car->pickupPatient(); // Perform patient pickup
 		BackCars.enqueue(car, car->getPriority());
 	}
-
+	
 	// Process BackCars: return cars to hospitals if they have completed their task
-	int priority;
 	while (!BackCars.isEmpty() && BackCars.peek(car, priority) && car->getReturnTime() == timeStep) {
 		BackCars.dequeue(car, priority);
 		// Handle returning the car to its hospital
 		// HospitalList[car->getHospitalID()].handleReturningCar(car);
-
 	}
 }
 
@@ -328,7 +337,6 @@ Organizer::~Organizer()
 	}
 	delete[] HospitalList;  // Delete the array of Hospital pointers
 }
-
 
 #endif
 

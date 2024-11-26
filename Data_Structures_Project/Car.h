@@ -72,6 +72,7 @@ inline int Car::getArrivalTime()
 {
 	return arrivalTime;
 }
+
 int Car::getReturnTime()
 {
 	return returnTime;
@@ -81,7 +82,6 @@ carType Car::getCarType()
 {
 	return cType;
 }
-
 
 bool Car::AssignPatient(Patient* p)
 {	
@@ -97,7 +97,6 @@ bool Car::AssignPatient(Patient* p)
 		return false;
 	}
 }
-
 
 ostream& operator <<(ostream& os, Car& car)
 {

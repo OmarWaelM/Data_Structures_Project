@@ -20,19 +20,18 @@ private:
 
 public:
 	//Member Function
-	Hospital() {}
-	void setID(int id) { hospitalID = id; }
-	int getHospitalID() const { return hospitalID; }
-	void setSCarsCount(int count) { scCount = count; }
-	void setNCarsCount(int count) { ncCount = count; }
+	Hospital() {}//
+	void setID(int id) { hospitalID = id; }//
+	int getHospitalID() const { return hospitalID; }//
+	void setSCarsCount(int count) { scCount = count; }	//dont know
+	void setNCarsCount(int count) { ncCount = count; }	//dont know
 	int getSCarsCount() const { return scCount; } // Getter for SCars count
 	int getNCarsCount() const { return ncCount; } // Getter for NCars count
 	void setDistanceMatrix(int** matrix, int size);
 	int** getDistanceMatrix() { return distanceMatrix; }
-	void addCarToList(Car* car);
-	void addPatientToList(Patient* patient);
-	void assignPatientToCar(Patient* patient, Car* car);
-
+	void addCarToList(Car* car);//
+	void addPatientToList(Patient* patient);//
+	bool assignPatientToCar(Patient* p);//
 
 	friend ostream& operator <<(ostream& os, Hospital& h);
 
@@ -56,8 +55,43 @@ void Hospital::addPatientToList(Patient* patient)
 		EPList.enqueue(patient, patient->getPatientPriority());
 }
 
-void Hospital::assignPatientToCar(Patient* patient, Car* car)
+bool Hospital::assignPatientToCar(Patient* p)
 {
+	Car* ambulance = nullptr;
+	Patient* patient = nullptr;
+	int x;
+	if (p->getPatientType() == NP && NCList.getCount() != 0)
+	{
+		NPList.dequeue(patient);
+		NCList.dequeue(ambulance);
+		ambulance->AssignPatient(patient);
+		return true;
+	}
+	else if (p->getPatientType() == SP && SCList.getCount() != 0)
+	{
+		SPList.dequeue(patient);
+		SCList.dequeue(ambulance);
+		ambulance->AssignPatient(patient);
+		return true;
+	}
+	else if (p->getPatientType() == EP)
+	{
+		if (NCList.getCount() != 0)
+		{
+			NCList.dequeue(ambulance);
+			EPList.dequeue(patient, x);
+			ambulance->AssignPatient(patient);
+
+		}
+		else if (SCList.getCount() != 0)
+		{
+			SCList.dequeue(ambulance);
+			EPList.dequeue(patient, x);
+			ambulance->AssignPatient(patient);
+		}
+		return true;
+	}
+	return false;
 }
 
 void Hospital::setDistanceMatrix(int** matrix, int size)

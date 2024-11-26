@@ -17,7 +17,7 @@ private:
 public:
 	UI() :mode(SILENT){}
 	void Start();
-	bool fileExists(const string& filename);
+	bool fileExists(string& filename);
 	void setInputFileName(string& filename);
 	string getInputFileName();
 	void Output(int timestep, Hospital** h, int nOfHosp, priQueue<Car*>* backCars, ModifiedPriQ<Car*>* outCars, LinkedQueue<Patient*>* finished);
@@ -93,7 +93,7 @@ void UI::Start()
 }
 
 //Checks whether the filename inserted by the user exists or not
-bool UI::fileExists(const string& filename)
+bool UI::fileExists(string& filename)
 {
 	ifstream file;
 	file.open(filename + ".txt", ios::in);
