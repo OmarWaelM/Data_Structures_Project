@@ -195,6 +195,9 @@ void Organizer::processInputFile()
 	}
 	inputFile.close();
 
+	readHospitalData();
+	readPatientRequests();
+	readCancellationRequests();
 }
 
 void Organizer::Simulator()
@@ -334,7 +337,20 @@ void Organizer::readPatientRequests()
 
 void Organizer::readCancellationRequests()
 {
+	for (int i = 0; i < numCancellations; ++i)
+	{
+		stringstream ss(cancellations[i]);
+		int PID, hospitalID, cancellationTimestep;
 
+		// Parse the cancellation request
+		ss >> PID >> hospitalID >> cancellationTimestep;
+
+		// Create a CancellationReq struct
+		CancellationReq cancellation = { PID, hospitalID, cancellationTimestep };
+
+		// Enqueue the cancellation request into the CancellationList
+		CancellationList.enqueue(cancellation);
+	}
 }
 
 void Organizer::handleCarMovements()
@@ -387,6 +403,14 @@ Organizer::~Organizer()
 	{
 		patientQueue.dequeue(tempPatient);
 		delete tempPatient;  // Free the memory allocated for the Patient object
+	}
+
+	// Dequeue all cancellation requests and delete each CancellationReq struct
+	CancellationReq tempCancellation;
+	while (!CancellationList.isEmpty())
+	{
+		CancellationList.dequeue(tempCancellation); // Dequeue each cancellation request
+		// No need to explicitly delete tempCancellation since it's a struct
 	}
 }
 
