@@ -1,4 +1,5 @@
-#pragma once
+#ifndef PATIENT_H
+#define PATIENT_H
 
 using namespace std;
 
@@ -73,3 +74,5 @@ ostream& operator <<(ostream& os, Patient& patient)
 	os << patient.patientID;
 	return os;
 }
+
+#endif

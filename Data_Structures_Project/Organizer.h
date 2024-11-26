@@ -1,15 +1,10 @@
 #ifndef ORGANIZER_H
 #define ORGANIZER_H
-using namespace std;
+#include "Car.h"
 #include "UI.h"
 #include "Hospital.h"
-#include "Patient.h"
-#include "Car.h"
-#include "LinkedQueue.h"
-#include "priQueue.h"
-#include "ModifiedPriQ.h"
-
 using namespace std;
+
 #include<iostream>
 #include <string>
 #include <fstream>
@@ -136,7 +131,9 @@ Organizer::Organizer() :
 	patientRequests(nullptr),
 	numCancellations(0),
 	cancellations(nullptr)
+
 {
+	timeStep = 0;
 	GUI.Start();
 	filename = GUI.getInputFileName();
 }
@@ -214,6 +211,7 @@ void Organizer::Simulator()
 	timeStep = 0;
 	GUI.Start();
 }
+
 
 void Organizer::AddHospital(const int Hospital_ID)
 {
