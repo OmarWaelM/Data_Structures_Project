@@ -299,7 +299,7 @@ void Organizer::PrintHospitals() const
 void Organizer::readCarData()
 {
 
-}
+} 
 
 void Organizer::readPatientRequests()
 {
