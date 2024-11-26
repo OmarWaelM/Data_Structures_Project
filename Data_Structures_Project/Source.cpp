@@ -1,4 +1,4 @@
-/*#include <iostream>
+#include <iostream>
 #include <Windows.h>
 #include <string>
 #include <fstream>
@@ -19,8 +19,6 @@
 using namespace std;
 
 int main() 
-{
-	/*
 	int x;
 	cout << "before clear" << endl;
 	cin >> x;
@@ -45,4 +43,4 @@ int main()
 	Organizer Org;
 	Org.Simulator();
 	return 0;
-} */
+}
