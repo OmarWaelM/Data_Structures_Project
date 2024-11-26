@@ -1,4 +1,5 @@
-#pragma once
+#ifndef CAR_H
+#define CAR_H
 #include "Patient.h"
 
 enum carType {
@@ -84,7 +85,7 @@ carType Car::getCarType()
 }
 
 
-bool  Car::AssignPatient(Patient* p)
+bool Car::AssignPatient(Patient* p)
 {	
 	if (assignedPatient == nullptr)
 	{
@@ -94,8 +95,9 @@ bool  Car::AssignPatient(Patient* p)
 		return true;
 	}
 	else
+	{
 		return false;
-
+	}
 }
 
 
@@ -108,3 +110,5 @@ ostream& operator <<(ostream& os, Car& car)
 	os << car.carID << "_H" << car.hospital << "_P" << car.assignedPatient->getPatientID();
 	return os;
 }
+
+#endif
