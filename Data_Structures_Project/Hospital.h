@@ -22,7 +22,6 @@ public:
 	void addCarToList(Car* car);
 	void addPatientToList(Patient* patient);
 	bool assignPatientToCar(Patient* patient);
-	bool cancelNPRequest(Patient* NP);
 	friend ostream& operator <<(ostream& os, Hospital& h);
 
 };
@@ -85,10 +84,7 @@ bool Hospital::assignPatientToCar(Patient* p)
 	return false;
 }
 
-bool Hospital::cancelNPRequest(Patient* NP)
-{
-	return(NPList.cancelRequest(NP));
-}
+
 
 
 //this can be changed i made it to look like the description
