@@ -29,7 +29,7 @@ class Organizer
 {
 private:
 	//Lists used in orgranizer class
-	LinkedQueue<Patient*> patientQueue;  // Patient queue (list of pointers to patients)
+	LinkedQueue<Patient*> patientsList;  // Patients list queue (list of pointers to patients)
 	LinkedQueue<CancellationReq> CancellationList;
 	LinkedQueue<Patient*> FinishedList;
 	priQueue<Car*> BackCars;
@@ -314,7 +314,7 @@ void Organizer::readPatientRequests()
         }
 
 		// Enqueue the patient pointer into the queue
-		patientQueue.enqueue(patient);
+		patientsList.enqueue(patient);
 	}
 }
 
@@ -416,9 +416,9 @@ Organizer::~Organizer()
 
 	// Dequeue all patients and delete each dynamically allocated Patient object
 	Patient* tempPatient;
-	while (!patientQueue.isEmpty())
+	while (!patientsList.isEmpty())
 	{
-		patientQueue.dequeue(tempPatient);
+		patientsList.dequeue(tempPatient);
 		delete tempPatient;  // Free the memory allocated for the Patient object
 	}
 
