@@ -63,7 +63,8 @@ public:
 
 	// Getter for number of hospitals
 	int getNumHospitals() const { return numHospitals; }
-  
+	Hospital* getHospital(int ID);
+
 	Hospital* getHospital(int ID)
 		{
 		// Ensure ID is within bounds
@@ -190,7 +191,6 @@ void Organizer::processInputFile()
 
 }
 
-
 void Organizer::AddHospital(const int Hospital_ID)
 {
 	int index = Hospital_ID - 1;
@@ -296,6 +296,15 @@ void Organizer::readCancellationRequests()
 {
   
 }   
+
+Hospital* Organizer::getHospital(int ID)
+{
+	// Ensure ID is within bounds
+	if (ID < 0 || ID > numHospitals) {
+		return nullptr;  // Return nullptr if ID is invalid
+	}
+	return HospitalList[ID];  // Return the pointer to the hospital object at index ID
+}
 
 void Organizer::handleCarMovements()
 {
