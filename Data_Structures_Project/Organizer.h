@@ -90,7 +90,7 @@ public:
 	void AddHospital(const int Hospital_ID);
 
 	//Printing out the hospitals in the hospital list
-	void PrintHospitals()const;
+	void printHospitals()const;
 
 	// functions for managing finished lists
 	//Adding an entry to the finished list
@@ -263,38 +263,12 @@ void Organizer::readHospitalData()
 	}
 }
 
-void Organizer::PrintHospitals() const
+void Organizer::printHospitals() const
 {
-	// Check if HospitalList is initialized
-	if (!HospitalList)
-	{
-		cout << "No hospitals available to display.\n";
-		return;
-	}
-
-	// Iterate through the HospitalList and print details of each hospital
 	for (int i = 0; i < numHospitals; ++i)
 	{
-		cout << "Hospital " << i + 1 << ":\n";
-
-		// Access and display hospital details
-		cout << "  Hospital ID: " << HospitalList[i]->getHospitalID() << "\n";
-		cout << "  SCars: " << HospitalList[i]->getSCarsCount() << "\n";
-		cout << "  NCars: " << HospitalList[i]->getNCarsCount() << "\n";
-		cout << "----------------------------------------\n";
+		cout << *HospitalList[i]; // Use the overloaded << operator for Hospital class
 	}
-
-	cout << "Distance Matrix:\n";
-	for (int i = 0; i < numHospitals; ++i)
-	{
-		for (int j = 0; j < numHospitals; ++j)
-		{
-			// Adjust width for uniform spacing
-			cout << setw(5) << distanceMatrix[i][j] << " ";
-		}
-		cout << "\n";
-	}
-	cout << "----------------------------------------\n";
 }
 
 void Organizer::readPatientRequests()

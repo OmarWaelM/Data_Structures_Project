@@ -35,7 +35,7 @@ public:
 	void assignPatientToCar(Patient* patient, Car* car);
 
 
-	// friend ostream& operator <<(ostream& os, Hospital& h);
+	friend ostream& operator <<(ostream& os, Hospital& h);
 
 };
 
