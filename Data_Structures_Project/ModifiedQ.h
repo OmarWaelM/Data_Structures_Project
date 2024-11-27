@@ -1,4 +1,4 @@
-#pragma once
+
 template <typename T>
 class ModifiedQ : public LinkedQueue<T>
 {
@@ -7,38 +7,38 @@ public:
 };
 
 template<typename T>
- bool ModifiedQ<T>::cancelRequest(T& entry)
+bool ModifiedQ<T>::cancelRequest(T& entry)
 {
-	 if (isEmpty())
-		 return false;
+	if (this->isEmpty())
+		return false;
 
-	 Node<T>* nodeToDeletePtr = frontPtr;
+	Node<T>* nodeToDeletePtr = this->frontPtr;
 
-	 if (frontPtr->getItem() == entry)
-	 {
-		 frontPtr = frontPtr->getNext();
-		 if (frontPtr == nullptr)  
-			 backPtr = nullptr;
-		 delete nodeToDeletePtr;
-		 count--;
-		 return true;
-	 }
+	if (this->frontPtr->getItem() == entry)
+	{
+		this->frontPtr = this->frontPtr->getNext();
+		if (this->frontPtr == nullptr)
+			this->backPtr = nullptr;
+		delete nodeToDeletePtr;
+		this->count--;
+		return true;
+	}
 
-	 while (nodeToDeletePtr->getNext() != nullptr && nodeToDeletePtr->getNext()->getItem() != entry)
-		{
-			nodeToDeletePtr = nodeToDeletePtr->getNext();
-		}
-	 if (nodeToDeletePtr->getNext()!=nullptr)
-	 {
-		 Node<T>* entryToDelete = nodeToDeletePtr->getNext();
-		 nodeToDeletePtr->setNext(entryToDelete->getNext());
+	while (nodeToDeletePtr->getNext() != nullptr && nodeToDeletePtr->getNext()->getItem() != entry)
+	{
+		nodeToDeletePtr = nodeToDeletePtr->getNext();
+	}
+	if (nodeToDeletePtr->getNext() != nullptr)
+	{
+		Node<T>* entryToDelete = nodeToDeletePtr->getNext();
+		nodeToDeletePtr->setNext(entryToDelete->getNext());
 
-		 if (entryToDelete == backPtr)
-			 backPtr = entryToDelete;
-		 delete entryToDelete;
-		 count--;
-		 return true;
-	 }
-	 
-	 return false;
- }
+		if (entryToDelete == this->backPtr)
+			this->backPtr = entryToDelete;
+		delete entryToDelete;
+		this->count--;
+		return true;
+	}
+
+	return false;
+}
