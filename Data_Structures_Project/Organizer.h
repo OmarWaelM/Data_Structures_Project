@@ -347,7 +347,7 @@ void Organizer::PrintHospitalsList() const
 		cout << "----------------------------------------\n";
 	}
 
-	cout << "\nDistance Matrix:\n";
+	cout << "Distance Matrix:\n";
 	for (int i = 0; i < numHospitals; ++i)
 	{
 		for (int j = 0; j < numHospitals; ++j)
@@ -377,16 +377,16 @@ void Organizer::printPatientsList() const {
 		tempQueue.peek(tempPatient); // Get the front patient
 
 		// Print patient details using the getter methods
-		cout << "Patient ID: " << tempPatient->getPatientID()
-			<< ", Type: " << (tempPatient->getPatientType() == NP ? "Normal Patient" :
-				tempPatient->getPatientType() == SP ? "Special Patient" : "Emergency Patient")
-			<< ", Nearest Hospital ID: " << tempPatient->getNearestHospital()
-			<< ", Distance to Hospital: " << tempPatient->getDistance();
+		cout << "Patient ID: " << tempPatient->getPatientID() << endl;
+		cout << "Patient Type: " << (tempPatient->getPatientType() == NP ? "Normal Patient" :
+			tempPatient->getPatientType() == SP ? "Special Patient" : "Emergency Patient") << endl;
+		cout << "Nearest Hospital ID: " << tempPatient->getNearestHospital() << endl;
+		cout << "Distance to Hospital: " << tempPatient->getDistance() << endl;
 		if (tempPatient->getPatientType() == EP)
 		{
-			cout << ", Case Severity: " << tempPatient->getPatientPriority() << endl;
+			cout << "Case Severity: " << tempPatient->getPatientPriority() << endl;
 		}
-
+		cout << "----------------------------------------\n";
 		tempQueue.dequeue(tempPatient); // Remove the front patient
 	}
 }
