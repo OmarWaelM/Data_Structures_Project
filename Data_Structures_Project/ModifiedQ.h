@@ -3,23 +3,22 @@
 #include "LinkedQueue.h"
 
 
-template <typename T>
-class ModifiedQ : public LinkedQueue<T>
+class ModifiedQ : public LinkedQueue<Patient*>
 {
 public:
-	bool cancelRequest(T& entry);
+	bool cancelRequest(int patientID);
 };
 
-template<typename T>
-bool ModifiedQ<T>::cancelRequest(T& entry)
+
+bool ModifiedQ::cancelRequest(int patientID)
 {
 	//check if the queue is empty
 	if (this->isEmpty())
 		return false;
 
-	Node<T>* nodeToDeletePtr = this->frontPtr;
+	Node<Patient*>* nodeToDeletePtr = this->frontPtr;
 	// check if the entry is at the front
-	if (this->frontPtr->getItem() == entry)
+	if (this->frontPtr->getItem()->getPatientID() == patientID)
 	{
 		this->frontPtr = this->frontPtr->getNext();
 		if (this->frontPtr == nullptr)
@@ -29,14 +28,14 @@ bool ModifiedQ<T>::cancelRequest(T& entry)
 		return true;
 	}
 	// check if the entry is in the middle or at the back
-	while (nodeToDeletePtr->getNext() != nullptr && nodeToDeletePtr->getNext()->getItem() != entry)
+	while (nodeToDeletePtr->getNext() != nullptr && nodeToDeletePtr->getNext()->getItem()->getPatientID() != patientID)
 	{
 		nodeToDeletePtr = nodeToDeletePtr->getNext();
 	}
 
 	if (nodeToDeletePtr->getNext() != nullptr)
 	{
-		Node<T>* entryToDelete = nodeToDeletePtr->getNext();
+		Node<Patient*>* entryToDelete = nodeToDeletePtr->getNext();
 		nodeToDeletePtr->setNext(entryToDelete->getNext());
 		// if the entry is at the back, set the backPtr
 		if (entryToDelete == this->backPtr)
