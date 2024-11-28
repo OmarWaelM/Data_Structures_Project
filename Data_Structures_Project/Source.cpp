@@ -5,6 +5,7 @@
 #include <iomanip>
 #include <conio.h>
 #include <fstream>
+#include <random>
 #include "LinkedQueue.h"
 #include "priQueue.h"
 #include "ModifiedQ.h"

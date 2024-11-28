@@ -28,9 +28,9 @@ private:
 	string filename;
 
 	Hospital** HospitalList; //An array of pointers to hospitals
-	int numHospitals;
-	int speedScars, speedNcars;
-	int** distanceMatrix;
+	int numHospitals;//
+	int speedScars, speedNcars;//
+	int** distanceMatrix;//
 	int* scarsPerHospital;
 	int* ncarsPerHospital;
 	int numRequests;
@@ -44,10 +44,11 @@ public:
     
     //Constructor
     Organizer();
-	void processInputFile();
+
 	void Simulator();
-  
-    // Functions for managing Back Cars:
+
+  	void processInputFile();
+    //Functions for managing Back Cars:
     //Adding a Back Car based on its priority
     void AddBackCar(const string& Car, int Priority);
   
@@ -63,16 +64,8 @@ public:
 
 	// Getter for number of hospitals
 	int getNumHospitals() const { return numHospitals; }
-	Hospital* getHospital(int ID);
 
-	Hospital* getHospital(int ID)
-		{
-		// Ensure ID is within bounds
-		if (ID < 0 || ID > numHospitals) {
-			return nullptr;  // Return nullptr if ID is invalid
-		}
-		return HospitalList[ID];  // Return the pointer to the hospital object at index ID
-	}
+	Hospital* getHospital(int ID);
   
 	//Adding a Hospital to the hospital list
 	void AddHospital(const int Hospital_ID);
@@ -131,6 +124,18 @@ Organizer::Organizer():
 void Organizer::Simulator()
 {
 	processInputFile();
+	int randomNum = 0;
+	while (!AllPatientsList.isEmpty())
+	{
+		timeStep++;
+		for (int i = 0; i < numHospitals; i++)
+		{
+			randomNum = rand()%100;
+			//Generate random number
+			//conditions for moving patients and cars
+		}
+		GUI.Output(timeStep, HospitalList, numHospitals, &BackCars, &OutCars, &FinishedList);
+	}
 }  
 
 void Organizer::processInputFile()
