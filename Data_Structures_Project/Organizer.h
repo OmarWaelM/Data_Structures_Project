@@ -236,6 +236,18 @@ void Organizer::Simulator()
 {
 	timeStep = 0;
 	GUI.Start();
+	processInputFile();
+
+	Patient* p;
+	while (patientsList.dequeue(p))
+	{
+		int hid = p->getNearestHospital();
+		HospitalList[hid - 1]->addPatientToList(p);
+	}
+
+
+
+
 }
 
 
