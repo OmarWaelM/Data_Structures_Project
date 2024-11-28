@@ -267,8 +267,6 @@ void Organizer::readHospitalData()
 			Car* car = new Car(carID++, i + 1, NC, speedNcars);
 			HospitalList[i]->addCarToList(car);  // Adds to SCList or NCList based on car type
 		}
-
-		HospitalList[i]->setDistanceMatrix(distanceMatrix, numHospitals);
 	}
 }
 

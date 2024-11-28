@@ -29,7 +29,7 @@ private:
 public:
 	UI() :mode(SILENT){}
 	void Start();
-	bool fileExists(const string& filename);
+	bool fileExists(string& filename);
 	void setInputFileName(string& filename);
 	string getInputFileName();
   

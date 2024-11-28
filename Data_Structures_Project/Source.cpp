@@ -1,4 +1,4 @@
-#include <iostream>
+/*#include <iostream>
 #include <Windows.h>
 #include <string>
 #include <fstream>
@@ -43,4 +43,4 @@ int main()
 	Organizer Org;
 	Org.Simulator();
 	return 0;
-}
+} */
