@@ -1,19 +1,18 @@
 #pragma once
 #include "priQueue.h"
 
-template <typename T>
-class ModifiedPriQ : public priQueue<T>
+class ModifiedPriQ : public priQueue<Car*>
 {
 public:
     // Cancel an item based on a specific condition
-    bool cancelItemByCondition(bool (*condition)(T)) 
+    bool cancelItemByCondition(int patientID, Car*& c)
     {
-        priNode<T>* Current = this->head;
-        priNode<T>* Previous = nullptr;  //keep track of the previous node
-
+        priNode<Car*>* Current = this->head;
+        priNode<Car*>* Previous = nullptr;  //keep track of the previous node
+        int pri;
         while (Current)
         {
-            if (condition(Current->getItem())) //test the current item with the condition
+            if (Current->getItem(pri)->getAssignedPatientID() == patientID) //test the current item with the condition
             {// if item meets the condition, then it is removed
                 
                 if (Previous) 
@@ -21,7 +20,7 @@ public:
                 else 
                     this->head = Current->getNext(); //updating the head if removing the first node
                
-
+                c = Current->getItem(pri);
                 delete Current; // Free the memory of the removed node
                 count--;
                 return true; //item successfully removed
