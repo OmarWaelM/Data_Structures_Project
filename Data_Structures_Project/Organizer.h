@@ -103,6 +103,8 @@ public:
 	void readHospitalData();
 	//Printing out the hospitals in the hospital list
 	void PrintHospitalsList()const;
+	void printPatientsList()const;
+	void printCancellationList()const;
 
 	// Reads patient request list
 	void readPatientRequests();
@@ -390,6 +392,58 @@ void Organizer::PrintHospitalsList() const
 		cout << "\n";
 	}
 	cout << "----------------------------------------\n";
+}
+
+void Organizer::printPatientsList() const {
+	if (patientsList.isEmpty()) {
+		cout << "The patients list is empty." << endl;
+		return;
+	}
+
+	cout << "Patients List:" << endl;
+
+	// Create a copy of the patientsList to traverse without modifying it
+	LinkedQueue<Patient*> tempQueue = patientsList;
+	Patient* tempPatient;
+
+	while (!tempQueue.isEmpty())
+	{
+		tempQueue.peek(tempPatient); // Get the front patient
+
+		// Print patient details using the getter methods
+		cout << "Patient ID: " << tempPatient->getPatientID()
+			 << ", Type: " << (tempPatient->getPatientType() == NP ? "Normal Patient" :
+				tempPatient->getPatientType() == SP ? "Special Patient" : "Emergency Patient")
+			 << ", Nearest Hospital ID: " << tempPatient->getNearestHospital()
+			 << ", Distance to Hospital: " << tempPatient->getDistance()
+			 << ", Priority: " << tempPatient->getPatientPriority() << endl;
+
+		tempQueue.dequeue(tempPatient); // Remove the front patient
+	}
+}
+
+void Organizer::printCancellationList() const {
+	if (CancellationList.isEmpty()) {
+		cout << "The cancellation list is empty." << endl;
+		return;
+	}
+
+	cout << "Cancellation List:" << endl;
+
+	// Create a copy of the CancellationList to traverse without modifying it
+	LinkedQueue<CancellationReq> tempQueue = CancellationList;
+	CancellationReq tempCancellation;
+
+	while (!tempQueue.isEmpty()) {
+		tempQueue.peek(tempCancellation); // Get the front cancellation request
+
+		// Print cancellation request details
+		cout << "Patient ID: " << tempCancellation.PID
+			<< ", Hospital ID: " << tempCancellation.hospitalID
+			<< ", Cancellation Time: " << tempCancellation.CancellationTimestep << endl;
+
+		tempQueue.dequeue(tempCancellation); // Remove the front cancellation request
+	}
 }
 
 Organizer::~Organizer()
