@@ -425,8 +425,6 @@ Organizer::~Organizer()
 	delete[] distanceMatrix;
 	delete[] scarsPerHospital;
 	delete[] ncarsPerHospital;
-	delete[] patientRequests;
-	delete[] cancellations;
 
 	// Cleanup for the hospitalArray
 	for (int i = 0; i < numHospitals; ++i)
