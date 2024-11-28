@@ -412,11 +412,14 @@ void Organizer::printPatientsList() const {
 
 		// Print patient details using the getter methods
 		cout << "Patient ID: " << tempPatient->getPatientID()
-			 << ", Type: " << (tempPatient->getPatientType() == NP ? "Normal Patient" :
+			<< ", Type: " << (tempPatient->getPatientType() == NP ? "Normal Patient" :
 				tempPatient->getPatientType() == SP ? "Special Patient" : "Emergency Patient")
-			 << ", Nearest Hospital ID: " << tempPatient->getNearestHospital()
-			 << ", Distance to Hospital: " << tempPatient->getDistance()
-			 << ", Priority: " << tempPatient->getPatientPriority() << endl;
+			<< ", Nearest Hospital ID: " << tempPatient->getNearestHospital()
+			<< ", Distance to Hospital: " << tempPatient->getDistance();
+		if (tempPatient->getPatientType() == EP)
+		{
+			cout << ", Case Severity: " << tempPatient->getPatientPriority() << endl;
+		}
 
 		tempQueue.dequeue(tempPatient); // Remove the front patient
 	}
