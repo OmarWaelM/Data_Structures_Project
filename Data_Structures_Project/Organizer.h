@@ -47,17 +47,21 @@ private:
 
 public:
 	//Member Functions
-
+  
 	//Constructor
 	Organizer();
 	void processInputFile();
 	void Simulator();
-
+  
+  
+  Hospital* getNearestHospital(Patient* EP);
+  bool addEPtoHospital(Patient* EP);
+  
 	// Functions for managing Back Cars:
 	//Adding a Back Car based on its priority
 	//void AddBackCar(const string& Car, int Priority);
 
-    //Removing the highest priority from the Back_Cars queue
+  //Removing the highest priority from the Back_Cars queue
 	//bool RemoveBackCar(string& Car);
 
 	LinkedQueue<Patient*>* getFinishedList() { return &FinishedList; }
@@ -414,6 +418,26 @@ void Organizer::printCancellationList() const {
 		tempQueue.dequeue(tempCancellation); // Remove the front cancellation request
 	}
 }
+
+
+Hospital* Organizer::getNearestHospital(Patient* EP)
+{
+    return nullptr;
+}
+
+bool Organizer::addEPtoHospital(Patient* EP)
+{
+    Hospital* hospital = EP->getNearestHospital();
+    if (!(hospital->assignPatientToCar()))
+    {
+        //get the shortest hospital list
+        //get nearest hospital to the current one
+        return true;
+    }
+    return false;
+}
+
+
 
 Organizer::~Organizer()
 {

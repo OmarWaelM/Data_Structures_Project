@@ -28,7 +28,6 @@ public:
 	int getDistance();
 	int getNearestHospital();
 	void setPriority(int priority) { patientPri = priority; }
-
 	friend ostream& operator <<(ostream& os, Patient& patient);
 };
 
@@ -68,6 +67,7 @@ int Patient::getNearestHospital()
 {
 	return nearestHospital;
 }
+
 
 ostream& operator <<(ostream& os, Patient& patient)
 {
