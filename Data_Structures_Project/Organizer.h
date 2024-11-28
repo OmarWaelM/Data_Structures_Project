@@ -373,21 +373,19 @@ void Organizer::handleCarMovements()
 	Car* car;
 	int cp;
 	// Process OutCars: move cars to BackCars if they have arrived
-	while (!OutCars.isEmpty() && OutCars.peek(car,cp) && car->getArrivalTime() == timeStep)
+	while (!OutCars.isEmpty() && OutCars.peek(car,cp) && car->getDistToPatient() == 0)
 	{
 		int priority;
 		OutCars.dequeue(car, priority);
-		car->pickupPatient(); // Perform patient pickup
-		BackCars.enqueue(car, car->getPriority());
+		BackCars.enqueue(car, -car->getDistToHospital());
 	}
 
 	// Process BackCars: return cars to hospitals if they have completed their task
 	int priority;
-	while (!BackCars.isEmpty() && BackCars.peek(car, priority) && car->getReturnTime() == timeStep)
+	while (!BackCars.isEmpty() && BackCars.peek(car, priority) && car->getDistToHospital() == 0)
 	{
 		BackCars.dequeue(car, priority);
-		// Handle returning the car to its hospital
-		// HospitalList[car->getHospitalID()].handleReturningCar(car);
+		HospitalList[car->getHospital() - 1]->addCarToList(car);
 
 	}
 }

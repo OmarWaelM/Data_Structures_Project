@@ -25,6 +25,8 @@ public:
 	int getcarID();
 	int getHospital();
 	int getAssignedPatientID();
+	int getDistToPatient();
+	int getDistToHospital();
 	carType getCarType();
 	bool AssignPatient(Patient* p);
 
@@ -55,6 +57,16 @@ int Car::getHospital()
 int Car::getAssignedPatientID()
 {
 	return assignedPatient->getPatientID();
+}
+
+int Car::getDistToPatient()
+{
+	return distToPatient;
+}
+
+int Car::getDistToHospital()
+{
+	return distToHospital;
 }
 
 carType Car::getCarType()
