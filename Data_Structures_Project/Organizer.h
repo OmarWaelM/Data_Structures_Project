@@ -53,17 +53,6 @@ public:
 	Organizer();
 	void processInputFile();
 	void Simulator();
-  
-  
-  Hospital* getNearestHospital(Patient* EP);
-  bool addEPtoHospital(Patient* EP);
-  
-	// Functions for managing Back Cars:
-	//Adding a Back Car based on its priority
-	//void AddBackCar(const string& Car, int Priority);
-
-  //Removing the highest priority from the Back_Cars queue
-	//bool RemoveBackCar(string& Car);
 
 	LinkedQueue<Patient*>* getFinishedList() { return &FinishedList; }
 
@@ -75,30 +64,14 @@ public:
 	// Getter for number of hospitals
 	int getNumHospitals() const { return numHospitals; }
 
-	Hospital* getHospital(int ID)
-	{
-		// Ensure ID is within bounds
-		if (ID < 0 || ID > numHospitals) {
-			return nullptr;  // Return nullptr if ID is invalid
-		}
-		return HospitalList[ID];  // Return the pointer to the hospital object at index ID
-	}
+	// Getter for hospital with specific id
+	Hospital* getHospital(int ID);
 
 	//Adding a Hospital to the hospital list
 	void AddHospital(const int Hospital_ID);
 
 	//Printing out the hospitals' information as shown in the sample output file
 	void printHospitals()const;
-
-	// functions for managing finished lists
-	//Adding an entry to the finished list
-	//void AddFinished(const string& Finished_Entry);
-
-	//Removing an entry from the finished list
-	//bool RemoveFinished(string& Finished_Entry);
-
-	//Print items in Finished List
-	//void DisplayFinishedList()const;
 
 	/***** Input file member functions *****/
 
@@ -236,11 +209,13 @@ void Organizer::processInputFile()
 
 void Organizer::Simulator()
 {
+	//Initialization
 	timeStep = 0;
 	GUI.Start();
 	filename = GUI.getInputFileName();
 	processInputFile();
 
+	//Moving all patients to their hospitals
 	Patient* p;
 	while (patientsList.dequeue(p))
 	{
@@ -250,45 +225,55 @@ void Organizer::Simulator()
 
 	bool endSimulation = false;
 	int randomNum = 0;
+
 	while (!endSimulation)
 	{
+		//Updating timestep
 		timeStep++;
+	
 		for (int i = 0; i < numHospitals; i++)
 		{
+			//Generating random number between 0 and 100
 			randomNum = rand() % 100;
 
 			if (randomNum >= 10 && randomNum < 20)
 			{
+				//Getting patient from sp list
 				Patient* p = nullptr;
 				if (HospitalList[i]->getSP(p))
 					FinishedList.enqueue(p);
 			}
 			if (randomNum >= 20 && randomNum < 25)
 			{
+				//Getting patient from ep list
 				Patient* p = nullptr;
 				if (HospitalList[i]->getEP(p))
 					FinishedList.enqueue(p);
 			}
 			if (randomNum >= 30 && randomNum < 40)
 			{
+				//Getting patient from np list
 				Patient* p = nullptr;
 				if (HospitalList[i]->getNP(p))
 					FinishedList.enqueue(p);
 			}
 			if (randomNum >= 40 && randomNum < 45)
 			{
+				//Getting car from sc list
 				Car* c = nullptr;
 				if (HospitalList[i]->getSC(c))
 					OutCars.enqueue(c, 1);
 			}
 			if (randomNum >= 70 && randomNum < 75)
 			{
+				//Getting car from nc list
 				Car* c = nullptr;
 				if (HospitalList[i]->getNC(c))
 					OutCars.enqueue(c, 1);
 			}
 			if (randomNum >= 80 && randomNum < 90)
 			{
+				//Moving car from out to back cars list
 				Car* c = nullptr;
 				int pri;
 				if (OutCars.dequeue(c, pri))
@@ -296,6 +281,7 @@ void Organizer::Simulator()
 			}
 			if (randomNum >= 90 && randomNum < 95)
 			{
+				//Moving car from back cars list to hospital
 				Car* c = nullptr;
 				int pri;
 				if (BackCars.dequeue(c, pri))
@@ -305,8 +291,9 @@ void Organizer::Simulator()
 				}
 			}
 		}
+		//Output hospital data
 		GUI.Output(timeStep, HospitalList, numHospitals, &BackCars, &OutCars, &FinishedList);
-
+		//Checking if all hospitals are empty
 		endSimulation = true;
 		for (int i = 0; i < numHospitals; i++)
 		{
@@ -317,7 +304,6 @@ void Organizer::Simulator()
 
 
 }
-
 
 void Organizer::AddHospital(const int Hospital_ID)
 {
@@ -495,25 +481,14 @@ void Organizer::printCancellationList() const {
 	}
 }
 
-
-Hospital* Organizer::getNearestHospital(Patient* EP)
+Hospital* Organizer::getHospital(int ID)
 {
-    return nullptr;
+	// Ensure ID is within bounds
+	if (ID < 0 || ID > numHospitals) {
+		return nullptr;  // Return nullptr if ID is invalid
+	}
+	return HospitalList[ID];  // Return the pointer to the hospital object at index ID
 }
-
-bool Organizer::addEPtoHospital(Patient* EP)
-{
-    Hospital* hospital = HospitalList[EP->getNearestHospital()-1];
-    if (!(hospital->assignPatientToCar(EP)))
-    {
-        //get the shortest hospital list
-        //get nearest hospital to the current one
-        return true;
-    }
-    return false;
-}
-
-
 
 Organizer::~Organizer()
 {
@@ -549,7 +524,6 @@ Organizer::~Organizer()
 		// No need to explicitly delete tempCancellation since it's a struct
 	}
 }
-
 
 #endif
 
