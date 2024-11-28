@@ -1,4 +1,6 @@
-#pragma once
+#ifndef CAR_H
+#define CAR_H
+#include "Patient.h"
 
 enum carType {
 	NC,
@@ -16,17 +18,26 @@ private:
 	Patient* assignedPatient;
 	int distToPatient;
 	int distToHospital;
-  
+	int arrivalTime;
+	int returnTime;      // Time at which the car is expected to return to the hospital
+	int priority;
 public:
 	Car(int id, int hosp, carType type, int spd);
 
 	int getcarID();
 	int getHospital();
 	int getAssignedPatientID();
+	int getArrivalTime();
 	carType getCarType();
-
+	int getReturnTime();
+	void setReturnTime(int time) { returnTime = time; }
 	bool AssignPatient(Patient* p);
-
+	int getPriority() const { return priority; }
+	void pickupPatient()
+	{
+		cout << "Car " << carID << " is picking up a patient." << endl;
+		
+	}
 	friend ostream& operator <<(ostream& os, Car& car);
 };
 
@@ -37,8 +48,11 @@ Car::Car(int id, int hosp, carType type, int spd)
 	cType = type;
 	speed = spd;
 	assignedPatient = nullptr;
+	arrivalTime = 0;
+	priority = 0;
 	distToHospital = 0;
 	distToPatient = 0;
+	returnTime = 0;
 }
 
 int Car::getcarID()
@@ -56,14 +70,23 @@ int Car::getAssignedPatientID()
 	return assignedPatient->getPatientID();
 }
 
+inline int Car::getArrivalTime()
+{
+	return arrivalTime;
+}
+int Car::getReturnTime()
+{
+	return returnTime;
+}
+
 carType Car::getCarType()
 {
 	return cType;
 }
 
 
-bool  Car::AssignPatient(Patient* p)
-{
+bool Car::AssignPatient(Patient* p)
+{	
 	if (assignedPatient == nullptr)
 	{
 		assignedPatient = p;
@@ -72,8 +95,9 @@ bool  Car::AssignPatient(Patient* p)
 		return true;
 	}
 	else
+	{
 		return false;
-
+	}
 }
 
 
@@ -86,3 +110,5 @@ ostream& operator <<(ostream& os, Car& car)
 	os << car.carID << "_H" << car.hospital << "_P" << car.assignedPatient->getPatientID();
 	return os;
 }
+
+#endif

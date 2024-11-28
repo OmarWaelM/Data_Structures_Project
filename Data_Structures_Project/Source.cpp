@@ -1,6 +1,10 @@
 #include <iostream>
 #include <Windows.h>
 #include <string>
+#include <fstream>
+#include <iomanip>
+#include <conio.h>
+#include <fstream>
 #include "LinkedQueue.h"
 #include "priQueue.h"
 #include "ModifiedQ.h"
@@ -8,14 +12,13 @@
 #include "Patient.h"
 #include "Car.h"
 #include "Hospital.h"
-#include "Organizer.h"
 #include "UI.h"
+#include "Organizer.h"
+
 
 using namespace std;
 
-int main() 
-{
-	/*
+int main() {
 	int x;
 	cout << "before clear" << endl;
 	cin >> x;
@@ -36,7 +39,8 @@ int main()
 
 	C1.AssignPatient(&P1);
 	cout << H1 << endl;
-	*/
+
 	Organizer Org;
+	Org.Simulator();
 	return 0;
 }

@@ -1,8 +1,18 @@
 #ifndef UI_H
 #define UI_H
 using namespace std;
-
-class Organizer;
+#include "Hospital.h"
+#include "Car.h"
+#include "Patient.h"
+#include "ModifiedPriQ.h"
+#include "LinkedQueue.h"
+#include "priQueue.h"
+#include <conio.h>
+#include <iostream>
+#include <fstream>
+#include <sstream>
+#include <string>
+#include "WinUser.h"
 
 enum UI_MODE {
 	SILENT,
@@ -13,13 +23,18 @@ class UI
 {
 private:
 	UI_MODE mode;
-	Organizer* org;
+  string fileName;
+  string outFileName;
+  
 public:
-	UI(Organizer* organizer):mode(SILENT), org(organizer) {}
+	UI() :mode(SILENT){}
 	void Start();
-	void Output();
-	void printPage(int hospitalID);
-	
+	bool fileExists(string& filename);
+	void setInputFileName(string& filename);
+	string getInputFileName();
+  
+	void Output(int timestep, Hospital** h, int nOfHosp, priQueue<Car*>* backCars, ModifiedPriQ<Car*>* outCars, LinkedQueue<Patient*>* finished);
+
 };
 
 
@@ -28,7 +43,7 @@ void UI::Start()
 	//Choosing mode
 	mode = SILENT;
 	printf("\033c");
-	cout << "Choose the mode you would like to use:" << endl;
+	cout << "Choose the mode you would like to use (Use Arrow Keys):" << endl;
 	cout << "SILENT		";
 	cout << "<----";
 	cout << endl;
@@ -41,7 +56,7 @@ void UI::Start()
 		{
 			mode = SILENT;
 			printf("\033c");
-			cout << "Choose the mode you would like to use:" << endl;
+			cout << "Choose the mode you would like to use (Use Arrow Keys):" << endl;
 			cout << "SILENT		";
 			cout << "<----";
 			cout << endl;
@@ -53,7 +68,7 @@ void UI::Start()
 		{
 			mode = INTERACTIVE;
 			printf("\033c");
-			cout << "Choose the mode you would like to use:" << endl;
+			cout << "Choose the mode you would like to use (Use Arrow Keys):" << endl;
 			cout << "SILENT			";
 
 			cout << endl;
@@ -62,22 +77,67 @@ void UI::Start()
 			cout << endl;
 		}
 	}
-	//Getting file input name
+	//Getting input file name
 	printf("\033c");
-	string name;
-	cout << "Please enter the name of the file you would like to open: ";
-	cin >> name;
-	cout << "Opening file " << name << "...";
+  string name;
+  // Loop until the user provides a valid file
+	while (1)
+	{
+		cout << "Please enter the name of the file you would like to open: ";
+		cin >> name; 
+
+		// Check if the file exists
+		if (fileExists(name))
+		{
+			cout << "Opening file " << name << "...";
+			setInputFileName(name);
+			
+			break;
+		}
+		else
+		{
+			cout << "Error: File " << name << " does not exist. Please try again." << endl;
+		}
+	}
+  //Getting output file name
+	printf("\033c");
+	cout << "Please enter the name of the file you would like to save to: " << endl;
+	cin >> outFileName;
+	printf("\033c");
 }
 
-void UI::Output()
+//Checks whether the filename inserted by the user exists or not
+bool UI::fileExists(string& filename)
 {
-
+	ifstream file;
+	file.open(filename + ".txt", ios::in);
+	return file.is_open(); // Return true if the file can be opened, false otherwise
+}
+//Sends the input file name to the Organizer
+void UI::setInputFileName(string& filename)
+{
+	fileName = filename;
 }
 
-void UI::printPage(int hospitalID)
+string UI::getInputFileName()
 {
+	return fileName;
+}
 
+void UI::Output(int timestep, Hospital** h, int nOfHosp, priQueue<Car*>* backCars, ModifiedPriQ<Car*>* outCars, LinkedQueue<Patient*>* finished)
+{
+	for (int i = 0; i < nOfHosp; i++)
+	{
+		cout << "Current Timestep: " << timestep << endl;
+		cout << *h[i];
+		cout << "-------------------------------------------------" << endl;
+		cout << outCars->getCount() << " ==> Out cars: " << *outCars << endl;
+		cout << backCars->getCount() << " <== Back cars: " << *backCars << endl;
+		cout << "-------------------------------------------------" << endl;
+		cout << finished->getCount() << " finished patients: " << *finished << endl;
+		cout << "Press any key to display next hospital" << endl;
+		_getch();
+	}
 }
 
 #endif

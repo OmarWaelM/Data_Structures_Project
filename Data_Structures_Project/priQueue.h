@@ -39,6 +39,7 @@ public :
 template <typename T>
 class priQueue
 {
+protected:
     priNode<T>* head;
     int count;  // number of items in queue
 public:
@@ -90,8 +91,7 @@ public:
     bool peek(T& topEntry, int& pri) {
         if (isEmpty())
             return false;
-
-        topEntry = head->getItem();
+        topEntry = head->getItem(pri);
         pri = head->getPri();
         return true;
     }

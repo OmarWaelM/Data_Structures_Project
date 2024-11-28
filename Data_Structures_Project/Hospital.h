@@ -1,6 +1,12 @@
 #ifndef HOSPITAL_H
 #define HOSPITAL_H
 
+#include "ModifiedPriQ.h"
+#include "ModifiedQ.h"
+#include "LinkedQueue.h"
+#include "priQueue.h"
+
+
 class Hospital
 {
 private:
@@ -14,17 +20,27 @@ private:
 
 	//General data memebers
 	int hospitalID;
+	int scCount;           // Number of SCars
+	int ncCount;           // Number of NCars
 
 public:
 	//Member Function
-	Hospital() {}
+	Hospital();
 	void setID(int id) { hospitalID = id; }
+	int getHospitalID() const { return hospitalID; }
+	void setSCarsCount(int count) { scCount = count; }
+	void setNCarsCount(int count) { ncCount = count; }
+	int getSCarsCount() const { return scCount; } // Getter for SCars count
+	int getNCarsCount() const { return ncCount; } // Getter for NCars count
 	void addCarToList(Car* car);
 	void addPatientToList(Patient* patient);
 	bool assignPatientToCar(Patient* patient);
+
 	friend ostream& operator <<(ostream& os, Hospital& h);
 
 };
+
+Hospital::Hospital(): hospitalID(0), scCount(0), ncCount(0) {}
 
 void Hospital::addCarToList(Car* car)
 {
