@@ -10,6 +10,7 @@ using namespace std;
 #include <fstream>
 #include <sstream>
 #include <iomanip>
+#include <random>
 
 class UI;
 
@@ -28,7 +29,7 @@ private:
 	LinkedQueue<CancellationReq> CancellationList;
 	LinkedQueue<Patient*> FinishedList;
 	priQueue<Car*> BackCars;
-	ModifiedPriQ<Car*> OutCars;
+	ModifiedPriQ OutCars;
 
 	//General data members
 	int timeStep;
@@ -47,17 +48,21 @@ private:
 
 public:
 	//Member Functions
-
+  
 	//Constructor
 	Organizer();
 	void processInputFile();
 	void Simulator();
-
+  
+  
+  Hospital* getNearestHospital(Patient* EP);
+  bool addEPtoHospital(Patient* EP);
+  
 	// Functions for managing Back Cars:
 	//Adding a Back Car based on its priority
 	//void AddBackCar(const string& Car, int Priority);
 
-    //Removing the highest priority from the Back_Cars queue
+  //Removing the highest priority from the Back_Cars queue
 	//bool RemoveBackCar(string& Car);
 
 	LinkedQueue<Patient*>* getFinishedList() { return &FinishedList; }
@@ -125,9 +130,6 @@ Organizer::Organizer() :
 	numCancellations(0)
 
 {
-	timeStep = 0;
-	GUI.Start();
-	filename = GUI.getInputFileName();
 }
 
 /***** FILE LOADING FUNCTION *****/
@@ -236,6 +238,84 @@ void Organizer::Simulator()
 {
 	timeStep = 0;
 	GUI.Start();
+	filename = GUI.getInputFileName();
+	processInputFile();
+
+	Patient* p;
+	while (patientsList.dequeue(p))
+	{
+		int hid = p->getNearestHospital();
+		HospitalList[hid - 1]->addPatientToList(p);
+	}
+
+	bool endSimulation = false;
+	int randomNum = 0;
+	while (!endSimulation)
+	{
+		timeStep++;
+		for (int i = 0; i < numHospitals; i++)
+		{
+			randomNum = rand() % 100;
+
+			if (randomNum >= 10 && randomNum < 20)
+			{
+				Patient* p = nullptr;
+				if (HospitalList[i]->getSP(p))
+					FinishedList.enqueue(p);
+			}
+			if (randomNum >= 20 && randomNum < 25)
+			{
+				Patient* p = nullptr;
+				if (HospitalList[i]->getEP(p))
+					FinishedList.enqueue(p);
+			}
+			if (randomNum >= 30 && randomNum < 40)
+			{
+				Patient* p = nullptr;
+				if (HospitalList[i]->getNP(p))
+					FinishedList.enqueue(p);
+			}
+			if (randomNum >= 40 && randomNum < 45)
+			{
+				Car* c = nullptr;
+				if (HospitalList[i]->getSC(c))
+					OutCars.enqueue(c, 1);
+			}
+			if (randomNum >= 70 && randomNum < 75)
+			{
+				Car* c = nullptr;
+				if (HospitalList[i]->getNC(c))
+					OutCars.enqueue(c, 1);
+			}
+			if (randomNum >= 80 && randomNum < 90)
+			{
+				Car* c = nullptr;
+				int pri;
+				if (OutCars.dequeue(c, pri))
+					BackCars.enqueue(c, pri);
+			}
+			if (randomNum >= 90 && randomNum < 95)
+			{
+				Car* c = nullptr;
+				int pri;
+				if (BackCars.dequeue(c, pri))
+				{
+					int cid = c->getHospital();
+					HospitalList[cid - 1]->addCarToList(c);
+				}
+			}
+		}
+		GUI.Output(timeStep, HospitalList, numHospitals, &BackCars, &OutCars, &FinishedList);
+
+		endSimulation = true;
+		for (int i = 0; i < numHospitals; i++)
+		{
+			if (!HospitalList[i]->empty())
+				endSimulation = false;
+		}
+	}
+
+
 }
 
 
@@ -414,6 +494,26 @@ void Organizer::printCancellationList() const {
 		tempQueue.dequeue(tempCancellation); // Remove the front cancellation request
 	}
 }
+
+
+Hospital* Organizer::getNearestHospital(Patient* EP)
+{
+    return nullptr;
+}
+
+bool Organizer::addEPtoHospital(Patient* EP)
+{
+    Hospital* hospital = EP->getNearestHospital();
+    if (!(hospital->assignPatientToCar()))
+    {
+        //get the shortest hospital list
+        //get nearest hospital to the current one
+        return true;
+    }
+    return false;
+}
+
+
 
 Organizer::~Organizer()
 {

@@ -126,8 +126,10 @@ string UI::getInputFileName()
 
 void UI::Output(int timestep, Hospital** h, int nOfHosp, priQueue<Car*>* backCars, ModifiedPriQ<Car*>* outCars, LinkedQueue<Patient*>* finished)
 {
+	
 	for (int i = 0; i < nOfHosp; i++)
 	{
+		printf("\033c");
 		cout << "Current Timestep: " << timestep << endl;
 		cout << *h[i];
 		cout << "-------------------------------------------------" << endl;
