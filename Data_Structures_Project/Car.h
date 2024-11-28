@@ -107,7 +107,14 @@ ostream& operator <<(ostream& os, Car& car)
 		os << 'S';
 	else
 		os << 'N';
-	os << car.carID << "_H" << car.hospital << "_P" << car.assignedPatient->getPatientID();
+	if (car.assignedPatient)
+	{
+		os << car.carID << "_H" << car.hospital << "_P" << car.assignedPatient->getPatientID();
+	}
+	else
+	{
+		os << car.carID << "_H" << car.hospital;
+	}
 	return os;
 }
 
