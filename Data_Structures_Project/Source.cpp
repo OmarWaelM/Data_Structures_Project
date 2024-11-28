@@ -18,7 +18,7 @@
 
 using namespace std;
 
-int main() 
+int main() {
 	int x;
 	cout << "before clear" << endl;
 	cin >> x;

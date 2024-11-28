@@ -24,7 +24,7 @@ class Organizer
 {
 private:
 	//Lists used in orgranizer class
-	LinkedQueue<Patient*> patientQueue;  // Patient queue (list of pointers to patients)
+	LinkedQueue<Patient*> patientsList;  // Patients list queue (list of pointers to patients)
 	LinkedQueue<CancellationReq> CancellationList;
 	LinkedQueue<Patient*> FinishedList;
 	priQueue<Car*> BackCars;
@@ -42,9 +42,7 @@ private:
 	int* scarsPerHospital;
 	int* ncarsPerHospital;
 	int numRequests;
-	string* patientRequests;
 	int numCancellations;
-	string* cancellations;
 
 
 public:
@@ -103,12 +101,8 @@ public:
 	void readHospitalData();
 	//Printing out the hospitals in the hospital list
 	void PrintHospitalsList()const;
-
-	// Reads patient request list
-	void readPatientRequests();
-
-	//// Reads request cancellation list
-	void readCancellationRequests();
+	void printPatientsList()const;
+	void printCancellationList()const;
 
 	// Functions for handling Out Cars
 	//void handleCancellations();
@@ -128,9 +122,7 @@ Organizer::Organizer() :
 	scarsPerHospital(nullptr),
 	ncarsPerHospital(nullptr),
 	numRequests(0),
-	patientRequests(nullptr),
-	numCancellations(0),
-	cancellations(nullptr)
+	numCancellations(0)
 
 {
 	timeStep = 0;
@@ -141,8 +133,8 @@ Organizer::Organizer() :
 /***** FILE LOADING FUNCTION *****/
 
 /* The processInputFile function loads, reads and processes the input file 
-containing data related to the hospitals, patient requests, and cancellations.
-It then calls the respective functions to store the data in appropriate data structures */
+containing data related to the hospitals, patient requests, and cancellations. It then either calls
+the respective functions to store the data in appropriate data structures or stores the latter itself */
 
 void Organizer::processInputFile()
 {
@@ -183,27 +175,61 @@ void Organizer::processInputFile()
 	// Read number of patient requests
 	inputFile >> numRequests;
 
-	// Read each request and store it in a dynamic array
-	patientRequests = new string[numRequests];
+	//Read all patients' requests list
 	for (int i = 0; i < numRequests; i++)
 	{
-		getline(inputFile, patientRequests[i]);
+		string type;
+		int requestTime, patientID, nearestHospitalID, distanceToHospital, caseSeverity;
+		inputFile >> type;
+		Patient* patient = nullptr; // Pointer to a Patient object
+
+		if (type == "NP")
+		{
+			inputFile >> requestTime >> patientID >> nearestHospitalID >> distanceToHospital;
+
+			// Dynamically create a Normal Patient (NP)
+			patient = new Patient(patientID, requestTime, nearestHospitalID, distanceToHospital, NP);
+		}
+		else if (type == "SP")
+		{
+			inputFile >> requestTime >> patientID >> nearestHospitalID >> distanceToHospital;
+
+			// Dynamically create a Special Patient (SP)
+			patient = new Patient(patientID, requestTime, nearestHospitalID, distanceToHospital, SP);
+		}
+		else if (type == "EP")
+		{
+			inputFile >> requestTime >> patientID >> nearestHospitalID >> distanceToHospital >> caseSeverity;
+
+			// Dynamically create an Emergency Patient (EP) with case severity
+			patient = new Patient(patientID, requestTime, nearestHospitalID, distanceToHospital, EP, caseSeverity);
+		}
+
+		// Enqueue the patient pointer into the queue
+		patientsList.enqueue(patient);
 	}
 
 	// Read number of cancellations
 	inputFile >> numCancellations;
 
-	cancellations = new string[numCancellations];
+	//Reads request cancellation list
 	for (int i = 0; i < numCancellations; i++)
 	{
-		getline(inputFile, cancellations[i]);
+		int PID, hospitalID, cancellationTimestep;
+		// Parse the cancellation request
+		inputFile >> PID >> hospitalID >> cancellationTimestep;
+
+		// Create a CancellationReq struct
+		CancellationReq cancellation = { PID, hospitalID, cancellationTimestep };
+
+		// Enqueue the cancellation request into the CancellationList
+		CancellationList.enqueue(cancellation);
 	}
+
 	inputFile.close();
 
-	// Call functions to process the loaded data and create our program's data structures
+	// Call the readHospitalData function to process the loaded data and create the appropriate data structures
 	readHospitalData();
-	readPatientRequests();
-	readCancellationRequests();
 }
 
 void Organizer::Simulator()
@@ -265,8 +291,6 @@ void Organizer::readHospitalData()
 			Car* car = new Car(carID++, i + 1, NC, speedNcars);
 			HospitalList[i]->addCarToList(car);  // Adds to SCList or NCList based on car type
 		}
-
-		HospitalList[i]->setDistanceMatrix(distanceMatrix, numHospitals);
 	}
 }
 
@@ -275,62 +299,6 @@ void Organizer::printHospitals() const
 	for (int i = 0; i < numHospitals; ++i)
 	{
 		cout << *HospitalList[i]; // Use the overloaded << operator for Hospital class
-	}
-}
-
-void Organizer::readPatientRequests()
-{
-	for (int i = 0; i < numRequests; i++)
-	{
-		stringstream ss(patientRequests[i]);
-		string type;
-		int requestTime, patientID, nearestHospitalID, distanceToHospital, caseSeverity;
-
-		ss >> type; // Read the type of patient (NP, SP, EP)
-		Patient* patient = nullptr; // Pointer to a Patient object 
-
-		if (type == "NP")
-		{
-			ss >> requestTime >> patientID >> nearestHospitalID >> distanceToHospital;
-
-			// Dynamically create a Normal Patient (NP)
-			patient = new Patient(patientID, requestTime, nearestHospitalID, distanceToHospital, NP);
-		}
-		else if (type == "SP")
-		{
-			ss >> requestTime >> patientID >> nearestHospitalID >> distanceToHospital;
-
-			// Dynamically create a Special Patient (SP)
-			patient = new Patient(patientID, requestTime, nearestHospitalID, distanceToHospital, SP);
-		}
-		else if (type == "EP")
-		{
-            ss >> requestTime >> patientID >> nearestHospitalID >> distanceToHospital >> caseSeverity;
-
-            // Dynamically create an Emergency Patient (EP) with case severity
-            patient = new Patient(patientID, requestTime, nearestHospitalID, distanceToHospital, EP, caseSeverity);
-        }
-
-		// Enqueue the patient pointer into the queue
-		patientQueue.enqueue(patient);
-	}
-}
-
-void Organizer::readCancellationRequests()
-{
-	for (int i = 0; i < numCancellations; ++i)
-	{
-		stringstream ss(cancellations[i]);
-		int PID, hospitalID, cancellationTimestep;
-
-		// Parse the cancellation request
-		ss >> PID >> hospitalID >> cancellationTimestep;
-
-		// Create a CancellationReq struct
-		CancellationReq cancellation = { PID, hospitalID, cancellationTimestep };
-
-		// Enqueue the cancellation request into the CancellationList
-		CancellationList.enqueue(cancellation);
 	}
 }
 
@@ -379,7 +347,7 @@ void Organizer::PrintHospitalsList() const
 		cout << "----------------------------------------\n";
 	}
 
-	cout << "\nDistance Matrix:\n";
+	cout << "Distance Matrix:\n";
 	for (int i = 0; i < numHospitals; ++i)
 	{
 		for (int j = 0; j < numHospitals; ++j)
@@ -392,6 +360,61 @@ void Organizer::PrintHospitalsList() const
 	cout << "----------------------------------------\n";
 }
 
+void Organizer::printPatientsList() const {
+	if (patientsList.isEmpty()) {
+		cout << "The patients list is empty." << endl;
+		return;
+	}
+
+	cout << "Patients List:" << endl;
+
+	// Create a copy of the patientsList to traverse without modifying it
+	LinkedQueue<Patient*> tempQueue = patientsList;
+	Patient* tempPatient;
+
+	while (!tempQueue.isEmpty())
+	{
+		tempQueue.peek(tempPatient); // Get the front patient
+
+		// Print patient details using the getter methods
+		cout << "Patient ID: " << tempPatient->getPatientID() << endl;
+		cout << "Patient Type: " << (tempPatient->getPatientType() == NP ? "Normal Patient" :
+			tempPatient->getPatientType() == SP ? "Special Patient" : "Emergency Patient") << endl;
+		cout << "Nearest Hospital ID: " << tempPatient->getNearestHospital() << endl;
+		cout << "Distance to Hospital: " << tempPatient->getDistance() << endl;
+		if (tempPatient->getPatientType() == EP)
+		{
+			cout << "Case Severity: " << tempPatient->getPatientPriority() << endl;
+		}
+		cout << "----------------------------------------\n";
+		tempQueue.dequeue(tempPatient); // Remove the front patient
+	}
+}
+
+void Organizer::printCancellationList() const {
+	if (CancellationList.isEmpty()) {
+		cout << "The cancellation list is empty." << endl;
+		return;
+	}
+
+	cout << "Cancellation List:" << endl;
+
+	// Create a copy of the CancellationList to traverse without modifying it
+	LinkedQueue<CancellationReq> tempQueue = CancellationList;
+	CancellationReq tempCancellation;
+
+	while (!tempQueue.isEmpty()) {
+		tempQueue.peek(tempCancellation); // Get the front cancellation request
+
+		// Print cancellation request details
+		cout << "Patient ID: " << tempCancellation.PID
+			<< ", Hospital ID: " << tempCancellation.hospitalID
+			<< ", Cancellation Time: " << tempCancellation.CancellationTimestep << endl;
+
+		tempQueue.dequeue(tempCancellation); // Remove the front cancellation request
+	}
+}
+
 Organizer::~Organizer()
 {
 	// Cleanup dynamically allocated memory
@@ -402,8 +425,6 @@ Organizer::~Organizer()
 	delete[] distanceMatrix;
 	delete[] scarsPerHospital;
 	delete[] ncarsPerHospital;
-	delete[] patientRequests;
-	delete[] cancellations;
 
 	// Cleanup for the hospitalArray
 	for (int i = 0; i < numHospitals; ++i)
@@ -414,9 +435,9 @@ Organizer::~Organizer()
 
 	// Dequeue all patients and delete each dynamically allocated Patient object
 	Patient* tempPatient;
-	while (!patientQueue.isEmpty())
+	while (!patientsList.isEmpty())
 	{
-		patientQueue.dequeue(tempPatient);
+		patientsList.dequeue(tempPatient);
 		delete tempPatient;  // Free the memory allocated for the Patient object
 	}
 
