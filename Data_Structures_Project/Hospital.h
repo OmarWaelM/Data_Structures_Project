@@ -26,6 +26,7 @@ private:
 public:
 	//Member Function
 	Hospital();
+	Hospital(int ID) { hospitalID = ID; }
 	void setID(int id) { hospitalID = id; }
 	int getHospitalID() const { return hospitalID; }
 	void setSCarsCount(int count) { scCount = count; }
