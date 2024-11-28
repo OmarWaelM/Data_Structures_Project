@@ -133,8 +133,8 @@ Organizer::Organizer() :
 /***** FILE LOADING FUNCTION *****/
 
 /* The processInputFile function loads, reads and processes the input file 
-containing data related to the hospitals, patient requests, and cancellations.
-It then calls the respective functions to store the data in appropriate data structures */
+containing data related to the hospitals, patient requests, and cancellations. It then either calls
+the respective functions to store the data in appropriate data structures or stores the latter itself */
 
 void Organizer::processInputFile()
 {
