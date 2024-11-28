@@ -503,8 +503,8 @@ Hospital* Organizer::getNearestHospital(Patient* EP)
 
 bool Organizer::addEPtoHospital(Patient* EP)
 {
-    Hospital* hospital = EP->getNearestHospital();
-    if (!(hospital->assignPatientToCar()))
+    Hospital* hospital = HospitalList[EP->getNearestHospital()-1];
+    if (!(hospital->assignPatientToCar(EP)))
     {
         //get the shortest hospital list
         //get nearest hospital to the current one
