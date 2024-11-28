@@ -5,7 +5,7 @@ class ModifiedPriQ : public priQueue<Car*>
 {
 public:
     // Cancel an item based on a specific condition
-    bool cancelItemByCondition(int patientID, Car*& c)
+    bool cancelRequest(int patientID, Car*& c)
     {
         priNode<Car*>* Current = this->head;
         priNode<Car*>* Previous = nullptr;  //keep track of the previous node
