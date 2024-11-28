@@ -42,9 +42,7 @@ private:
 	int* scarsPerHospital;
 	int* ncarsPerHospital;
 	int numRequests;
-	string* patientRequests;
 	int numCancellations;
-	string* cancellations;
 
 
 public:
@@ -106,12 +104,6 @@ public:
 	void printPatientsList()const;
 	void printCancellationList()const;
 
-	// Reads patient request list
-	void readPatientRequests();
-
-	//// Reads request cancellation list
-	void readCancellationRequests();
-
 	// Functions for handling Out Cars
 	//void handleCancellations();
 	void handleCarMovements();
@@ -130,9 +122,7 @@ Organizer::Organizer() :
 	scarsPerHospital(nullptr),
 	ncarsPerHospital(nullptr),
 	numRequests(0),
-	patientRequests(nullptr),
-	numCancellations(0),
-	cancellations(nullptr)
+	numCancellations(0)
 
 {
 	timeStep = 0;
@@ -185,27 +175,61 @@ void Organizer::processInputFile()
 	// Read number of patient requests
 	inputFile >> numRequests;
 
-	// Read each request and store it in a dynamic array
-	patientRequests = new string[numRequests];
+	//Read all patients' requests list
 	for (int i = 0; i < numRequests; i++)
 	{
-		getline(inputFile, patientRequests[i]);
+		string type;
+		int requestTime, patientID, nearestHospitalID, distanceToHospital, caseSeverity;
+		inputFile >> type;
+		Patient* patient = nullptr; // Pointer to a Patient object
+
+		if (type == "NP")
+		{
+			inputFile >> requestTime >> patientID >> nearestHospitalID >> distanceToHospital;
+
+			// Dynamically create a Normal Patient (NP)
+			patient = new Patient(patientID, requestTime, nearestHospitalID, distanceToHospital, NP);
+		}
+		else if (type == "SP")
+		{
+			inputFile >> requestTime >> patientID >> nearestHospitalID >> distanceToHospital;
+
+			// Dynamically create a Special Patient (SP)
+			patient = new Patient(patientID, requestTime, nearestHospitalID, distanceToHospital, SP);
+		}
+		else if (type == "EP")
+		{
+			inputFile >> requestTime >> patientID >> nearestHospitalID >> distanceToHospital >> caseSeverity;
+
+			// Dynamically create an Emergency Patient (EP) with case severity
+			patient = new Patient(patientID, requestTime, nearestHospitalID, distanceToHospital, EP, caseSeverity);
+		}
+
+		// Enqueue the patient pointer into the queue
+		patientsList.enqueue(patient);
 	}
 
 	// Read number of cancellations
 	inputFile >> numCancellations;
 
-	cancellations = new string[numCancellations];
+	//Reads request cancellation list
 	for (int i = 0; i < numCancellations; i++)
 	{
-		getline(inputFile, cancellations[i]);
+		int PID, hospitalID, cancellationTimestep;
+		// Parse the cancellation request
+		inputFile >> PID >> hospitalID >> cancellationTimestep;
+
+		// Create a CancellationReq struct
+		CancellationReq cancellation = { PID, hospitalID, cancellationTimestep };
+
+		// Enqueue the cancellation request into the CancellationList
+		CancellationList.enqueue(cancellation);
 	}
+
 	inputFile.close();
 
-	// Call functions to process the loaded data and create our program's data structures
+	// Call the readHospitalData function to process the loaded data and create the appropriate data structures
 	readHospitalData();
-	readPatientRequests();
-	readCancellationRequests();
 }
 
 void Organizer::Simulator()
@@ -275,62 +299,6 @@ void Organizer::printHospitals() const
 	for (int i = 0; i < numHospitals; ++i)
 	{
 		cout << *HospitalList[i]; // Use the overloaded << operator for Hospital class
-	}
-}
-
-void Organizer::readPatientRequests()
-{
-	for (int i = 0; i < numRequests; i++)
-	{
-		stringstream ss(patientRequests[i]);
-		string type;
-		int requestTime, patientID, nearestHospitalID, distanceToHospital, caseSeverity;
-
-		ss >> type; // Read the type of patient (NP, SP, EP)
-		Patient* patient = nullptr; // Pointer to a Patient object 
-
-		if (type == "NP")
-		{
-			ss >> requestTime >> patientID >> nearestHospitalID >> distanceToHospital;
-
-			// Dynamically create a Normal Patient (NP)
-			patient = new Patient(patientID, requestTime, nearestHospitalID, distanceToHospital, NP);
-		}
-		else if (type == "SP")
-		{
-			ss >> requestTime >> patientID >> nearestHospitalID >> distanceToHospital;
-
-			// Dynamically create a Special Patient (SP)
-			patient = new Patient(patientID, requestTime, nearestHospitalID, distanceToHospital, SP);
-		}
-		else if (type == "EP")
-		{
-            ss >> requestTime >> patientID >> nearestHospitalID >> distanceToHospital >> caseSeverity;
-
-            // Dynamically create an Emergency Patient (EP) with case severity
-            patient = new Patient(patientID, requestTime, nearestHospitalID, distanceToHospital, EP, caseSeverity);
-        }
-
-		// Enqueue the patient pointer into the queue
-		patientsList.enqueue(patient);
-	}
-}
-
-void Organizer::readCancellationRequests()
-{
-	for (int i = 0; i < numCancellations; ++i)
-	{
-		stringstream ss(cancellations[i]);
-		int PID, hospitalID, cancellationTimestep;
-
-		// Parse the cancellation request
-		ss >> PID >> hospitalID >> cancellationTimestep;
-
-		// Create a CancellationReq struct
-		CancellationReq cancellation = { PID, hospitalID, cancellationTimestep };
-
-		// Enqueue the cancellation request into the CancellationList
-		CancellationList.enqueue(cancellation);
 	}
 }
 
