@@ -33,7 +33,7 @@ public:
 	void setInputFileName(string& filename);
 	string getInputFileName();
   
-	void Output(int timestep, Hospital** h, int nOfHosp, priQueue<Car*>* backCars, ModifiedPriQ<Car*>* outCars, LinkedQueue<Patient*>* finished);
+	void Output(int timestep, Hospital** h, int nOfHosp, priQueue<Car*>* backCars, ModifiedPriQ* outCars, LinkedQueue<Patient*>* finished);
 
 };
 
@@ -77,10 +77,11 @@ void UI::Start()
 			cout << endl;
 		}
 	}
+
 	//Getting input file name
 	printf("\033c");
-  string name;
-  // Loop until the user provides a valid file
+	string name;
+	// Loop until the user provides a valid file
 	while (1)
 	{
 		cout << "Please enter the name of the file you would like to open: ";
@@ -99,7 +100,7 @@ void UI::Start()
 			cout << "Error: File " << name << " does not exist. Please try again." << endl;
 		}
 	}
-  //Getting output file name
+	//Getting output file name
 	printf("\033c");
 	cout << "Please enter the name of the file you would like to save to: " << endl;
 	cin >> outFileName;
@@ -113,6 +114,7 @@ bool UI::fileExists(string& filename)
 	file.open(filename + ".txt", ios::in);
 	return file.is_open(); // Return true if the file can be opened, false otherwise
 }
+
 //Sends the input file name to the Organizer
 void UI::setInputFileName(string& filename)
 {
@@ -124,7 +126,8 @@ string UI::getInputFileName()
 	return fileName;
 }
 
-void UI::Output(int timestep, Hospital** h, int nOfHosp, priQueue<Car*>* backCars, ModifiedPriQ<Car*>* outCars, LinkedQueue<Patient*>* finished)
+//Prints lists with proper formatting
+void UI::Output(int timestep, Hospital** h, int nOfHosp, priQueue<Car*>* backCars, ModifiedPriQ* outCars, LinkedQueue<Patient*>* finished)
 {
 	
 	for (int i = 0; i < nOfHosp; i++)

@@ -25,6 +25,7 @@ public:
 	patientType getPatientType();
 	int getPatientPriority();
 	int getPatientID();
+	int getRequestTime();
 	int getDistance();
 	int getNearestHospital();
 	void setPriority(int priority) { patientPri = priority; }
@@ -56,6 +57,11 @@ int Patient::getPatientPriority()
 int Patient::getPatientID()
 {
 	return patientID;
+}
+
+int Patient::getRequestTime()
+{
+	return reqTime;
 }
 
 int Patient::getDistance()

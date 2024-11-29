@@ -16,28 +16,20 @@ private:
 	int speed;
 	int hospital;
 	Patient* assignedPatient;
-	int distToPatient;
-	int distToHospital;
-	int arrivalTime;
-	int returnTime;      // Time at which the car is expected to return to the hospital
-	int priority;
+	int distToPatient; //decrememnted by speed every timestep
+	int distToHospital; //incrememnted by speed every timestep
+
 public:
 	Car(int id, int hosp, carType type, int spd);
 
 	int getcarID();
 	int getHospital();
 	int getAssignedPatientID();
-	int getArrivalTime();
+	int getDistToPatient();
+	int getDistToHospital();
 	carType getCarType();
-	int getReturnTime();
-	void setReturnTime(int time) { returnTime = time; }
 	bool AssignPatient(Patient* p);
-	int getPriority() const { return priority; }
-	void pickupPatient()
-	{
-		cout << "Car " << carID << " is picking up a patient." << endl;
-		
-	}
+
 	friend ostream& operator <<(ostream& os, Car& car);
 };
 
@@ -48,11 +40,8 @@ Car::Car(int id, int hosp, carType type, int spd)
 	cType = type;
 	speed = spd;
 	assignedPatient = nullptr;
-	arrivalTime = 0;
-	priority = 0;
 	distToHospital = 0;
 	distToPatient = 0;
-	returnTime = 0;
 }
 
 int Car::getcarID()
@@ -70,20 +59,20 @@ int Car::getAssignedPatientID()
 	return assignedPatient->getPatientID();
 }
 
-inline int Car::getArrivalTime()
+int Car::getDistToPatient()
 {
-	return arrivalTime;
+	return distToPatient;
 }
-int Car::getReturnTime()
+
+int Car::getDistToHospital()
 {
-	return returnTime;
+	return distToHospital;
 }
 
 carType Car::getCarType()
 {
 	return cType;
 }
-
 
 bool Car::AssignPatient(Patient* p)
 {	
@@ -100,7 +89,6 @@ bool Car::AssignPatient(Patient* p)
 	}
 }
 
-
 ostream& operator <<(ostream& os, Car& car)
 {
 	if (car.cType == SC)
@@ -111,7 +99,7 @@ ostream& operator <<(ostream& os, Car& car)
 	{
 		os << car.carID << "_H" << car.hospital << "_P" << car.assignedPatient->getPatientID();
 	}
-	else
+	else //only used during this phase as later on patient will always be assigned when printing
 	{
 		os << car.carID << "_H" << car.hospital;
 	}

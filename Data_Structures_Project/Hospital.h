@@ -13,7 +13,7 @@ private:
 	//Lists used in hospital class
 	LinkedQueue<Patient*> SPList;
 	priQueue<Patient*> EPList;
-	ModifiedQ<Patient*> NPList;
+	ModifiedQ NPList;
 
 	LinkedQueue<Car*> SCList;
 	LinkedQueue<Car*> NCList;
