@@ -2,19 +2,17 @@
 #include <Windows.h>
 #include <string>
 #include <fstream>
+#include <sstream>
 #include <iomanip>
 #include <conio.h>
-#include <fstream>
+#include <random>
 #include "LinkedQueue.h"
 #include "priQueue.h"
 #include "ModifiedQ.h"
 #include "ModifiedPriQ.h"
-#include "Patient.h"
-#include "Car.h"
 #include "Hospital.h"
 #include "UI.h"
 #include "Organizer.h"
-
 
 using namespace std;
 

@@ -1,12 +1,6 @@
 #ifndef HOSPITAL_H
 #define HOSPITAL_H
 
-#include "ModifiedPriQ.h"
-#include "ModifiedQ.h"
-#include "LinkedQueue.h"
-#include "priQueue.h"
-
-
 class Hospital
 {
 private:

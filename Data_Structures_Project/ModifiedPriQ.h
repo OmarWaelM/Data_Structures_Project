@@ -1,5 +1,5 @@
 #pragma once
-#include "priQueue.h"
+#include "Car.h"
 
 class ModifiedPriQ : public priQueue<Car*>
 {

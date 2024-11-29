@@ -1,18 +1,7 @@
 #ifndef ORGANIZER_H
 #define ORGANIZER_H
-#include "Car.h"
-#include "UI.h"
-#include "Hospital.h"
+
 using namespace std;
-
-#include<iostream>
-#include <string>
-#include <fstream>
-#include <sstream>
-#include <iomanip>
-#include <random>
-
-class UI;
 
 struct CancellationReq
 {
