@@ -1,18 +1,7 @@
 #ifndef ORGANIZER_H
 #define ORGANIZER_H
-#include "Car.h"
-#include "UI.h"
-#include "Hospital.h"
+
 using namespace std;
-
-#include<iostream>
-#include <string>
-#include <fstream>
-#include <sstream>
-#include <iomanip>
-#include <random>
-
-class UI;
 
 struct CancellationReq
 {
@@ -216,8 +205,12 @@ void Organizer::Simulator()
 	processInputFile();
 
 	Patient* p;
+	Car* car;
+	CancellationReq cr;
 	bool endSimulation = false;
 	int randomNum = 0;
+
+	GUI.Output(timeStep, HospitalList, numHospitals, &BackCars, &OutCars, &FinishedList);
 
 	while (!endSimulation)
 	{
@@ -229,7 +222,16 @@ void Organizer::Simulator()
 		{
 			patientsList.dequeue(p);
 			HospitalList[p->getNearestHospital() - 1]->addPatientToList(p);
-			
+		}
+
+		while (CancellationList.peek(cr) && cr.CancellationTimestep == timeStep)
+		{
+			CancellationList.dequeue(cr);
+			if (!HospitalList[cr.hospitalID - 1]->cancelRequest(cr.PID))
+			{
+				OutCars.cancelRequest(cr.PID, car);
+				BackCars.enqueue(car, 1);
+			}
 		}
 
 		for (int i = 0; i < numHospitals; i++)
@@ -344,9 +346,6 @@ void Organizer::readHospitalData()
 		int scars, ncars;
 		scars = scarsPerHospital[i];
 		ncars = ncarsPerHospital[i];
-
-		HospitalList[i]->setSCarsCount(scars);
-		HospitalList[i]->setNCarsCount(ncars);
 
 		// Adds SCars to the hospital's SCList and NCars to the NCList
 		// For each SCar, add it to the SCList

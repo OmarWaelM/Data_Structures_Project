@@ -1,6 +1,5 @@
 #ifndef CAR_H
 #define CAR_H
-#include "Patient.h"
 
 enum carType {
 	NC,
