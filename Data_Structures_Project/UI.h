@@ -1,17 +1,8 @@
 #ifndef UI_H
 #define UI_H
+
 using namespace std;
-#include "Hospital.h"
-#include "Car.h"
-#include "Patient.h"
-#include "ModifiedPriQ.h"
-#include "LinkedQueue.h"
-#include "priQueue.h"
-#include <conio.h>
-#include <iostream>
-#include <fstream>
-#include <sstream>
-#include <string>
+
 #include "WinUser.h"
 
 enum UI_MODE {
