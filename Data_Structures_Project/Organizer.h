@@ -215,14 +215,7 @@ void Organizer::Simulator()
 	filename = GUI.getInputFileName();
 	processInputFile();
 
-	//Moving all patients to their hospitals
 	Patient* p;
-	while (patientsList.dequeue(p))
-	{
-		int hid = p->getNearestHospital();
-		HospitalList[hid - 1]->addPatientToList(p);
-	}
-
 	bool endSimulation = false;
 	int randomNum = 0;
 
@@ -230,7 +223,15 @@ void Organizer::Simulator()
 	{
 		//Updating timestep
 		timeStep++;
-	
+
+		//Checking for new patients
+		while (patientsList.peek(p) && p->getRequestTime() == timeStep)
+		{
+			patientsList.dequeue(p);
+			HospitalList[p->getNearestHospital() - 1]->addPatientToList(p);
+			
+		}
+
 		for (int i = 0; i < numHospitals; i++)
 		{
 			//Generating random number between 0 and 100
@@ -293,8 +294,11 @@ void Organizer::Simulator()
 		}
 		//Output hospital data
 		GUI.Output(timeStep, HospitalList, numHospitals, &BackCars, &OutCars, &FinishedList);
-		//Checking if all hospitals are empty
+
+		//Checking if all lists are empty
 		endSimulation = true;
+		if (!patientsList.isEmpty())
+			endSimulation = false;
 		for (int i = 0; i < numHospitals; i++)
 		{
 			if (!HospitalList[i]->empty())
