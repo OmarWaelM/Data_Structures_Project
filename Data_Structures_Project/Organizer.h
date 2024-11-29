@@ -224,14 +224,12 @@ void Organizer::Simulator()
 			HospitalList[p->getNearestHospital() - 1]->addPatientToList(p);
 		}
 
+		//Checking for cancellation requests
 		while (CancellationList.peek(cr) && cr.CancellationTimestep == timeStep)
 		{
 			CancellationList.dequeue(cr);
-			if (!HospitalList[cr.hospitalID - 1]->cancelRequest(cr.PID))
-			{
-				OutCars.cancelRequest(cr.PID, car);
-				BackCars.enqueue(car, 1);
-			}
+			HospitalList[cr.hospitalID - 1]->cancelRequest(cr.PID);
+			//does not check the outcars list as no patient-car assignment occurs
 		}
 
 		for (int i = 0; i < numHospitals; i++)
