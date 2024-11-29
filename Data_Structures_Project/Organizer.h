@@ -14,18 +14,17 @@ class Organizer
 {
 private:
 	//Lists used in orgranizer class
-	LinkedQueue<Patient*> patientsList;  // Patients list queue (list of pointers to patients)
-	LinkedQueue<CancellationReq> CancellationList;
-	LinkedQueue<Patient*> FinishedList;
-	priQueue<Car*> BackCars;
-	ModifiedPriQ OutCars;
+	Hospital** HospitalList; //An array of pointers to hospitals
+	LinkedQueue<Patient*> patientsList;  // Patients list of type Linked Queue (list of pointers to patients)
+	LinkedQueue<CancellationReq> CancellationList; // Cancellation requests' list of type Linked Queue
+	LinkedQueue<Patient*> FinishedList; //Finished patients' list of type Linked Queue
+	priQueue<Car*> BackCars; // Back cars' list (cars on their way back) of type Priority Queue
+	ModifiedPriQ OutCars; // Out cars' list (cars out on their way to pick up patients) of type Priority Queue (modified)
 
 	//General data members
 	int timeStep;
 	UI GUI;
 	string filename;
-
-	Hospital** HospitalList; //An array of pointers to hospitals
 	int numHospitals;
 	int speedScars, speedNcars;
 	int** distanceMatrix;
@@ -224,14 +223,12 @@ void Organizer::Simulator()
 			HospitalList[p->getNearestHospital() - 1]->addPatientToList(p);
 		}
 
+		//Checking for cancellation requests
 		while (CancellationList.peek(cr) && cr.CancellationTimestep == timeStep)
 		{
 			CancellationList.dequeue(cr);
-			if (!HospitalList[cr.hospitalID - 1]->cancelRequest(cr.PID))
-			{
-				OutCars.cancelRequest(cr.PID, car);
-				BackCars.enqueue(car, 1);
-			}
+			HospitalList[cr.hospitalID - 1]->cancelRequest(cr.PID);
+			//does not check the outcars list as no patient-car assignment occurs
 		}
 
 		for (int i = 0; i < numHospitals; i++)
