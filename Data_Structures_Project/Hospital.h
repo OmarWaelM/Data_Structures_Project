@@ -20,21 +20,18 @@ private:
 
 	//General data memebers
 	int hospitalID;
-	int scCount;           // Number of SCars
-	int ncCount;           // Number of NCars
 
 public:
 	//Member Function
 	Hospital();
 	void setID(int id) { hospitalID = id; }
 	int getHospitalID() const { return hospitalID; }
-	void setSCarsCount(int count) { scCount = count; }
-	void setNCarsCount(int count) { ncCount = count; }
-	int getSCarsCount() const { return scCount; } // Getter for SCars count
-	int getNCarsCount() const { return ncCount; } // Getter for NCars count
+	int getSCarsCount() { return SCList.getCount(); } // Getter for SCars count
+	int getNCarsCount() { return NCList.getCount(); } // Getter for NCars count
 	void addCarToList(Car* car);
 	void addPatientToList(Patient* patient);
 	bool assignPatientToCar(Patient* patient);
+	bool cancelRequest(int patientID);
 
 	//Simulation Specific Function
 	bool empty();
@@ -49,7 +46,7 @@ public:
 
 };
 
-Hospital::Hospital(): hospitalID(0), scCount(0), ncCount(0) {}
+Hospital::Hospital(): hospitalID(0) {}
 
 void Hospital::addCarToList(Car* car)
 {
@@ -109,7 +106,10 @@ bool Hospital::assignPatientToCar(Patient* p)
 	return false;
 }
 
-
+bool Hospital::cancelRequest(int patientID)
+{
+	return NPList.cancelRequest(patientID);
+}
 
 
 //this can be changed i made it to look like the description
