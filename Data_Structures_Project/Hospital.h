@@ -13,7 +13,7 @@ private:
 	//Lists used in hospital class
 	LinkedQueue<Patient*> SPList;
 	priQueue<Patient*> EPList;
-	ModifiedQ<Patient*> NPList;
+	ModifiedQ NPList;
 
 	LinkedQueue<Car*> SCList;
 	LinkedQueue<Car*> NCList;
@@ -35,6 +35,15 @@ public:
 	void addCarToList(Car* car);
 	void addPatientToList(Patient* patient);
 	bool assignPatientToCar(Patient* patient);
+
+	//Simulation Specific Function
+	bool empty();
+	bool getNP(Patient*& p);
+	bool getEP(Patient*& p);
+	bool getSP(Patient*& p);
+	bool getNC(Car*& c);
+	bool getSC(Car*& c);
+
 
 	friend ostream& operator <<(ostream& os, Hospital& h);
 
@@ -114,5 +123,39 @@ ostream& operator <<(ostream& os, Hospital& h)
 	os << "==============	Hospital #" << h.hospitalID << " data end  =============" << endl;
 	return os;
 }
+
+
+bool Hospital::empty()
+{
+	bool res = (NPList.isEmpty() && SPList.isEmpty() && EPList.isEmpty());
+	return res;
+}
+
+bool Hospital::getNP(Patient*& p)
+{
+	bool res = NPList.dequeue(p);
+	return res;
+}
+
+bool Hospital::getEP(Patient*& p)
+{
+	int pri;
+	return EPList.dequeue(p, pri);
+}
+
+bool Hospital::getSP(Patient*& p)
+{
+	return SPList.dequeue(p);
+}
+bool Hospital::getNC(Car*& c)
+{
+	return NCList.dequeue(c);
+}
+
+bool Hospital::getSC(Car*& c)
+{
+	return SCList.dequeue(c);
+}
+
 
 #endif
