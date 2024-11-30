@@ -1,7 +1,10 @@
 #ifndef UI_H
 #define UI_H
+
 using namespace std;
-#include <conio.h>
+
+#include "WinUser.h"
+
 enum UI_MODE {
 	SILENT,
 	INTERACTIVE,
@@ -11,13 +14,18 @@ class UI
 {
 private:
 	UI_MODE mode;
-	string inFileName;
-	string outFileName;
-
+  string fileName;
+  string outFileName;
+  
 public:
-	UI():mode(SILENT) {}
+	UI() :mode(SILENT){}
 	void Start();
-	void Output(int timestep, Hospital** h, int nOfHosp, priQueue<Car*>* backCars, ModifiedPriQ<Car*>* outCars, LinkedQueue<Patient*>* finished);
+	bool fileExists(string& filename);
+	void setInputFileName(string& filename);
+	string getInputFileName();
+  
+	void Output(int timestep, Hospital** h, int nOfHosp, priQueue<Car*>* backCars, ModifiedPriQ* outCars, LinkedQueue<Patient*>* finished);
+
 };
 
 
@@ -60,10 +68,29 @@ void UI::Start()
 			cout << endl;
 		}
 	}
+
 	//Getting input file name
 	printf("\033c");
-	cout << "Please enter the name of the file you would like to open: ";
-	cin >> inFileName;
+	string name;
+	// Loop until the user provides a valid file
+	while (1)
+	{
+		cout << "Please enter the name of the file you would like to open: ";
+		cin >> name; 
+
+		// Check if the file exists
+		if (fileExists(name))
+		{
+			cout << "Opening file " << name << "...";
+			setInputFileName(name);
+			
+			break;
+		}
+		else
+		{
+			cout << "Error: File " << name << " does not exist. Please try again." << endl;
+		}
+	}
 	//Getting output file name
 	printf("\033c");
 	cout << "Please enter the name of the file you would like to save to: " << endl;
@@ -71,10 +98,32 @@ void UI::Start()
 	printf("\033c");
 }
 
-void UI::Output(int timestep, Hospital** h, int nOfHosp, priQueue<Car*>* backCars, ModifiedPriQ<Car*>* outCars, LinkedQueue<Patient*>* finished)
+//Checks whether the filename inserted by the user exists or not
+bool UI::fileExists(string& filename)
 {
+	ifstream file;
+	file.open(filename + ".txt", ios::in);
+	return file.is_open(); // Return true if the file can be opened, false otherwise
+}
+
+//Sends the input file name to the Organizer
+void UI::setInputFileName(string& filename)
+{
+	fileName = filename;
+}
+
+string UI::getInputFileName()
+{
+	return fileName;
+}
+
+//Prints lists with proper formatting
+void UI::Output(int timestep, Hospital** h, int nOfHosp, priQueue<Car*>* backCars, ModifiedPriQ* outCars, LinkedQueue<Patient*>* finished)
+{
+	
 	for (int i = 0; i < nOfHosp; i++)
 	{
+		printf("\033c");
 		cout << "Current Timestep: " << timestep << endl;
 		cout << *h[i];
 		cout << "-------------------------------------------------" << endl;
