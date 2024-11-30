@@ -370,14 +370,16 @@ void Organizer::printHospitals() const
 
 void Organizer::handleCarMovements()
 {
+	
 	Car* car;
 	int cp;
-	// Process OutCars: move cars to BackCars if they have arrived
+	// Move cars from the OutCars queue to BackCars queue when they arrive at the patient's location (distance to the patient becomes 0)
 	while (!OutCars.isEmpty() && OutCars.peek(car,cp) && car->getDistToPatient() == 0)
 	{
 		int priority;
 		OutCars.dequeue(car, priority);
-		BackCars.enqueue(car, -car->getDistToHospital());
+		BackCars.enqueue(car, -car->getDistToHospital());//car added to BackCars,with a priority based on its distance to the hospital
+         //Negative distance used to ensure cars closer to the hospital are prioritized (higher priority for shorter distances)	
 	}
 
 	// Process BackCars: return cars to hospitals if they have completed their task
