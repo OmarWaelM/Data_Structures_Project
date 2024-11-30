@@ -12,13 +12,14 @@ public:
         int pri;
         while (Current)
         {
-            if (Current->getItem(pri)->getAssignedPatientID() == patientID) //test the current item with the condition
+            //For each node in the queue, it checks whether the car's assigned patient ID matches the given patientID
+            if (Current->getItem(pri)->getAssignedPatientID() == patientID) 
             {// if item meets the condition, then it is removed
                 
                 if (Previous) 
-                    Previous->setNext(Current->getNext());//bypassing the current node
+                    Previous->setNext(Current->getNext());//If it's not the head, update the Previous node's next pointer to skip the Current node
                 else 
-                    this->head = Current->getNext(); //updating the head if removing the first node
+                    this->head = Current->getNext(); //If the Current node is the head, update the head pointer to skip this node:
                
                 c = Current->getItem(pri);
                 delete Current; // Free the memory of the removed node
