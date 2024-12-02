@@ -60,7 +60,7 @@ public:
 
 	//Printing out the hospitals' information as shown in the sample output file
 	void printHospitals()const;
-
+  
 	/***** Input file member functions *****/
 
 	//Reads hospital distance data
@@ -77,8 +77,7 @@ public:
 	~Organizer();
 };
 
-Organizer::Organizer() :
-	GUI(),
+Organizer::Organizer():
 	timeStep(0),
 	HospitalList(nullptr),
 	numHospitals(0),
@@ -89,7 +88,6 @@ Organizer::Organizer() :
 	ncarsPerHospital(nullptr),
 	numRequests(0),
 	numCancellations(0)
-
 {
 }
 
@@ -291,6 +289,7 @@ void Organizer::Simulator()
 				}
 			}
 		}
+    
 		//Output hospital data
 		GUI.Output(timeStep, HospitalList, numHospitals, &BackCars, &OutCars, &FinishedList);
 

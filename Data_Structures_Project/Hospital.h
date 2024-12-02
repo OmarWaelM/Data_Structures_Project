@@ -35,7 +35,6 @@ public:
 	bool getNC(Car*& c);
 	bool getSC(Car*& c);
 
-
 	friend ostream& operator <<(ostream& os, Hospital& h);
 
 };
