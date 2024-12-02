@@ -26,12 +26,7 @@ public:
 
 	//Car and Patient Assignment
 	bool assignPatientToCar(Patient* patient);
-	bool cancelRequest(int patientID); //update this to return car&
-
-	//TODO: Function to loop and assign patients until either all patients are assigned or no more patients 
-	//		can be assigned 
-	//void updateHospital();
-
+	bool cancelRequest(int patientID) { return NPList.cancelRequest(patientID); } //update this to return car&
 
 	//Setter
 	void setID(int id) { hospitalID = id; }
@@ -42,6 +37,7 @@ public:
 	int getNCarsCount() { return NCList.getCount(); }	// Getter for NCars count
 	int getEPListLength() { return EPList.getCount(); }	// Getter for EPList count
 	bool isEmpty() { return (NPList.isEmpty() && SPList.isEmpty() && EPList.isEmpty()); }	// Checks if all patient lists are empty
+
 	//Outstream operator overloading
 	friend ostream& operator <<(ostream& os, Hospital& h);
 
@@ -111,11 +107,6 @@ bool Hospital::assignPatientToCar(Patient* p)
 	}
 	
 	return false;
-}
-
-bool Hospital::cancelRequest(int patientID)
-{
-	return NPList.cancelRequest(patientID);
 }
 
 ostream& operator <<(ostream& os, Hospital& h)
