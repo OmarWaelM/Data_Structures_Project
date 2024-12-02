@@ -1,14 +1,12 @@
 #ifndef ORGANIZER_H
 #define ORGANIZER_H
-#include "Car.h"
-#include "UI.h"
-#include "Hospital.h"
+
 using namespace std;
 
 struct CancellationReq
 {
 	int PID;
-    int hospitalID;
+	int hospitalID;
 	int CancellationTimestep;
 };
 
@@ -16,91 +14,67 @@ class Organizer
 {
 private:
 	//Lists used in orgranizer class
-	LinkedQueue<Patient*> AllPatientsList;
-	LinkedQueue<CancellationReq> CancellationList;
-	LinkedQueue<Patient*> FinishedList;
-	priQueue<Car*> BackCars;
-	ModifiedPriQ<Car*> OutCars;	
-  
+	Hospital** HospitalList; //An array of pointers to hospitals
+	LinkedQueue<Patient*> patientsList;  // Patients list of type Linked Queue (list of pointers to patients)
+	LinkedQueue<CancellationReq> CancellationList; // Cancellation requests' list of type Linked Queue
+	LinkedQueue<Patient*> FinishedList; //Finished patients' list of type Linked Queue
+	priQueue<Car*> BackCars; // Back cars' list (cars on their way back) of type Priority Queue
+	ModifiedPriQ OutCars; // Out cars' list (cars out on their way to pick up patients) of type Priority Queue (modified)
+
 	//General data members
 	int timeStep;
 	UI GUI;
 	string filename;
-
-	Hospital** HospitalList; //An array of pointers to hospitals
-	int numHospitals;//
-	int speedScars, speedNcars;//
-	int** distanceMatrix;//
+	int numHospitals;
+	int speedScars, speedNcars;
+	int** distanceMatrix;
 	int* scarsPerHospital;
 	int* ncarsPerHospital;
 	int numRequests;
-	string* patientRequests;
 	int numCancellations;
-	string* cancellations;
 
 
 public:
 	//Member Functions
-    
-    //Constructor
-    Organizer();
-
+  
+	//Constructor
+	Organizer();
+	void processInputFile();
 	void Simulator();
 
-  	void processInputFile();
-    //Functions for managing Back Cars:
-    //Adding a Back Car based on its priority
-    void AddBackCar(const string& Car, int Priority);
-  
-	//Removing the highest priority from the Back_Cars queue
-    //bool RemoveBackCar(string& Car);
-  
 	LinkedQueue<Patient*>* getFinishedList() { return &FinishedList; }
 
 	//Functions for managing hospital list:
-  
-	//Getter for hospital list (if needed)
+
+	// Getter for hospital list (if needed)
 	Hospital** getHospitalList() { return HospitalList; }
 
 	// Getter for number of hospitals
 	int getNumHospitals() const { return numHospitals; }
 
+	// Getter for hospital with specific id
 	Hospital* getHospital(int ID);
-  
+
 	//Adding a Hospital to the hospital list
 	void AddHospital(const int Hospital_ID);
+
+	//Printing out the hospitals' information as shown in the sample output file
+	void printHospitals()const;
   
+	/***** Input file member functions *****/
+
+	//Reads hospital distance data
+	void readHospitalData();
 	//Printing out the hospitals in the hospital list
-	void PrintHospitals()const;
+	void PrintHospitalsList()const;
+	void printPatientsList()const;
+	void printCancellationList()const;
 
-    // functions for managing finished lists
-    //Adding an entry to the finished list
-    //void AddFinished(const string& Finished_Entry);
-    //Removing an entry from the finished list
-	//bool RemoveFinished(string& Finished_Entry);
-    //Print items in Finished List
-    //void DisplayFinishedList()const;
-
-    /***** Input file member functions *****/
-
-    //Reads hospital distance data
-    void readHospitalData();
-
-    // Reads the available car data
-    void readCarData();
-  
-	// Reads patient request list
-    void readPatientRequests();
-
-    // Reads request cancellation list
-    void readCancellationRequests();
-  
 	// Functions for handling Out Cars
-    void handleCancellations();
-    void handleCarMovements();
+	//void handleCancellations();
+	void handleCarMovements();
 
-    ~Organizer();
-
+	~Organizer();
 };
 
 Organizer::Organizer():
@@ -113,39 +87,24 @@ Organizer::Organizer():
 	scarsPerHospital(nullptr),
 	ncarsPerHospital(nullptr),
 	numRequests(0),
-	patientRequests(nullptr),
-	numCancellations(0),
-	cancellations(nullptr)
+	numCancellations(0)
 {
-	GUI.Start();
-	filename = GUI.getInputFileName();
 }
 
-void Organizer::Simulator()
-{
-	processInputFile();
-	int randomNum = 0;
-	while (!AllPatientsList.isEmpty())
-	{
-		timeStep++;
-		for (int i = 0; i < numHospitals; i++)
-		{
-			randomNum = rand()%100;
-			//Generate random number
-			//conditions for moving patients and cars
-		}
-		GUI.Output(timeStep, HospitalList, numHospitals, &BackCars, &OutCars, &FinishedList);
-	}
-}  
+/***** FILE LOADING FUNCTION *****/
+
+/* The processInputFile function loads, reads and processes the input file 
+containing data related to the hospitals, patient requests, and cancellations. It then either calls
+the respective functions to store the data in appropriate data structures or stores the latter itself */
 
 void Organizer::processInputFile()
 {
 	ifstream inputFile;
 	inputFile.open(filename + ".txt", ios::in);
-    if (!inputFile.is_open())
-    {
-        return;
-    }
+	if (!inputFile.is_open())
+	{
+		return;
+	}
 
 	//Read the number of hospitals (the first line)
 	inputFile >> numHospitals;
@@ -177,22 +136,174 @@ void Organizer::processInputFile()
 	// Read number of patient requests
 	inputFile >> numRequests;
 
-	// Read each request and store it in a dynamic array
-	patientRequests = new string[numRequests];
+	//Read all patients' requests list
 	for (int i = 0; i < numRequests; i++)
 	{
-		getline(inputFile, patientRequests[i]);
+		string type;
+		int requestTime, patientID, nearestHospitalID, distanceToHospital, caseSeverity;
+		inputFile >> type;
+		Patient* patient = nullptr; // Pointer to a Patient object
+
+		if (type == "NP")
+		{
+			inputFile >> requestTime >> patientID >> nearestHospitalID >> distanceToHospital;
+
+			// Dynamically create a Normal Patient (NP)
+			patient = new Patient(patientID, requestTime, nearestHospitalID, distanceToHospital, NP);
+		}
+		else if (type == "SP")
+		{
+			inputFile >> requestTime >> patientID >> nearestHospitalID >> distanceToHospital;
+
+			// Dynamically create a Special Patient (SP)
+			patient = new Patient(patientID, requestTime, nearestHospitalID, distanceToHospital, SP);
+		}
+		else if (type == "EP")
+		{
+			inputFile >> requestTime >> patientID >> nearestHospitalID >> distanceToHospital >> caseSeverity;
+
+			// Dynamically create an Emergency Patient (EP) with case severity
+			patient = new Patient(patientID, requestTime, nearestHospitalID, distanceToHospital, EP, caseSeverity);
+		}
+
+		// Enqueue the patient pointer into the queue
+		patientsList.enqueue(patient);
 	}
 
 	// Read number of cancellations
 	inputFile >> numCancellations;
 
-	cancellations = new string[numCancellations];
+	//Reads request cancellation list
 	for (int i = 0; i < numCancellations; i++)
 	{
-		getline(inputFile, cancellations[i]);
+		int PID, hospitalID, cancellationTimestep;
+		// Parse the cancellation request
+		inputFile >> PID >> hospitalID >> cancellationTimestep;
+
+		// Create a CancellationReq struct
+		CancellationReq cancellation = { PID, hospitalID, cancellationTimestep };
+
+		// Enqueue the cancellation request into the CancellationList
+		CancellationList.enqueue(cancellation);
 	}
+
 	inputFile.close();
+
+	// Call the readHospitalData function to process the loaded data and create the appropriate data structures
+	readHospitalData();
+}
+
+void Organizer::Simulator()
+{
+	//Initialization
+	timeStep = 0;
+	GUI.Start();
+	filename = GUI.getInputFileName();
+	processInputFile();
+
+	Patient* p;
+	Car* car;
+	CancellationReq cr;
+	bool endSimulation = false;
+	int randomNum = 0;
+
+	GUI.Output(timeStep, HospitalList, numHospitals, &BackCars, &OutCars, &FinishedList);
+
+	while (!endSimulation)
+	{
+		//Updating timestep
+		timeStep++;
+
+		//Checking for new patients
+		while (patientsList.peek(p) && p->getRequestTime() == timeStep)
+		{
+			patientsList.dequeue(p);
+			HospitalList[p->getNearestHospital() - 1]->addPatientToList(p);
+		}
+
+		//Checking for cancellation requests
+		while (CancellationList.peek(cr) && cr.CancellationTimestep == timeStep)
+		{
+			CancellationList.dequeue(cr);
+			HospitalList[cr.hospitalID - 1]->cancelRequest(cr.PID);
+			//does not check the outcars list as no patient-car assignment occurs
+		}
+
+		for (int i = 0; i < numHospitals; i++)
+		{
+			//Generating random number between 0 and 100
+			randomNum = rand() % 100;
+
+			if (randomNum >= 10 && randomNum < 20)
+			{
+				//Getting patient from sp list
+				Patient* p = nullptr;
+				if (HospitalList[i]->getSP(p))
+					FinishedList.enqueue(p);
+			}
+			if (randomNum >= 20 && randomNum < 25)
+			{
+				//Getting patient from ep list
+				Patient* p = nullptr;
+				if (HospitalList[i]->getEP(p))
+					FinishedList.enqueue(p);
+			}
+			if (randomNum >= 30 && randomNum < 40)
+			{
+				//Getting patient from np list
+				Patient* p = nullptr;
+				if (HospitalList[i]->getNP(p))
+					FinishedList.enqueue(p);
+			}
+			if (randomNum >= 40 && randomNum < 45)
+			{
+				//Getting car from sc list
+				Car* c = nullptr;
+				if (HospitalList[i]->getSC(c))
+					OutCars.enqueue(c, 1);
+			}
+			if (randomNum >= 70 && randomNum < 75)
+			{
+				//Getting car from nc list
+				Car* c = nullptr;
+				if (HospitalList[i]->getNC(c))
+					OutCars.enqueue(c, 1);
+			}
+			if (randomNum >= 80 && randomNum < 90)
+			{
+				//Moving car from out to back cars list
+				Car* c = nullptr;
+				int pri;
+				if (OutCars.dequeue(c, pri))
+					BackCars.enqueue(c, pri);
+			}
+			if (randomNum >= 90 && randomNum < 95)
+			{
+				//Moving car from back cars list to hospital
+				Car* c = nullptr;
+				int pri;
+				if (BackCars.dequeue(c, pri))
+				{
+					int cid = c->getHospital();
+					HospitalList[cid - 1]->addCarToList(c);
+				}
+			}
+		}
+    
+		//Output hospital data
+		GUI.Output(timeStep, HospitalList, numHospitals, &BackCars, &OutCars, &FinishedList);
+
+		//Checking if all lists are empty
+		endSimulation = true;
+		if (!patientsList.isEmpty())
+			endSimulation = false;
+		for (int i = 0; i < numHospitals; i++)
+		{
+			if (!HospitalList[i]->empty())
+				endSimulation = false;
+		}
+	}
+
 
 }
 
@@ -201,7 +312,7 @@ void Organizer::AddHospital(const int Hospital_ID)
 	int index = Hospital_ID - 1;
 
 	// Ensure the index is within bounds
-	if (index < 0 || index >= numHospitals) 
+	if (index < 0 || index >= numHospitals)
 	{
 		return;
 	}
@@ -232,12 +343,9 @@ void Organizer::readHospitalData()
 		scars = scarsPerHospital[i];
 		ncars = ncarsPerHospital[i];
 
-		HospitalList[i]->setSCarsCount(scars);
-		HospitalList[i]->setNCarsCount(ncars);
-
 		// Adds SCars to the hospital's SCList and NCars to the NCList
 		// For each SCar, add it to the SCList
-		for (int j = 0; j < scars; ++j) 
+		for (int j = 0; j < scars; ++j)
 		{
 			Car* car = new Car(carID++, i + 1, SC, speedScars);
 			HospitalList[i]->addCarToList(car);  // Adds to SCList or NCList based on car type
@@ -248,12 +356,42 @@ void Organizer::readHospitalData()
 			Car* car = new Car(carID++, i + 1, NC, speedNcars);
 			HospitalList[i]->addCarToList(car);  // Adds to SCList or NCList based on car type
 		}
-
-		HospitalList[i]->setDistanceMatrix(distanceMatrix, numHospitals);
 	}
 }
 
-void Organizer::PrintHospitals() const
+void Organizer::printHospitals() const
+{
+	for (int i = 0; i < numHospitals; ++i)
+	{
+		cout << *HospitalList[i]; // Use the overloaded << operator for Hospital class
+	}
+}
+
+void Organizer::handleCarMovements()
+{
+	
+	Car* car;
+	int cp;
+	// Move cars from the OutCars queue to BackCars queue when they arrive at the patient's location (distance to the patient becomes 0)
+	while (!OutCars.isEmpty() && OutCars.peek(car,cp) && car->getDistToPatient() == 0)
+	{
+		int priority;
+		OutCars.dequeue(car, priority);
+		BackCars.enqueue(car, -car->getDistToHospital());//car added to BackCars,with a priority based on its distance to the hospital
+         //Negative distance used to ensure cars closer to the hospital are prioritized (higher priority for shorter distances)	
+	}
+
+	// Process BackCars: return cars to hospitals if they have completed their task
+	int priority;
+	while (!BackCars.isEmpty() && BackCars.peek(car, priority) && car->getDistToHospital() == 0)
+	{
+		BackCars.dequeue(car, priority);
+		HospitalList[car->getHospital() - 1]->addCarToList(car);
+
+	}
+}
+
+void Organizer::PrintHospitalsList() const
 {
 	// Check if HospitalList is initialized
 	if (!HospitalList)
@@ -274,7 +412,7 @@ void Organizer::PrintHospitals() const
 		cout << "----------------------------------------\n";
 	}
 
-	cout << "\nDistance Matrix:\n";
+	cout << "Distance Matrix:\n";
 	for (int i = 0; i < numHospitals; ++i)
 	{
 		for (int j = 0; j < numHospitals; ++j)
@@ -287,20 +425,60 @@ void Organizer::PrintHospitals() const
 	cout << "----------------------------------------\n";
 }
 
-void Organizer::readCarData()
-{
+void Organizer::printPatientsList() const {
+	if (patientsList.isEmpty()) {
+		cout << "The patients list is empty." << endl;
+		return;
+	}
 
+	cout << "Patients List:" << endl;
+
+	// Create a copy of the patientsList to traverse without modifying it
+	LinkedQueue<Patient*> tempQueue = patientsList;
+	Patient* tempPatient;
+
+	while (!tempQueue.isEmpty())
+	{
+		tempQueue.peek(tempPatient); // Get the front patient
+
+		// Print patient details using the getter methods
+		cout << "Patient ID: " << tempPatient->getPatientID() << endl;
+		cout << "Patient Type: " << (tempPatient->getPatientType() == NP ? "Normal Patient" :
+			tempPatient->getPatientType() == SP ? "Special Patient" : "Emergency Patient") << endl;
+		cout << "Nearest Hospital ID: " << tempPatient->getNearestHospital() << endl;
+		cout << "Distance to Hospital: " << tempPatient->getDistance() << endl;
+		if (tempPatient->getPatientType() == EP)
+		{
+			cout << "Case Severity: " << tempPatient->getPatientPriority() << endl;
+		}
+		cout << "----------------------------------------\n";
+		tempQueue.dequeue(tempPatient); // Remove the front patient
+	}
 }
 
-void Organizer::readPatientRequests()
-{
-   
-}
+void Organizer::printCancellationList() const {
+	if (CancellationList.isEmpty()) {
+		cout << "The cancellation list is empty." << endl;
+		return;
+	}
 
-void Organizer::readCancellationRequests()
-{
-  
-}   
+	cout << "Cancellation List:" << endl;
+
+	// Create a copy of the CancellationList to traverse without modifying it
+	LinkedQueue<CancellationReq> tempQueue = CancellationList;
+	CancellationReq tempCancellation;
+
+	while (!tempQueue.isEmpty()) {
+		tempQueue.peek(tempCancellation); // Get the front cancellation request
+
+		// Print cancellation request details
+		cout << "Patient ID: " << tempCancellation.PID
+			<< ", Hospital ID: " << tempCancellation.hospitalID
+			<< ", Cancellation Time: " << tempCancellation.CancellationTimestep << endl;
+
+		tempQueue.dequeue(tempCancellation); // Remove the front cancellation request
+	}
+}
 
 Hospital* Organizer::getHospital(int ID)
 {
@@ -309,26 +487,6 @@ Hospital* Organizer::getHospital(int ID)
 		return nullptr;  // Return nullptr if ID is invalid
 	}
 	return HospitalList[ID];  // Return the pointer to the hospital object at index ID
-}
-
-void Organizer::handleCarMovements()
-{
-	Car* car;
-	int priority;
-	// Process OutCars: move cars to BackCars if they have arrived
-	while (!OutCars.isEmpty() && OutCars.peek(car, priority) && car->getArrivalTime() == timeStep) {
-		
-		OutCars.dequeue(car, priority);
-		car->pickupPatient(); // Perform patient pickup
-		BackCars.enqueue(car, car->getPriority());
-	}
-	
-	// Process BackCars: return cars to hospitals if they have completed their task
-	while (!BackCars.isEmpty() && BackCars.peek(car, priority) && car->getReturnTime() == timeStep) {
-		BackCars.dequeue(car, priority);
-		// Handle returning the car to its hospital
-		// HospitalList[car->getHospitalID()].handleReturningCar(car);
-	}
 }
 
 Organizer::~Organizer()
@@ -341,8 +499,6 @@ Organizer::~Organizer()
 	delete[] distanceMatrix;
 	delete[] scarsPerHospital;
 	delete[] ncarsPerHospital;
-	delete[] patientRequests;
-	delete[] cancellations;
 
 	// Cleanup for the hospitalArray
 	for (int i = 0; i < numHospitals; ++i)
@@ -350,6 +506,22 @@ Organizer::~Organizer()
 		delete HospitalList[i];  // Delete each individual Hospital object
 	}
 	delete[] HospitalList;  // Delete the array of Hospital pointers
+
+	// Dequeue all patients and delete each dynamically allocated Patient object
+	Patient* tempPatient;
+	while (!patientsList.isEmpty())
+	{
+		patientsList.dequeue(tempPatient);
+		delete tempPatient;  // Free the memory allocated for the Patient object
+	}
+
+	// Dequeue all cancellation requests and delete each CancellationReq struct
+	CancellationReq tempCancellation;
+	while (!CancellationList.isEmpty())
+	{
+		CancellationList.dequeue(tempCancellation); // Dequeue each cancellation request
+		// No need to explicitly delete tempCancellation since it's a struct
+	}
 }
 
 #endif

@@ -7,35 +7,39 @@ private:
 	//Lists used in hospital class
 	LinkedQueue<Patient*> SPList;
 	priQueue<Patient*> EPList;
-	ModifiedQ<Patient*> NPList;
+	ModifiedQ NPList;
 
 	LinkedQueue<Car*> SCList;
 	LinkedQueue<Car*> NCList;
 
 	//General data memebers
 	int hospitalID;
-	int scCount;           // Number of SCars
-	int ncCount;           // Number of NCars
-	int** distanceMatrix;  // 2D array to store the distance matrix for the hospital
 
 public:
 	//Member Function
-	Hospital() {}//
-	void setID(int id) { hospitalID = id; }//
-	int getHospitalID() const { return hospitalID; }//
-	void setSCarsCount(int count) { scCount = count; }	//dont know
-	void setNCarsCount(int count) { ncCount = count; }	//dont know
-	int getSCarsCount() const { return scCount; } // Getter for SCars count
-	int getNCarsCount() const { return ncCount; } // Getter for NCars count
-	void setDistanceMatrix(int** matrix, int size);
-	int** getDistanceMatrix() { return distanceMatrix; }
-	void addCarToList(Car* car);//
-	void addPatientToList(Patient* patient);//
-	bool assignPatientToCar(Patient* p);//
+	Hospital();
+	void setID(int id) { hospitalID = id; }
+	int getHospitalID() const { return hospitalID; }
+	int getSCarsCount() { return SCList.getCount(); } // Getter for SCars count
+	int getNCarsCount() { return NCList.getCount(); } // Getter for NCars count
+	void addCarToList(Car* car);
+	void addPatientToList(Patient* patient);
+	bool assignPatientToCar(Patient* patient);
+	bool cancelRequest(int patientID);
+
+	//Simulation Specific Function
+	bool empty();
+	bool getNP(Patient*& p);
+	bool getEP(Patient*& p);
+	bool getSP(Patient*& p);
+	bool getNC(Car*& c);
+	bool getSC(Car*& c);
 
 	friend ostream& operator <<(ostream& os, Hospital& h);
 
 };
+
+Hospital::Hospital(): hospitalID(0) {}
 
 void Hospital::addCarToList(Car* car)
 {
@@ -79,7 +83,7 @@ bool Hospital::assignPatientToCar(Patient* p)
 		if (NCList.getCount() != 0)
 		{
 			NCList.dequeue(ambulance);
-			EPList.dequeue(patient, x);
+			EPList.dequeue(patient,x);
 			ambulance->AssignPatient(patient);
 
 		}
@@ -91,26 +95,15 @@ bool Hospital::assignPatientToCar(Patient* p)
 		}
 		return true;
 	}
+	
 	return false;
 }
 
-void Hospital::setDistanceMatrix(int** matrix, int size)
+bool Hospital::cancelRequest(int patientID)
 {
-	// Allocate memory for the matrix
-	distanceMatrix = new int* [size];
-	for (int i = 0; i < size; ++i)
-	{
-		distanceMatrix[i] = new int[size];  // Allocate memory for each row
-	}
-
-	// Copy data from the input matrix
-	for (int i = 0; i < size; ++i)
-	{
-		for (int j = 0; j < size; ++j) {
-			distanceMatrix[i][j] = matrix[i][j];  // Assign each value
-		}
-	}
+	return NPList.cancelRequest(patientID);
 }
+
 
 //this can be changed i made it to look like the description
 ostream& operator <<(ostream& os, Hospital& h)
@@ -123,5 +116,39 @@ ostream& operator <<(ostream& os, Hospital& h)
 	os << "==============	Hospital #" << h.hospitalID << " data end  =============" << endl;
 	return os;
 }
+
+
+bool Hospital::empty()
+{
+	bool res = (NPList.isEmpty() && SPList.isEmpty() && EPList.isEmpty());
+	return res;
+}
+
+bool Hospital::getNP(Patient*& p)
+{
+	bool res = NPList.dequeue(p);
+	return res;
+}
+
+bool Hospital::getEP(Patient*& p)
+{
+	int pri;
+	return EPList.dequeue(p, pri);
+}
+
+bool Hospital::getSP(Patient*& p)
+{
+	return SPList.dequeue(p);
+}
+bool Hospital::getNC(Car*& c)
+{
+	return NCList.dequeue(c);
+}
+
+bool Hospital::getSC(Car*& c)
+{
+	return SCList.dequeue(c);
+}
+
 
 #endif
