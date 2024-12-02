@@ -10,25 +10,38 @@ class Car
 {
 private:
 	//Car data members
-	int carID;
 	carType cType;
+	int carID;
 	int speed;
 	int hospital;
-	Patient* assignedPatient;
-	int distToPatient; //decrememnted by speed every timestep
+	int distToPatient;	//decrememnted by speed every timestep
 	int distToHospital; //incrememnted by speed every timestep
+	Patient* assignedPatient;
 
 public:
+	//Constructor
 	Car(int id, int hosp, carType type, int spd);
 
-	int getcarID();
-	int getHospital();
-	int getAssignedPatientID();
-	int getDistToPatient();
-	int getDistToHospital();
-	carType getCarType();
+	//Assignment and Deassignment
 	bool AssignPatient(Patient* p);
 
+	//----------------------------------------------------------------------------------------------------
+	//TODO: Implement functions to return patient and reset values to retrun to hospital
+	//Patient* deassignPatient();
+	//		Update functions decrement distances by speed every timestep, if distance is less that speed decrements to 0
+	//void updateBack();
+	//void updateOut();	
+	//----------------------------------------------------------------------------------------------------
+
+	//Getters
+	int getcarID() { return carID; }
+	int getHospital() { return hospital; }
+	int getAssignedPatientID() { return assignedPatient->getPatientID(); }
+	int getDistToPatient() { return distToPatient; }
+	int getDistToHospital() { return distToHospital; }
+	carType getCarType() { return cType; }
+	
+	//Outstream operator overloading
 	friend ostream& operator <<(ostream& os, Car& car);
 };
 
@@ -43,36 +56,6 @@ Car::Car(int id, int hosp, carType type, int spd)
 	distToPatient = 0;
 }
 
-int Car::getcarID()
-{
-	return carID;
-}
-
-int Car::getHospital()
-{
-	return hospital;
-}
-
-int Car::getAssignedPatientID()
-{
-	return assignedPatient->getPatientID();
-}
-
-int Car::getDistToPatient()
-{
-	return distToPatient;
-}
-
-int Car::getDistToHospital()
-{
-	return distToHospital;
-}
-
-carType Car::getCarType()
-{
-	return cType;
-}
-
 bool Car::AssignPatient(Patient* p)
 {	
 	if (assignedPatient == nullptr)
@@ -83,9 +66,7 @@ bool Car::AssignPatient(Patient* p)
 		return true;
 	}
 	else
-	{
 		return false;
-	}
 }
 
 ostream& operator <<(ostream& os, Car& car)

@@ -15,66 +15,51 @@ private:
 	//Patient data members
 	int patientID;
 	patientType pType;
+
 	int patientPri; // Corresponds to the case severity (for EP only)
-	int reqTime; // Time of the request
+	int reqTime;	// Time of the request
 	int pickupTime;
+	int finishTime;
+
 	int nearestHospital;
 	int distToHospital;
+
 public:
+	//Constructor
 	Patient(int id, int requestTime, int hospital, int dist, patientType type, int priority = -1);
-	patientType getPatientType();
-	int getPatientPriority();
-	int getPatientID();
-	int getRequestTime();
-	int getDistance();
-	int getNearestHospital();
-	void setPriority(int priority) { patientPri = priority; }
+
+	//Getters
+	patientType getPatientType() { return pType; }
+	int getPatientPriority() { return patientPri; }
+	int getPatientID() { return patientID; }
+	int getRequestTime() { return reqTime; }
+	int getDistance() { return distToHospital; }
+	int getNearestHospital() { return nearestHospital; }
+	int getFinishTime() { return finishTime; }
+	int getWaitTime() { return pickupTime - reqTime; }
+
+	//Time Setters
+	void setPickup(int pt) { pickupTime = pt; }
+	void setFinished(int ft) { finishTime = ft; }
+
+	//Output stream operator overloading
 	friend ostream& operator <<(ostream& os, Patient& patient);
 };
 
-
+//Constructor
 Patient::Patient(int id, int requestTime, int hospital, int dist, patientType type, int priority)
-	: patientID(id), reqTime(requestTime), nearestHospital(hospital), distToHospital(dist),
-	pType(type), patientPri(priority), pickupTime(-1) 
+	:patientID(id), 
+	 reqTime(requestTime),
+	 nearestHospital(hospital), 
+	 distToHospital(dist),
+	 pType(type), 
+	 patientPri(priority), 
+	 pickupTime(-1), 
+	 finishTime(-1)
 {
-	// If the patient type is not EP, the priority (case severity) should remain -1
-	if (pType != EP)
-	{
-		patientPri = -1;
-	}
 }
 
-patientType Patient::getPatientType()
-{
-	return pType;
-}
-
-int Patient::getPatientPriority()
-{
-	return patientPri;
-}
-
-int Patient::getPatientID()
-{
-	return patientID;
-}
-
-int Patient::getRequestTime()
-{
-	return reqTime;
-}
-
-int Patient::getDistance()
-{
-	return distToHospital;
-}
-
-int Patient::getNearestHospital()
-{
-	return nearestHospital;
-}
-
-
+//Outstream operator overloading
 ostream& operator <<(ostream& os, Patient& patient)
 {
 	os << patient.patientID;

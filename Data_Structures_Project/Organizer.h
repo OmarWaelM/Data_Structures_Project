@@ -13,21 +13,24 @@ struct CancellationReq
 class Organizer
 {
 private:
-	//Lists used in orgranizer class
-	Hospital** HospitalList; //An array of pointers to hospitals
-	LinkedQueue<Patient*> patientsList;  // Patients list of type Linked Queue (list of pointers to patients)
-	LinkedQueue<CancellationReq> CancellationList; // Cancellation requests' list of type Linked Queue
-	LinkedQueue<Patient*> FinishedList; //Finished patients' list of type Linked Queue
-	priQueue<Car*> BackCars; // Back cars' list (cars on their way back) of type Priority Queue
-	ModifiedPriQ OutCars; // Out cars' list (cars out on their way to pick up patients) of type Priority Queue (modified)
+	// Lists used in orgranizer class
+	Hospital** HospitalList;						// An array of pointers to hospitals
+	LinkedQueue<Patient*> patientsList;				// Patients list of type Linked Queue (list of pointers to patients)
+	LinkedQueue<CancellationReq> CancellationList;	// Cancellation requests' list of type Linked Queue
+	LinkedQueue<Patient*> FinishedList;				// Finished patients' list of type Linked Queue
+	priQueue<Car*> BackCars;						// Back cars' list (cars on their way back) of type Priority Queue
+	ModifiedPriQ OutCars;							// Out cars' list (cars out on their way to pick up patients) of type Priority Queue (modified)
 
-	//General data members
+	// General data members
 	int timeStep;
 	UI GUI;
-	string filename;
 	int numHospitals;
-	int speedScars, speedNcars;
 	int** distanceMatrix;
+
+	//File Loading data members (can be declared in file processing and freed at the end)
+	string filename;
+	string outfile; //used when outputting results file
+	int speedScars, speedNcars;
 	int* scarsPerHospital;
 	int* ncarsPerHospital;
 	int numRequests;
@@ -39,39 +42,32 @@ public:
   
 	//Constructor
 	Organizer();
-	void processInputFile();
+
+	//Simulator
 	void Simulator();
 
+	// Functions for managing hospital list:	
+	
+	// Getters (Not really needed since no classes have data member Organizer)
 	LinkedQueue<Patient*>* getFinishedList() { return &FinishedList; }
+	Hospital** getHospitalList() { return HospitalList; }	// Getter for hospital list (if needed)
+	int getNumHospitals() const { return numHospitals; }	// Getter for number of hospitals
+	Hospital* getHospital(int ID);						// Getter for hospital with specific id
 
-	//Functions for managing hospital list:
-
-	// Getter for hospital list (if needed)
-	Hospital** getHospitalList() { return HospitalList; }
-
-	// Getter for number of hospitals
-	int getNumHospitals() const { return numHospitals; }
-
-	// Getter for hospital with specific id
-	Hospital* getHospital(int ID);
-
-	//Adding a Hospital to the hospital list
-	void AddHospital(const int Hospital_ID);
-
-	//Printing out the hospitals' information as shown in the sample output file
-	void printHospitals()const;
+	// Not really needed as UI class does this
+	void printHospitals()const;	//Printing out the hospitals' information as shown in the sample output file
   
 	/***** Input file member functions *****/
+	void processInputFile();					//Processes input file
+	void readHospitalData();					//Reads hospital distance data
+	void AddHospital(const int Hospital_ID);	//Adding a Hospital to the hospital list
 
-	//Reads hospital distance data
-	void readHospitalData();
-	//Printing out the hospitals in the hospital list
-	void PrintHospitalsList()const;
+	// Not really needed as UI class does this
+	void printHospitalsList()const;				
 	void printPatientsList()const;
 	void printCancellationList()const;
 
 	// Functions for handling Out Cars
-	//void handleCancellations();
 	void handleCarMovements();
 
 	~Organizer();
@@ -89,108 +85,6 @@ Organizer::Organizer():
 	numRequests(0),
 	numCancellations(0)
 {
-}
-
-/***** FILE LOADING FUNCTION *****/
-
-/* The processInputFile function loads, reads and processes the input file 
-containing data related to the hospitals, patient requests, and cancellations. It then either calls
-the respective functions to store the data in appropriate data structures or stores the latter itself */
-
-void Organizer::processInputFile()
-{
-	ifstream inputFile;
-	inputFile.open(filename + ".txt", ios::in);
-	if (!inputFile.is_open())
-	{
-		return;
-	}
-
-	//Read the number of hospitals (the first line)
-	inputFile >> numHospitals;
-
-	//Read the speeds of SCars and Ncars (the second line)
-	inputFile >> speedScars >> speedNcars;
-
-	// Read the hospital matrix (numHospitals x numHospitals)
-	distanceMatrix = new int* [numHospitals];
-	for (int i = 0; i < numHospitals; ++i)
-	{
-		distanceMatrix[i] = new int[numHospitals];
-	}
-	for (int i = 0; i < numHospitals; i++)
-	{
-		for (int j = 0; j < numHospitals; j++)
-		{
-			inputFile >> distanceMatrix[i][j];
-		}
-	}
-	// Read the number of SCars and NCars available for each Hospital
-	scarsPerHospital = new int[numHospitals];  // SCars
-	ncarsPerHospital = new int[numHospitals];  // NCars
-	for (int i = 0; i < numHospitals; i++)
-	{
-		inputFile >> scarsPerHospital[i] >> ncarsPerHospital[i];
-	}
-
-	// Read number of patient requests
-	inputFile >> numRequests;
-
-	//Read all patients' requests list
-	for (int i = 0; i < numRequests; i++)
-	{
-		string type;
-		int requestTime, patientID, nearestHospitalID, distanceToHospital, caseSeverity;
-		inputFile >> type;
-		Patient* patient = nullptr; // Pointer to a Patient object
-
-		if (type == "NP")
-		{
-			inputFile >> requestTime >> patientID >> nearestHospitalID >> distanceToHospital;
-
-			// Dynamically create a Normal Patient (NP)
-			patient = new Patient(patientID, requestTime, nearestHospitalID, distanceToHospital, NP);
-		}
-		else if (type == "SP")
-		{
-			inputFile >> requestTime >> patientID >> nearestHospitalID >> distanceToHospital;
-
-			// Dynamically create a Special Patient (SP)
-			patient = new Patient(patientID, requestTime, nearestHospitalID, distanceToHospital, SP);
-		}
-		else if (type == "EP")
-		{
-			inputFile >> requestTime >> patientID >> nearestHospitalID >> distanceToHospital >> caseSeverity;
-
-			// Dynamically create an Emergency Patient (EP) with case severity
-			patient = new Patient(patientID, requestTime, nearestHospitalID, distanceToHospital, EP, caseSeverity);
-		}
-
-		// Enqueue the patient pointer into the queue
-		patientsList.enqueue(patient);
-	}
-
-	// Read number of cancellations
-	inputFile >> numCancellations;
-
-	//Reads request cancellation list
-	for (int i = 0; i < numCancellations; i++)
-	{
-		int PID, hospitalID, cancellationTimestep;
-		// Parse the cancellation request
-		inputFile >> PID >> hospitalID >> cancellationTimestep;
-
-		// Create a CancellationReq struct
-		CancellationReq cancellation = { PID, hospitalID, cancellationTimestep };
-
-		// Enqueue the cancellation request into the CancellationList
-		CancellationList.enqueue(cancellation);
-	}
-
-	inputFile.close();
-
-	// Call the readHospitalData function to process the loaded data and create the appropriate data structures
-	readHospitalData();
 }
 
 void Organizer::Simulator()
@@ -299,12 +193,114 @@ void Organizer::Simulator()
 			endSimulation = false;
 		for (int i = 0; i < numHospitals; i++)
 		{
-			if (!HospitalList[i]->empty())
+			if (!HospitalList[i]->isEmpty())
 				endSimulation = false;
 		}
 	}
 
 
+}
+
+/***** FILE LOADING FUNCTION *****/
+
+/* The processInputFile function loads, reads and processes the input file 
+containing data related to the hospitals, patient requests, and cancellations. It then either calls
+the respective functions to store the data in appropriate data structures or stores the latter itself */
+
+void Organizer::processInputFile()
+{
+	ifstream inputFile;
+	inputFile.open(filename + ".txt", ios::in);
+	if (!inputFile.is_open())
+	{
+		return;
+	}
+
+	//Read the number of hospitals (the first line)
+	inputFile >> numHospitals;
+
+	//Read the speeds of SCars and Ncars (the second line)
+	inputFile >> speedScars >> speedNcars;
+
+	// Read the hospital matrix (numHospitals x numHospitals)
+	distanceMatrix = new int* [numHospitals];
+	for (int i = 0; i < numHospitals; ++i)
+	{
+		distanceMatrix[i] = new int[numHospitals];
+	}
+	for (int i = 0; i < numHospitals; i++)
+	{
+		for (int j = 0; j < numHospitals; j++)
+		{
+			inputFile >> distanceMatrix[i][j];
+		}
+	}
+	// Read the number of SCars and NCars available for each Hospital
+	scarsPerHospital = new int[numHospitals];  // SCars
+	ncarsPerHospital = new int[numHospitals];  // NCars
+	for (int i = 0; i < numHospitals; i++)
+	{
+		inputFile >> scarsPerHospital[i] >> ncarsPerHospital[i];
+	}
+
+	// Read number of patient requests
+	inputFile >> numRequests;
+
+	//Read all patients' requests list
+	for (int i = 0; i < numRequests; i++)
+	{
+		string type;
+		int requestTime, patientID, nearestHospitalID, distanceToHospital, caseSeverity;
+		inputFile >> type;
+		Patient* patient = nullptr; // Pointer to a Patient object
+
+		if (type == "NP")
+		{
+			inputFile >> requestTime >> patientID >> nearestHospitalID >> distanceToHospital;
+
+			// Dynamically create a Normal Patient (NP)
+			patient = new Patient(patientID, requestTime, nearestHospitalID, distanceToHospital, NP);
+		}
+		else if (type == "SP")
+		{
+			inputFile >> requestTime >> patientID >> nearestHospitalID >> distanceToHospital;
+
+			// Dynamically create a Special Patient (SP)
+			patient = new Patient(patientID, requestTime, nearestHospitalID, distanceToHospital, SP);
+		}
+		else if (type == "EP")
+		{
+			inputFile >> requestTime >> patientID >> nearestHospitalID >> distanceToHospital >> caseSeverity;
+
+			// Dynamically create an Emergency Patient (EP) with case severity
+			patient = new Patient(patientID, requestTime, nearestHospitalID, distanceToHospital, EP, caseSeverity);
+		}
+
+		// Enqueue the patient pointer into the queue
+		patientsList.enqueue(patient);
+	}
+
+	// Read number of cancellations
+	inputFile >> numCancellations;
+
+	//Reads request cancellation list
+	for (int i = 0; i < numCancellations; i++)
+	{
+		int PID, hospitalID, cancellationTimestep;
+		// Parse the cancellation request
+		inputFile >> PID >> hospitalID >> cancellationTimestep;
+
+		// Create a CancellationReq struct
+		CancellationReq cancellation = { PID, hospitalID, cancellationTimestep };
+
+		// Enqueue the cancellation request into the CancellationList
+		CancellationList.enqueue(cancellation);
+	}
+
+	inputFile.close();
+
+	// Call the readHospitalData function to process the loaded data and create the appropriate data structures
+	readHospitalData();
 }
 
 void Organizer::AddHospital(const int Hospital_ID)
@@ -367,31 +363,7 @@ void Organizer::printHospitals() const
 	}
 }
 
-void Organizer::handleCarMovements()
-{
-	
-	Car* car;
-	int cp;
-	// Move cars from the OutCars queue to BackCars queue when they arrive at the patient's location (distance to the patient becomes 0)
-	while (!OutCars.isEmpty() && OutCars.peek(car,cp) && car->getDistToPatient() == 0)
-	{
-		int priority;
-		OutCars.dequeue(car, priority);
-		BackCars.enqueue(car, -car->getDistToHospital());//car added to BackCars,with a priority based on its distance to the hospital
-         //Negative distance used to ensure cars closer to the hospital are prioritized (higher priority for shorter distances)	
-	}
-
-	// Process BackCars: return cars to hospitals if they have completed their task
-	int priority;
-	while (!BackCars.isEmpty() && BackCars.peek(car, priority) && car->getDistToHospital() == 0)
-	{
-		BackCars.dequeue(car, priority);
-		HospitalList[car->getHospital() - 1]->addCarToList(car);
-
-	}
-}
-
-void Organizer::PrintHospitalsList() const
+void Organizer::printHospitalsList() const
 {
 	// Check if HospitalList is initialized
 	if (!HospitalList)
@@ -487,6 +459,29 @@ Hospital* Organizer::getHospital(int ID)
 		return nullptr;  // Return nullptr if ID is invalid
 	}
 	return HospitalList[ID];  // Return the pointer to the hospital object at index ID
+}
+
+void Organizer::handleCarMovements()
+{
+	Car* car;
+	int cp;
+	// Move cars from the OutCars queue to BackCars queue when they arrive at the patient's location (distance to the patient becomes 0)
+	while (!OutCars.isEmpty() && OutCars.peek(car,cp) && car->getDistToPatient() == 0)
+	{
+		int priority;
+		OutCars.dequeue(car, priority);
+		BackCars.enqueue(car, -car->getDistToHospital());//car added to BackCars,with a priority based on its distance to the hospital
+         //Negative distance used to ensure cars closer to the hospital are prioritized (higher priority for shorter distances)	
+	}
+
+	// Process BackCars: return cars to hospitals if they have completed their task
+	int priority;
+	while (!BackCars.isEmpty() && BackCars.peek(car, priority) && car->getDistToHospital() == 0)
+	{
+		BackCars.dequeue(car, priority);
+		HospitalList[car->getHospital() - 1]->addCarToList(car);
+
+	}
 }
 
 Organizer::~Organizer()
