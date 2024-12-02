@@ -7,7 +7,7 @@ public:
 	bool cancelRequest(int patientID);
 };
 
-bool ModifiedQ::cancelRequest(int patientID)
+bool ModifiedQ::cancelRequest(int patientID)	// Modify this to return car* by reference
 {
 	//check if the queue is empty
 	if (this->isEmpty())
