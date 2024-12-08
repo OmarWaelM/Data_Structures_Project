@@ -55,7 +55,7 @@ public:
 	void readHospitalData();					//Reads hospital distance data
 	void AddHospital(const int Hospital_ID);	//Adding a Hospital to the hospital list
 
-	// Functions for handling Out Cars
+	/**** Functions for handling Card **/
 	void updateOutCars();
 	void updateBackCars();
 	void updateCheckupCars();
@@ -67,13 +67,13 @@ public:
 	void backCarFailureAction(Car* car);
 	void addCarToCheckup(Car* car) { checkupList.enqueue(car, checkupTime); }
 
+	//create function to Assign all current patients from patientlist to hospital (code is in simulator)
+	//create function to Perform all cancellation requests (code is in simulator)
+	//create functino to Assign all possible patients from hospitals to out cars
 	//Hamdle no EP
-
-	//Backcars Failure
-	//Backcars Failure action
-
 	//Hospital Failure
 	//Hospital Failure action
+	//Processing input file needs to get probabilities and checkup time
 
 	~Organizer();
 };
@@ -140,6 +140,11 @@ void Organizer::Simulator()
 			HospitalList[cr.hospitalID - 1]->cancelRequest(cr.PID);
 			//does not check the outcars list as no patient-car assignment occurs
 		}
+
+		updateOutCars();
+		updateBackCars();
+		updateCheckupCars();
+		handleCarMovements();
 
 		for (int i = 0; i < numHospitals; i++)
 		{
