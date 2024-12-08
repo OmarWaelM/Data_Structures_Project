@@ -20,16 +20,17 @@ private:
 	LinkedQueue<Patient*> FinishedList;				// Finished patients' list of type Linked Queue
 	priQueue<Car*> BackCars;						// Back cars' list (cars on their way back) of type Priority Queue
 	ModifiedPriQ OutCars;							// Out cars' list (cars out on their way to pick up patients) of type Priority Queue (modified)
-	priQueue<Car*> CheckupList;						// Checkup cars list
+	priQueue<Car*> checkupList;						// Checkup cars list
 
 	// General data members
 	int timeStep;
 	UI GUI;
 	int numHospitals;
 	int** distanceMatrix;
-	int outCarsFailureProbability;
-	int backCarsFailureProbability;
-	int hospitalFailureProbability;
+	double outCarsFailureProbability;
+	double backCarsFailureProbability;
+	double hospitalFailureProbability;
+	int checkupTime;
 
 	//File Loading data members (can be declared in file processing and freed at the end)
 	string filename;//Keep
@@ -55,19 +56,18 @@ public:
 	void AddHospital(const int Hospital_ID);	//Adding a Hospital to the hospital list
 
 	// Functions for handling Out Cars
+	void updateOutCars();
+	void updateBackCars();
+	void updateCheckupCars();
 	void handleCarMovements(); //move from out to back and from back to hospitals
 	void moveCarFromFreeToOut(Patient* patient); //move from free to out
-	void handleOutCarFailures(double failureProbability);
-	void handleOutCarFailureAction();
-
-	
-
-	//Function for handling 
+	void outCarFailure();
+	void outCarFailureAction(Car* car);
+	void backCarFailure();
+	void backCarFailureAction(Car* car);
+	void addCarToCheckup(Car* car) { checkupList.enqueue(car, checkupTime); }
 
 	//Hamdle no EP
-	
-	//Outcars Failure
-	//Outcars Failure action
 
 	//Backcars Failure
 	//Backcars Failure action
@@ -88,7 +88,11 @@ Organizer::Organizer():
 	scarsPerHospital(nullptr),
 	ncarsPerHospital(nullptr),
 	numRequests(0),
-	numCancellations(0)
+	numCancellations(0),
+	outCarsFailureProbability(0),
+	backCarsFailureProbability(0),
+	hospitalFailureProbability(0),
+	checkupTime(0)
 {
 }
 
@@ -106,7 +110,7 @@ void Organizer::Simulator()
 	bool endSimulation = false;
 	int randomNum = 0;
 
-	GUI.Output(timeStep, HospitalList, numHospitals, &BackCars, &OutCars, &FinishedList);
+	GUI.Output(timeStep, HospitalList, numHospitals, &BackCars, &OutCars, &FinishedList, &checkupList);
 
 	while (!endSimulation)
 	{
@@ -199,7 +203,7 @@ void Organizer::Simulator()
 		}
     
 		//Output hospital data
-		GUI.Output(timeStep, HospitalList, numHospitals, &BackCars, &OutCars, &FinishedList);
+		GUI.Output(timeStep, HospitalList, numHospitals, &BackCars, &OutCars, &FinishedList, &checkupList);
 
 		//Checking if all lists are empty
 		endSimulation = true;
@@ -216,7 +220,6 @@ void Organizer::Simulator()
 }
 
 /***** FILE LOADING FUNCTION *****/
-
 /* The processInputFile function loads, reads and processes the input file 
 containing data related to the hospitals, patient requests, and cancellations. It then either calls
 the respective functions to store the data in appropriate data structures or stores the latter itself */
@@ -369,30 +372,108 @@ void Organizer::readHospitalData()
 	}
 }
 
+/****** CAR HANDLING FUNCTIONS ******/
+
+void Organizer::updateOutCars()
+{
+	priQueue<Car*> temp;
+	Car* c;
+	int pri;
+	while (!OutCars.isEmpty())
+	{
+		OutCars.dequeue(c, pri);
+		c->updateOut();
+		if (c->getDistToPatient() == 0)
+		temp.enqueue(c, -c->getDistToPatient());
+	}
+	while (!temp.isEmpty())
+	{
+		temp.dequeue(c, pri);
+		OutCars.enqueue(c, pri);
+	}
+}
+
+void Organizer::updateBackCars()
+{
+	priQueue<Car*> temp;
+	Car* c;
+	int pri;
+	while (!BackCars.isEmpty())
+	{
+		BackCars.dequeue(c, pri);
+		c->updateBack();
+		temp.enqueue(c, -c->getDistToHospital());
+	}
+	while (!temp.isEmpty())
+	{
+		temp.dequeue(c, pri);
+		BackCars.enqueue(c, pri);
+	}
+}
+
+void Organizer::updateCheckupCars()
+ {
+	priQueue<Car*> temp;
+	Car* c;
+	int p;
+	while (!checkupList.isEmpty())
+	{
+		checkupList.dequeue(c, p);
+		p--;
+		temp.enqueue(c, p);
+	}
+	while (!temp.isEmpty())
+	{
+		temp.dequeue(c, p);
+		checkupList.enqueue(c, p);
+	}
+ }
+
 void Organizer::handleCarMovements()
 {
 	Car* car;
-	int cp;
+	int priority;
 	// Move cars from the OutCars queue to BackCars queue when they arrive at the patient's location (distance to the patient becomes 0)
-	while (!OutCars.isEmpty() && OutCars.peek(car,cp) && car->getDistToPatient() == 0)
+	while (!OutCars.isEmpty() && OutCars.peek(car, priority) && car->getDistToPatient() == 0)
 	{
-		int priority;
 		OutCars.dequeue(car, priority);
+		car->getAssignedPatient()->setPickup(timeStep);
+		car->getAssignedPatient()->setStopped(false);
 		BackCars.enqueue(car, -car->getDistToHospital());//car added to BackCars,with a priority based on its distance to the hospital
          //Negative distance used to ensure cars closer to the hospital are prioritized (higher priority for shorter distances)	
 	}
 
 	// Process BackCars: return cars to hospitals if they have completed their task
-	int priority;
 	while (!BackCars.isEmpty() && BackCars.peek(car, priority) && car->getDistToHospital() == 0)
 	{
 		BackCars.dequeue(car, priority);
-		HospitalList[car->getHospital() - 1]->addCarToList(car);
+		if (car->getFailureBack() || car->getFailureOut())
+		{
+			car->setInCheckup(true);
+			addCarToCheckup(car);
+		}
+		else
+		{
+			Patient* p = car->deassignPatient();
+			p->setFinished(timeStep);
+			FinishedList.enqueue(p);
+			HospitalList[car->getHospital() - 1]->addCarToList(car);
+		}
+	}
 
+	// Process checkup list
+	while (!checkupList.isEmpty() && checkupList.peek(car, priority) && priority == 0)
+	{
+		checkupList.dequeue(car, priority);
+		car->setFailureBack(false);
+		car->setFailureOut(false);
+		car->setInCheckup(false);
+		HospitalList[car->getHospital() - 1]->addCarToList(car);
 	}
 }
 
- void Organizer::moveCarFromFreeToOut(Patient* patient)
+//wrong implementation
+void Organizer::moveCarFromFreeToOut(Patient* patient)
 {
 	 Car* car = nullptr;
 
@@ -416,51 +497,85 @@ void Organizer::handleCarMovements()
 	 }
  }
 
- void Organizer::handleOutCarFailures(double failureProbability)
- {
-	 if (OutCars.isEmpty()) return;
+void Organizer::outCarFailure()
+{
+	if (OutCars.isEmpty()) return;
 
-	 // Generate a random number to determine failure
-	 double randomValue = (rand() % 100) / 100.0; // Random value between 0 and 1
+	// Generate a random number to determine failure
+	double randomValue = (rand() % 100) / 100.0; // Random value between 0 and 1
 
-	 if (randomValue <= failureProbability) 
-	 {
-		 Car* car = nullptr;
-		 int priority;
+	if (randomValue <= outCarsFailureProbability) 
+	{
+		Car* car = nullptr;
+		int priority;
 
-		 // Dequeue a random car from OutCars
-		 if (OutCars.dequeue(car, priority)) {
-			 cout << "Car " << car->getcarID() << " has failed while en route to Patient " << car->getAssignedPatientID() << ".\n";
+		randomValue = (rand() % OutCars.getCount());
 
-			 // Handle failure action (move car to BackCars)
-			 BackCars.enqueue(car, priority);
+		priQueue<Car*> temp;
+		for (int i = 0; i < randomValue; i++)
+		{
+			OutCars.dequeue(car, priority);
+			temp.enqueue(car, priority);
+		}
 
-			 // Place the patient back at the hospital's queue
-			 Patient* patient = car->getAssignedPatient();
-			 HospitalList[car->getHospital() - 1]->addPatientToList(patient);
+		OutCars.dequeue(car, priority);
+		outCarFailureAction(car);
 
-			 // Mark the car as needing a checkup
-			 car->setInCheckup(true);
-		 }
-	 }
- }
+		while (!temp.isEmpty())
+		{
+			temp.dequeue(car, priority);
+			OutCars.enqueue(car, priority);
+		}
+	}
+}
 
- void Organizer::handleOutCarFailureAction()
-  {
-	   Car* car = nullptr;
-	   int priority;
+void Organizer::outCarFailureAction(Car* car)
+{
+	car->setFailureOut(true);
+	HospitalList[car->getHospital()-1]->addFailurePatient(car->getAssignedPatient());
+	BackCars.enqueue(car, -car->getDistToHospital());
+}
 
-	   // Process failed cars in BackCars
-	   while (!BackCars.isEmpty() && BackCars.peek(car, priority) && car->isInCheckup()) 
-	   {
-		   BackCars.dequeue(car, priority);
+void Organizer::backCarFailure()
+{
+	if (BackCars.isEmpty()) return;
 
-		   // Move the car to the checkup list
-		   HospitalList[car->getHospital() - 1]->addCarToCheckup(car);
+	// Generate a random number to determine failure
+	double randomValue = (rand() % 100) / 100.0; // Random value between 0 and 1
 
-		   cout << "Car " << car->getcarID() << " is now in checkup.\n";
-	   }
-  }
+	if (randomValue <= backCarsFailureProbability)
+	{
+		Car* car = nullptr;
+		int priority;
+
+		randomValue = (rand() % BackCars.getCount());
+
+		priQueue<Car*> temp;
+		for (int i = 0; i < randomValue; i++)
+		{
+			BackCars.dequeue(car, priority);
+			temp.enqueue(car, priority);
+		}
+
+		BackCars.dequeue(car, priority);
+		backCarFailureAction(car);
+
+		while (!temp.isEmpty())
+		{
+			temp.dequeue(car, priority);
+			BackCars.enqueue(car, priority);
+		}
+	}
+}
+
+void Organizer::backCarFailureAction(Car* car)
+{
+	car->setFailureBack(true);
+	car->getAssignedPatient()->setDistanceToPickup(car->getDistToHospital());
+	car->getAssignedPatient()->setStopped(true);
+	HospitalList[car->getHospital() - 1]->addFailurePatient(car->getAssignedPatient());
+	BackCars.enqueue(car, -car->getDistToHospital());
+}	
 
 Organizer::~Organizer()
 {
