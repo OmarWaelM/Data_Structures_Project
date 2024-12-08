@@ -17,6 +17,7 @@ private:
 	int distToPatient;	//decrememnted by speed every timestep
 	int distToHospital; //incrememnted by speed every timestep
 	Patient* assignedPatient;
+	bool inCheckUp;  //true if the car needs a check up
 
 public:
 	//Constructor
@@ -24,6 +25,8 @@ public:
 
 	//Assignment and Deassignment
 	bool AssignPatient(Patient* p);
+	void setInCheckup(bool state) {this->inCheckUp = state;}
+	bool isInCheckup() const {return this->inCheckUp;}
 
 	//----------------------------------------------------------------------------------------------------
 	//TODO: Implement functions to return patient and reset values to retrun to hospital
@@ -40,7 +43,8 @@ public:
 	int getDistToPatient() { return distToPatient; }
 	int getDistToHospital() { return distToHospital; }
 	carType getCarType() { return cType; }
-	
+	Patient* getAssignedPatient() const { return assignedPatient; } // Return the pointer to the assigned patient
+
 	//Outstream operator overloading
 	friend ostream& operator <<(ostream& os, Car& car);
 };
@@ -54,6 +58,7 @@ Car::Car(int id, int hosp, carType type, int spd)
 	assignedPatient = nullptr;
 	distToHospital = 0;
 	distToPatient = 0;
+	inCheckUp = false;
 }
 
 bool Car::AssignPatient(Patient* p)

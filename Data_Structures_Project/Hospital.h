@@ -10,6 +10,8 @@ private:
 	ModifiedQ NPList;
 	LinkedQueue<Car*> SCList;
 	LinkedQueue<Car*> NCList;
+	LinkedQueue<Car*> CheckupList;  // List of cars waiting for checkup
+
 
 	//General data memebers
 	int hospitalID;
@@ -30,6 +32,18 @@ public:
 
 	//Setter
 	void setID(int id) { hospitalID = id; }
+	void addCarToCheckup(Car* car) {CheckupList.enqueue(car);}
+	void processCheckupCars()
+	{
+		Car* car = nullptr;
+		while (!CheckupList.isEmpty())
+		{
+			CheckupList.dequeue(car);
+			car->setInCheckup(false);  // Reset checkup state
+			addCarToList(car);         // Add the car back to the free list
+			cout << "Car " << car->getcarID() << " has completed its checkup.\n";
+		}
+	}
 
 	//Getters
 	int getHospitalID() const { return hospitalID; }	// Getter for Hospital ID
