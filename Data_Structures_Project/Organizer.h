@@ -55,7 +55,14 @@ public:
 	void AddHospital(const int Hospital_ID);	//Adding a Hospital to the hospital list
 
 	// Functions for handling Out Cars
-	void handleCarMovements();
+	void handleCarMovements(); //move from out to back and from back to hospitals
+	void moveCarFromFreeToOut(Patient* patient); //move from free to out
+	void handleOutCarFailures(double failureProbability);
+	void handleOutCarFailureAction();
+
+	
+
+	//Function for handling 
 
 	//Hamdle no EP
 	
@@ -384,6 +391,76 @@ void Organizer::handleCarMovements()
 
 	}
 }
+
+ void Organizer::moveCarFromFreeToOut(Patient* patient)
+{
+	 Car* car = nullptr;
+
+	 // Assign a car to the patient (priority: SC > NC)
+	 if (HospitalList[patient->getNearestHospital() - 1]->getSC(car) ||
+		 HospitalList[patient->getNearestHospital() - 1]->getNC(car)) //-1 as the array is 1_based indexed
+	 {
+		 // Link the car to the patient
+		 car->AssignPatient(patient);
+
+		 // Calculate priority for OutCars based on distance to the patient
+		 int priority = -car->getDistToPatient();
+
+		 // Move the car to the OutCars queue
+		 OutCars.enqueue(car, priority);
+		 cout << "Car " << car->getcarID() << " assigned to Patient " << patient->getPatientID() << " and moved to OutCars.\n";
+	 }
+	 else
+	 {
+		 cout << "No available car for Patient " << patient->getPatientID() << ".\n";
+	 }
+ }
+
+ void Organizer::handleOutCarFailures(double failureProbability)
+ {
+	 if (OutCars.isEmpty()) return;
+
+	 // Generate a random number to determine failure
+	 double randomValue = (rand() % 100) / 100.0; // Random value between 0 and 1
+
+	 if (randomValue <= failureProbability) 
+	 {
+		 Car* car = nullptr;
+		 int priority;
+
+		 // Dequeue a random car from OutCars
+		 if (OutCars.dequeue(car, priority)) {
+			 cout << "Car " << car->getcarID() << " has failed while en route to Patient " << car->getAssignedPatientID() << ".\n";
+
+			 // Handle failure action (move car to BackCars)
+			 BackCars.enqueue(car, priority);
+
+			 // Place the patient back at the hospital's queue
+			 Patient* patient = car->getAssignedPatient();
+			 HospitalList[car->getHospital() - 1]->addPatientToList(patient);
+
+			 // Mark the car as needing a checkup
+			 car->setInCheckup(true);
+		 }
+	 }
+ }
+
+ void Organizer::handleOutCarFailureAction()
+  {
+	   Car* car = nullptr;
+	   int priority;
+
+	   // Process failed cars in BackCars
+	   while (!BackCars.isEmpty() && BackCars.peek(car, priority) && car->isInCheckup()) 
+	   {
+		   BackCars.dequeue(car, priority);
+
+		   // Move the car to the checkup list
+		   HospitalList[car->getHospital() - 1]->addCarToCheckup(car);
+
+		   cout << "Car " << car->getcarID() << " is now in checkup.\n";
+	   }
+  }
 
 Organizer::~Organizer()
 {

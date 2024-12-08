@@ -18,6 +18,7 @@ private:
 	int distToHospital; //incrememnted by speed every timestep
 	int timeToCompleteCheckup;
 	Patient* assignedPatient;
+	bool inCheckUp;  //true if the car needs a check up
 	bool failure;
 
 public:
@@ -27,7 +28,8 @@ public:
 	//Assignment and Deassignment
 	bool AssignPatient(Patient* p);
 	Patient* deassignPatient();
-
+  
+	void setInCheckup(bool stte) {this->inCheckUp = state;}
 	void Failure();
 
 	//Update functions decrement distances by speed every timestep, if distance is less that speed decrements to 0
@@ -43,8 +45,10 @@ public:
 	int getDistToHospital() { return distToHospital; }
 	int getTimeToCompleteCheckup() { return timeToCompleteCheckup; }
 	carType getCarType() { return cType; }
+	Patient* getAssignedPatient() const { return assignedPatient; } // Return the pointer to the assigned patient
 	bool getFailureState() { return failure; }
-	
+  bool isInCheckup() const {return this->inCheckUp;}
+  
 	//Outstream operator overloading
 	friend ostream& operator <<(ostream& os, Car& car);
 };
@@ -57,6 +61,7 @@ Car::Car(int id, int hosp, carType type, int spd)
 	speed = spd;
 	assignedPatient = nullptr;
 	distToHospital = 0;
+	inCheckUp = false;
 	distToPatient = -1;
 	timeToCompleteCheckup = -1;
 	failure = false;
