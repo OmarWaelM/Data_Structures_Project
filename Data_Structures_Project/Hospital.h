@@ -24,10 +24,11 @@ public:
 
 	//List Members movemen
 	void addCarToList(Car* car);
-	void addPatientToList(Patient* patient); //update this to return bool in case EP request cannot be served
+	bool addPatientToList(Patient* patient); //update this to return bool in case EP request cannot be served
 
 	//Car and Patient Assignment
-	bool assignPatientToCar(Patient* patient);
+	bool assignPatients(Car*&  ambulance);
+	bool assignPatientToCar(Patient* patient, Car*& ambulance);
 	bool cancelRequest(int patientID) { return NPList.cancelRequest(patientID); } //update this to return car&
 
 	//Setter
@@ -46,10 +47,10 @@ public:
 	}
 
 	//Getters
-	int getHospitalID() const { return hospitalID; }	// Getter for Hospital ID
-	int getSCarsCount() { return SCList.getCount(); }	// Getter for SCars count
-	int getNCarsCount() { return NCList.getCount(); }	// Getter for NCars count
-	int getEPListLength() { return EPList.getCount(); }	// Getter for EPList count
+	//int getHospitalID() const { return hospitalID; }	// Getter for Hospital ID
+	//int getSCarsCount() { return SCList.getCount(); }	// Getter for SCars count
+	//int getNCarsCount() { return NCList.getCount(); }	// Getter for NCars count
+	//int getEPListLength() { return EPList.getCount(); }	// Getter for EPList count
 	bool isEmpty() { return (NPList.isEmpty() && SPList.isEmpty() && EPList.isEmpty()); }	// Checks if all patient lists are empty
 
 	//Outstream operator overloading
@@ -73,19 +74,64 @@ void Hospital::addCarToList(Car* car)
 		NCList.enqueue(car);
 }
 
-void Hospital::addPatientToList(Patient* patient)
+bool Hospital::addPatientToList(Patient* patient)
 {
 	if (patient->getPatientType() == SP)
+	{
 		SPList.enqueue(patient);
+		return true;
+	}
 	else if (patient->getPatientType() == NP)
+	{
 		NPList.enqueue(patient);
+		return true;
+	}
 	else
-		EPList.enqueue(patient, patient->getPatientPriority());
+	{
+		if (!NCList.isEmpty() || !SCList.isEmpty())
+		{
+			EPList.enqueue(patient, patient->getPatientPriority());
+			return true;
+		}
+		return false;
+	}
 }
 
-bool Hospital::assignPatientToCar(Patient* p)
+bool Hospital::assignPatients(Car*& ambulance)
 {
-	Car* ambulance = nullptr;
+	Patient* p;
+	int pri;
+	if (!EPList.isEmpty())
+	{
+		EPList.peek(p, pri);
+		if (assignPatientToCar(p, ambulance))
+		{
+			EPList.dequeue(p, pri);
+			return true;
+		}
+	}
+	if (!SPList.isEmpty())
+	{
+		SPList.peek(p);
+		if (assignPatientToCar(p, ambulance))
+		{
+			SPList.dequeue(p);
+			return true;
+		}
+	}
+	if (!NPList.isEmpty())
+	{
+		NPList.peek(p);
+		if (assignPatientToCar(p, ambulance))
+		{
+			NPList.dequeue(p);
+			return true;
+		}
+	}
+}
+
+bool Hospital::assignPatientToCar(Patient* p, Car*& ambulance)
+{
 	Patient* patient = nullptr;
 	int x;
 	if (p->getPatientType() == NP && NCList.getCount() != 0)
@@ -109,7 +155,6 @@ bool Hospital::assignPatientToCar(Patient* p)
 			NCList.dequeue(ambulance);
 			EPList.dequeue(patient,x);
 			ambulance->AssignPatient(patient);
-
 		}
 		else if (SCList.getCount() != 0)
 		{

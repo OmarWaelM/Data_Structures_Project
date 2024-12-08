@@ -20,22 +20,25 @@ private:
 	LinkedQueue<Patient*> FinishedList;				// Finished patients' list of type Linked Queue
 	priQueue<Car*> BackCars;						// Back cars' list (cars on their way back) of type Priority Queue
 	ModifiedPriQ OutCars;							// Out cars' list (cars out on their way to pick up patients) of type Priority Queue (modified)
+	priQueue<Car*> CheckupList;						// Checkup cars list
 
 	// General data members
 	int timeStep;
 	UI GUI;
 	int numHospitals;
 	int** distanceMatrix;
+	int outCarsFailureProbability;
+	int backCarsFailureProbability;
+	int hospitalFailureProbability;
 
 	//File Loading data members (can be declared in file processing and freed at the end)
-	string filename;
-	string outfile; //used when outputting results file
+	string filename;//Keep
+	string outfile; //Keep used when outputting results file
 	int speedScars, speedNcars;
 	int* scarsPerHospital;
 	int* ncarsPerHospital;
 	int numRequests;
 	int numCancellations;
-
 
 public:
 	//Member Functions
@@ -45,27 +48,11 @@ public:
 
 	//Simulator
 	void Simulator();
-
-	// Functions for managing hospital list:	
-	
-	// Getters (Not really needed since no classes have data member Organizer)
-	LinkedQueue<Patient*>* getFinishedList() { return &FinishedList; }
-	Hospital** getHospitalList() { return HospitalList; }	// Getter for hospital list (if needed)
-	int getNumHospitals() const { return numHospitals; }	// Getter for number of hospitals
-	Hospital* getHospital(int ID);						// Getter for hospital with specific id
-
-	// Not really needed as UI class does this
-	void printHospitals()const;	//Printing out the hospitals' information as shown in the sample output file
   
 	/***** Input file member functions *****/
 	void processInputFile();					//Processes input file
 	void readHospitalData();					//Reads hospital distance data
 	void AddHospital(const int Hospital_ID);	//Adding a Hospital to the hospital list
-
-	// Not really needed as UI class does this
-	void printHospitalsList()const;				
-	void printPatientsList()const;
-	void printCancellationList()const;
 
 	// Functions for handling Out Cars
 	void handleCarMovements(); //move from out to back and from back to hospitals
@@ -76,6 +63,17 @@ public:
 	
 
 	//Function for handling 
+
+	//Hamdle no EP
+	
+	//Outcars Failure
+	//Outcars Failure action
+
+	//Backcars Failure
+	//Backcars Failure action
+
+	//Hospital Failure
+	//Hospital Failure action
 
 	~Organizer();
 };
@@ -114,6 +112,15 @@ void Organizer::Simulator()
 	{
 		//Updating timestep
 		timeStep++;
+
+		// 
+		// update cars
+		// check for returning cars
+		// check for patient requests
+		// assign patients to cars
+		// check for car failure
+		// check for hospital failure
+		//
 
 		//Checking for new patients
 		while (patientsList.peek(p) && p->getRequestTime() == timeStep)
@@ -360,112 +367,6 @@ void Organizer::readHospitalData()
 			HospitalList[i]->addCarToList(car);  // Adds to SCList or NCList based on car type
 		}
 	}
-}
-
-void Organizer::printHospitals() const
-{
-	for (int i = 0; i < numHospitals; ++i)
-	{
-		cout << *HospitalList[i]; // Use the overloaded << operator for Hospital class
-	}
-}
-
-void Organizer::printHospitalsList() const
-{
-	// Check if HospitalList is initialized
-	if (!HospitalList)
-	{
-		cout << "No hospitals available to display.\n";
-		return;
-	}
-
-	// Iterate through the HospitalList and print details of each hospital
-	for (int i = 0; i < numHospitals; ++i)
-	{
-		cout << "Hospital " << i + 1 << ":\n";
-
-		// Access and display hospital details
-		cout << "  Hospital ID: " << HospitalList[i]->getHospitalID() << "\n";
-		cout << "  SCars: " << HospitalList[i]->getSCarsCount() << "\n";
-		cout << "  NCars: " << HospitalList[i]->getNCarsCount() << "\n";
-		cout << "----------------------------------------\n";
-	}
-
-	cout << "Distance Matrix:\n";
-	for (int i = 0; i < numHospitals; ++i)
-	{
-		for (int j = 0; j < numHospitals; ++j)
-		{
-			// Adjust width for uniform spacing
-			cout << setw(5) << distanceMatrix[i][j] << " ";
-		}
-		cout << "\n";
-	}
-	cout << "----------------------------------------\n";
-}
-
-void Organizer::printPatientsList() const {
-	if (patientsList.isEmpty()) {
-		cout << "The patients list is empty." << endl;
-		return;
-	}
-
-	cout << "Patients List:" << endl;
-
-	// Create a copy of the patientsList to traverse without modifying it
-	LinkedQueue<Patient*> tempQueue = patientsList;
-	Patient* tempPatient;
-
-	while (!tempQueue.isEmpty())
-	{
-		tempQueue.peek(tempPatient); // Get the front patient
-
-		// Print patient details using the getter methods
-		cout << "Patient ID: " << tempPatient->getPatientID() << endl;
-		cout << "Patient Type: " << (tempPatient->getPatientType() == NP ? "Normal Patient" :
-			tempPatient->getPatientType() == SP ? "Special Patient" : "Emergency Patient") << endl;
-		cout << "Nearest Hospital ID: " << tempPatient->getNearestHospital() << endl;
-		cout << "Distance to Hospital: " << tempPatient->getDistance() << endl;
-		if (tempPatient->getPatientType() == EP)
-		{
-			cout << "Case Severity: " << tempPatient->getPatientPriority() << endl;
-		}
-		cout << "----------------------------------------\n";
-		tempQueue.dequeue(tempPatient); // Remove the front patient
-	}
-}
-
-void Organizer::printCancellationList() const {
-	if (CancellationList.isEmpty()) {
-		cout << "The cancellation list is empty." << endl;
-		return;
-	}
-
-	cout << "Cancellation List:" << endl;
-
-	// Create a copy of the CancellationList to traverse without modifying it
-	LinkedQueue<CancellationReq> tempQueue = CancellationList;
-	CancellationReq tempCancellation;
-
-	while (!tempQueue.isEmpty()) {
-		tempQueue.peek(tempCancellation); // Get the front cancellation request
-
-		// Print cancellation request details
-		cout << "Patient ID: " << tempCancellation.PID
-			<< ", Hospital ID: " << tempCancellation.hospitalID
-			<< ", Cancellation Time: " << tempCancellation.CancellationTimestep << endl;
-
-		tempQueue.dequeue(tempCancellation); // Remove the front cancellation request
-	}
-}
-
-Hospital* Organizer::getHospital(int ID)
-{
-	// Ensure ID is within bounds
-	if (ID < 0 || ID > numHospitals) {
-		return nullptr;  // Return nullptr if ID is invalid
-	}
-	return HospitalList[ID];  // Return the pointer to the hospital object at index ID
 }
 
 void Organizer::handleCarMovements()

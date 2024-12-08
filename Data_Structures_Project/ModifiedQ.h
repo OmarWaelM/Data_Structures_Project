@@ -5,9 +5,10 @@ class ModifiedQ : public LinkedQueue<Patient*>
 {
 public:
 	bool cancelRequest(int patientID);
+	void addToTop(Patient* p);
 };
 
-bool ModifiedQ::cancelRequest(int patientID)	// Modify this to return car* by reference
+bool ModifiedQ::cancelRequest(int patientID)
 {
 	//check if the queue is empty
 	if (this->isEmpty())
@@ -44,4 +45,11 @@ bool ModifiedQ::cancelRequest(int patientID)	// Modify this to return car* by re
 	}
 
 	return false;
+}
+
+void ModifiedQ::addToTop(Patient* p)	//Adds entry to the start of the queue
+{
+	Node<Patient*>* n = new Node<Patient*>(p);
+	n->setNext(frontPtr);
+	frontPtr = n;
 }
