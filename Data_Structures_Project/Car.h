@@ -16,10 +16,10 @@ private:
 	int hospital;
 	int distToPatient;	//decrememnted by speed every timestep
 	int distToHospital; //incrememnted by speed every timestep
-	int timeToCompleteCheckup;
 	Patient* assignedPatient;
 	bool inCheckUp;  //true if the car needs a check up
-	bool failure;
+	bool failureOut;
+	bool failureBack;
 
 public:
 	//Constructor
@@ -28,26 +28,26 @@ public:
 	//Assignment and Deassignment
 	bool AssignPatient(Patient* p);
 	Patient* deassignPatient();
-  
-	void setInCheckup(bool stte) {this->inCheckUp = state;}
-	void Failure();
+	
+	void setFailureOut(bool state) { failureOut = state; }
+	void setFailureBack(bool state) { failureBack = state; }
+	void setInCheckup(bool state) { inCheckUp = state; }
 
 	//Update functions decrement distances by speed every timestep, if distance is less that speed decrements to 0
 	void updateBack();
 	void updateOut();	
-	void updateCheckup();
 
 	//Getters
-	int getcarID() { return carID; }
-	int getHospital() { return hospital; }
-	int getAssignedPatientID() { return assignedPatient->getPatientID(); }
-	int getDistToPatient() { return distToPatient; }
-	int getDistToHospital() { return distToHospital; }
-	int getTimeToCompleteCheckup() { return timeToCompleteCheckup; }
-	carType getCarType() { return cType; }
+	int getcarID() const { return carID; }
+	int getHospital() const { return hospital; }
+	int getAssignedPatientID() const { return assignedPatient->getPatientID(); }
+	int getDistToPatient() const { return distToPatient; }
+	int getDistToHospital() const { return distToHospital; }
+	carType getCarType() const { return cType; }
 	Patient* getAssignedPatient() const { return assignedPatient; } // Return the pointer to the assigned patient
-	bool getFailureState() { return failure; }
-  bool isInCheckup() const {return this->inCheckUp;}
+	bool getFailureOut() const { return failureOut; }
+	bool getFailureBack() const { return failureBack; }
+	bool isInCheckup() const { return this->inCheckUp; }
   
 	//Outstream operator overloading
 	friend ostream& operator <<(ostream& os, Car& car);
@@ -63,8 +63,8 @@ Car::Car(int id, int hosp, carType type, int spd)
 	distToHospital = 0;
 	inCheckUp = false;
 	distToPatient = -1;
-	timeToCompleteCheckup = -1;
-	failure = false;
+	failureOut = false;
+	failureBack = false;
 }
 
 bool Car::AssignPatient(Patient* p)
@@ -94,22 +94,20 @@ Patient* Car::deassignPatient()
 		return nullptr;
 }
 
-void Car::Failure()
-{
-
-}
-
 void Car::updateBack()
 {
-	if (distToHospital < speed)
+	if (!assignedPatient->getStopped())
 	{
-		distToPatient += distToHospital;
-		distToHospital = 0;
-	}
-	else
-	{
-		distToPatient == speed;
-		distToHospital -= speed;
+		if (distToHospital < speed)
+		{
+			distToPatient += distToHospital;
+			distToHospital = 0;
+		}
+		else
+		{
+			distToPatient == speed;
+			distToHospital -= speed;
+		}
 	}
 }
 
@@ -125,11 +123,6 @@ void Car::updateOut()
 		distToPatient -= speed;
 		distToHospital += speed;
 	}
-}
-
-void Car::updateCheckup()
-{
-	timeToCompleteCheckup--;
 }
 
 ostream& operator <<(ostream& os, Car& car)
