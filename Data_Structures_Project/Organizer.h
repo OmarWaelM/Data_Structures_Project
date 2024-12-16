@@ -70,6 +70,7 @@ public:
 	void updateCheckupCars();
 	void handleCarMovements(); //move from out to back and from back to hospitals
 	void moveCarFromFreeToOut(Patient* patient); //move from free to out
+	void handleEP(Patient* patient) {} /*****To be updated when Arwa writes it*****/
 	void outCarFailure();
 	void outCarFailureAction(Car* car);
 	void backCarFailure();
@@ -488,7 +489,7 @@ void Organizer::handleCarMovements()
 }
 
 /* This function assigns a car to a patient based on their nearest hospital and patient type.
-   It then iterates through hospitals until a car is assigned or all options are exhausted. */
+   It then iterates through he nearest hospitals until a car is assigned or all options are exhausted. */
 
 void Organizer::moveCarFromFreeToOut(Patient* patient)
 {
@@ -498,83 +499,53 @@ void Organizer::moveCarFromFreeToOut(Patient* patient)
 	// Validate hospital ID; to ensure hospital exists
 	if (nearestHospitalID < 1 || nearestHospitalID > numHospitals) { return; }
 
-	bool checked[numHospitals] = { false }; // Track checked hospitals
+	Hospital* nearestHospital = HospitalList[nearestHospitalID - 1];
+	Car* car = nullptr;
+	bool carAssigned = false;
 
-	while (true)
+	patientType type = patient->getPatientType();
+
+	if (type == patientType::EP)
 	{
-		Hospital* nearestHospital = HospitalList[nearestHospitalID - 1];
-		Car* car = nullptr;
-		bool carAssigned = false;
-
-		patientType type = patient->getPatientType();
-
-		if (type == patientType::EP)
+		if (nearestHospital->getNC(car))
 		{
-			if (nearestHospital->getNC(car))
-			{
-				carAssigned = true; // Assign EP to NC car if available
-				car->setCarType(carType::NC);
-			}
-			else if (nearestHospital->getSC(car))
-			{
-				carAssigned = true; // Assign EP to SC car if NC car is unavailable
-				car->setCarType(carType::SC);
-			}
+			carAssigned = true; // Assign EP to NC car if available
+			car->setCarType(carType::NC);
 		}
-		else if (type == patientType::SP)
+		else if (nearestHospital->getSC(car))
 		{
-			if (nearestHospital->getSC(car))
-			{
-				carAssigned = true; // Assign SP to SC car if available
-				car->setCarType(carType::SC);
-			}
+			carAssigned = true; // Assign EP to SC car if NC car is unavailable
+			car->setCarType(carType::SC);
 		}
-		else if (type == patientType::NP)
+	}
+	else if (type == patientType::SP)
+	{
+		if (nearestHospital->getSC(car))
 		{
-			if (nearestHospital->getNC(car))
-			{
-				carAssigned = true; // Assign NP to NC car if available
-				car->setCarType(carType::NC);
-			}
+			carAssigned = true; // Assign SP to SC car if available
+			car->setCarType(carType::SC);
 		}
-
-		// If a car is assigned, implement the car assignment and return
-		if (carAssigned)
+	}
+	else if (type == patientType::NP)
+	{
+		if (nearestHospital->getNC(car))
 		{
-			car->AssignPatient(patient);
-			OutCars.enqueue(car, -car->getDistToPatient());
-			return;
+			carAssigned = true; // Assign NP to NC car if available
+			car->setCarType(carType::NC);
 		}
+	}
 
-		//If no cars are available in the nearest hospital to the patient
-		checked[nearestHospitalID - 1] = true; // Mark the current hospital as checked
+	// If a car is assigned, implement the car assignment and return
+	if (carAssigned)
+	{
+		car->AssignPatient(patient);
+		OutCars.enqueue(car, -car->getDistToPatient());
+		return;
+	}
 
-		// Find the next nearest hospital to the patient
-		int nextNearestHospitalID = -1;
-		int minDistance = -1;
-		bool foundValidHospital = false;
-
-		for (int i = 0; i < numHospitals; i++)
-		{
-			if (!checked[i])
-			{
-				int distance = distanceMatrix[nearestHospitalID - 1][i];
-
-				// Set minDistance with the first non-checked hospital's distance
-				if (minDistance == -1 || distance < minDistance)
-				{
-					minDistance = distance;
-					nextNearestHospitalID = i + 1;
-					foundValidHospital = true;
-				}
-			}
-		}
-
-		// If no more hospitals are available, exit the while loop
-		if (!foundValidHospital) { return; }
-
-		// Update nearestHospitalID to the next nearest hospital
-		nearestHospitalID = nextNearestHospitalID;
+	if (!carAssigned && (type == patientType::EP))
+	{
+		handleEP(patient); //To be updated when the function is written by Arwa
 	}
 }
 
