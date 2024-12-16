@@ -70,7 +70,7 @@ public:
 	void updateCheckupCars();
 	void handleCarMovements(); //move from out to back and from back to hospitals
 	void moveCarFromFreeToOut(Patient* patient); //move from free to out
-	void handleEP(Patient* patient) {} /*****To be updated when Arwa writes it*****/
+	void handleEP(Patient* patient);
 	void outCarFailure();
 	void outCarFailureAction(Car* car);
 	void backCarFailure();
@@ -549,7 +549,7 @@ void Organizer::moveCarFromFreeToOut(Patient* patient)
 
 	if (!carAssigned && (type == patientType::EP))
 	{
-		handleEP(patient); //To be updated when the function is written by Arwa
+		handleEP(patient); //To be updated
 	}
 }
 
