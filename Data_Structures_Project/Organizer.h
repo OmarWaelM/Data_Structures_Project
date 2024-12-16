@@ -477,9 +477,9 @@ void Organizer::handleCarMovements()
 	}
 }
 
-void Organizer::moveCarFromFreeToOut(Patient* p)
+void Organizer::moveCarFromFreeToOut(Patient* patient)
 {
-	if (!p) { return; }
+	if (!patient) { return; }
 }
 
 /*//wrong implementation
