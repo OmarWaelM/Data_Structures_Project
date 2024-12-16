@@ -477,7 +477,12 @@ void Organizer::handleCarMovements()
 	}
 }
 
-//wrong implementation
+void Organizer::moveCarFromFreeToOut(Patient* p)
+{
+	if (!p) { return; }
+}
+
+/*//wrong implementation
 void Organizer::moveCarFromFreeToOut(Patient* patient)
 {
 	 Car* car = nullptr;
@@ -500,7 +505,7 @@ void Organizer::moveCarFromFreeToOut(Patient* patient)
 	 {
 		 cout << "No available car for Patient " << patient->getPatientID() << ".\n";
 	 }
- }
+ }*/
 
 void Organizer::outCarFailure()
 {
