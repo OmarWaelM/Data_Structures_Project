@@ -76,9 +76,13 @@ public:
 	void backCarFailure();
 	void backCarFailureAction(Car* car);
 	void addCarToCheckup(Car* car) { checkupList.enqueue(car, checkupTime); }
+	void hospitalFaliure();
+	void hospitalFailureAction(Hospital* failedHospital);
 
 	void handleCancellations();
 	void addToFinishedList(Car* car);
+	void transferPatientsRequests(Patient* patient, int nearestHospitalID);
+	void transferFreeCars(Car* car, int nearestHospitalID);
 
 	//create function to Assign all current patients from patientlist to hospital (code is in simulator)
 	//create function to Perform all cancellation requests (code is in simulator)
@@ -257,6 +261,9 @@ void Organizer::processInputFile()
 
 	//Read the speeds of SCars and Ncars (the second line)
 	inputFile >> speedScars >> speedNcars;
+
+	// Read failure probabilities
+	inputFile >> outCarsFailureProbability >> backCarsFailureProbability >> hospitalFailureProbability; 
 
 	// Read the hospital matrix (numHospitals x numHospitals)
 	distanceMatrix = new int* [numHospitals];
@@ -633,6 +640,165 @@ void Organizer::backCarFailureAction(Car* car)
 	HospitalList[car->getHospital() - 1]->addFailurePatient(car->getAssignedPatient());
 	BackCars.enqueue(car, -car->getDistToHospital());
 }
+
+void Organizer::hospitalFaliure()
+{
+	// Generate a random number to determine failure
+	double randomValue = (rand() % 100) / 100.0; // Random value between 0 and 1
+
+	if (randomValue <= hospitalFailureProbability)
+	{
+		// Randomly select a hospital to fail
+		int failedHospitalID = rand() % numHospitals + 1;
+		Hospital* failedHospital = HospitalList[failedHospitalID - 1];
+		hospitalFailureAction(failedHospital);
+	}
+}
+
+void Organizer::hospitalFailureAction(Hospital* failedHospital)
+{
+	if (!failedHospital || failedHospital->isFailed()) { return; }
+
+	// Mark the hospital as failed
+	failedHospital->setFailed(true);
+
+	// Find the nearest hospital that is not failed
+	int nearestHospitalID = -1;
+	int minDistance = -1;
+
+	// Loop through the distance matrix to find the first valid distance
+	for (int i = 0; i < numHospitals; i++)
+	{
+		if (i != failedHospitalID - 1 && !HospitalList[i]->isFailed())
+		{
+			nearestHospitalID = i + 1;
+			minDistance = DistanceMatrix[failedHospitalID - 1][i];
+		}
+	}
+
+	// Transfer SP, EP, and NP patients to the nearest hospitals
+	Patient* patient;
+	LinkedQueue<Patient*> SPList = failedHospital->transferSPList();
+	priQueue<Patient*> EPList = failedHospital->transferEPList();
+	ModifiedQ NPList = failedHospital->transferNPList();
+
+	// Reassign SP patients
+	while (!SPList.isEmpty())
+	{
+		SPList.dequeue(patient);
+		transferPatientsRequests(patient, nearestHospitalID);
+	}
+
+	// Reassign EP patients
+	while (!EPList.isEmpty())
+	{
+		int priority; 
+		EPList.dequeue(patient, priority); 
+		transferPatientsRequests(patient, nearestHospitalID);
+	}
+
+	// Reassign NP patients
+	while (!NPList.isEmpty())
+	{
+		NPList.dequeue(patient); 
+		transferPatientsRequests(patient, nearestHospitalID);
+	}
+
+	// Remove all free cars (both SC and NC) from the system
+	Car* car;
+	LinkedQueue<Car*> SCList = failedHospital->transferSCList();
+	LinkedQueue<Car*> NCList = failedHospital->transferNCList();
+
+	while (!SCList.isEmpty())
+	{
+		SCList.dequeue(car);
+		delete car;
+	}
+
+	while (!NCList.isEmpty())
+	{
+		NCList.dequeue(car);
+		delete car;
+	}
+
+	// Handle OUT cars of the failed hospital
+	priQueue<Car*> tempOutCars;
+	Car* outCar = nullptr;
+	int priorityOut;
+
+	while (!OutCars.isEmpty())
+	{
+		OutCars.dequeue(outCar, priorityOut);
+		if (outCar->getHospital() == failedHospital->getHospitalID())
+		{
+			// Handle the failure of the assigned car
+			outCarFailureAction(outCar);
+			delete outCar; // Remove the car from the system
+		}
+		else {
+			tempOutCars.enqueue(outCar, priorityOut);
+		}
+	}
+
+	// Restore remaining OUT cars
+	while (!tempOutCars.isEmpty())
+	{
+		tempOutCars.dequeue(outCar, priorityOut);
+		OutCars.enqueue(outCar, priorityOut);
+	}
+
+	// Handle BACK cars of the failed hospital
+	priQueue<Car*> tempBackCars;
+	Car* backCar = nullptr;
+	int priorityBack;
+	while (!BackCars.isEmpty())
+	{
+		BackCars.dequeue(backCar, priorityBack);
+		if (backCar->getHospital() == failedHospital->getHospitalID())
+		{
+			// Handle the failure of the assigned car
+			backCarFailureAction(backCar);
+			delete backCar; // Remove the car from the system
+		}
+		else
+		{
+			tempBackCars.enqueue(backCar, priorityBack);
+		}
+	}
+
+	// Restore remaining BACK cars
+	while (!tempBackCars.isEmpty())
+	{
+		tempBackCars.dequeue(backCar, priorityBack);
+		BackCars.enqueue(backCar, priorityBack);
+	}
+
+	// Remove the hospital from the HospitalList and shift the remaining hospitals
+	for (int i = 0; i < numHospitals; i++)
+	{
+		if (HospitalList[i] == failedHospital)
+		{
+			delete HospitalList[i]; // Free memory
+			for (int j = i; j < numHospitals - 1; j++)
+			{
+				HospitalList[j] = HospitalList[j + 1]; // Shift hospitals to the left
+			}
+			HospitalList[numHospitals - 1] = nullptr; // Nullify the last pointer
+			numHospitals--; // Decrease the total count of hospitals
+			break;
+		}
+	}
+}
+
+void Organizer::transferPatientsRequests(Patient* patient, int nearestHospitalID)
+{
+	if (!patient) { return; }
+
+	// Assign the patient to the new nearest hospital
+	Hospital* nearestHospital = HospitalList[nearestHospitalID - 1];
+	nearestHospital->addPatientToList(patient);
+}
+
 void Organizer::handleCancellations()
 {
 	CancellationReq cr;

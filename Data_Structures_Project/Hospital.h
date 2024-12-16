@@ -14,6 +14,7 @@ private:
 
 	//General data memebers
 	int hospitalID;
+	bool isFailed;
 
 public:
 	//Member Function
@@ -45,6 +46,45 @@ public:
 	//Outstream operator overloading
 	friend ostream& operator <<(ostream& os, Hospital& h);
 
+	// For the hospital failure feature
+	bool isFailed() { return isFailed; }
+	void setFailed(bool status) { isFailed = status; }
+
+	LinkedQueue<Patient*> transferSPList()
+	{
+		LinkedQueue<Patient*> temp = SPList; // Save current list
+		SPList = nullptr; // Nullify after transfer
+		return temp; // Transfer the SP list 
+	}
+
+	priQueue<Patient*> transferEPList()
+	{
+		priQueue<Patient*> temp = EPList; // Save current list
+		EPList = nullptr; // Nullify after transfer
+		return temp; // Transfer the EP list 
+	}
+
+	ModifiedQ transferNPList()
+	{
+		ModifiedQ temp = NPList; // Save current list
+		NPList = nullptr; // Nullify after transfer
+		return temp; // Transfer the NP list 
+	}
+
+	LinkedQueue<Car*> transferSCList()
+	{
+		LinkedQueue<Car*> temp = SCList; // Save current list
+		SCList = nullptr; // Nullify after transfer
+		return temp; // Transfer the SC list 
+	}
+
+	LinkedQueue<Car*> transferNCList()
+	{
+		LinkedQueue<Car*> temp = NCList; // Save current list
+		NCList = nullptr; // Nullify after transfer
+		return temp; // Transfer the NC list 
+	}
+
 	//Simulation Specific Function
 	bool getNP(Patient*& p);
 	bool getEP(Patient*& p);
@@ -53,7 +93,7 @@ public:
 	bool getSC(Car*& c);
 };
 
-Hospital::Hospital(): hospitalID(0) {}
+Hospital::Hospital(): hospitalID(0), isFailed(false) {}
 
 void Hospital::addCarToList(Car* car)
 {
@@ -199,7 +239,6 @@ bool Hospital::isPatientInNPList(int patientID) const
 	}
 	return false;
 }
-
 
 //Simulator Function will probably not need in phase 2
 bool Hospital::getNP(Patient*& p) { return NPList.dequeue(p); }
