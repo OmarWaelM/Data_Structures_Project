@@ -64,7 +64,7 @@ public:
 	void readHospitalData();					//Reads hospital distance data
 	void AddHospital(const int Hospital_ID);	//Adding a Hospital to the hospital list
 
-	/**** Functions for handling Card **/
+	/**** Functions for handling Cars **/
 	void updateOutCars();
 	void updateBackCars();
 	void updateCheckupCars();
@@ -76,6 +76,9 @@ public:
 	void backCarFailure();
 	void backCarFailureAction(Car* car);
 	void addCarToCheckup(Car* car) { checkupList.enqueue(car, checkupTime); }
+
+	void handleCancellations();
+	void addToFinishedList(Car* car);
 
 	//create function to Assign all current patients from patientlist to hospital (code is in simulator)
 	//create function to Perform all cancellation requests (code is in simulator)
@@ -470,10 +473,8 @@ void Organizer::handleCarMovements()
 		}
 		else
 		{
-			Patient* p = car->deassignPatient();
-			p->setFinished(timeStep);
-			FinishedList.enqueue(p);
-			HospitalList[car->getHospital() - 1]->addCarToList(car);
+			// Deassigns the patient from the car and adds the patient to the FinishedList
+			addToFinishedList(car);
 		}
 	}
 
@@ -631,7 +632,40 @@ void Organizer::backCarFailureAction(Car* car)
 	car->getAssignedPatient()->setStopped(true);
 	HospitalList[car->getHospital() - 1]->addFailurePatient(car->getAssignedPatient());
 	BackCars.enqueue(car, -car->getDistToHospital());
-}	
+}
+void Organizer::handleCancellations()
+{
+	CancellationReq cr;
+	CancellationList.dequeue(cr);
+
+	while (CancellationList.peek(cr) && cr.CancellationTimestep == timeStep)
+	{
+		CancellationList.dequeue(cr);
+		Hospital* hospital = HospitalList[cr.hospitalID - 1];
+
+		// Verifies that the Patient exists in its corresponding hospital's NP List
+		if (!hospital->isPatientInNPList(cr.PID)) { return; }
+
+		// Search for the car in the OutCars list then dequeue it if found
+		Car* assignedCar = nullptr; 
+		bool carFound = OutCars.cancelRequest(cr.PID, assignedCar);
+
+		if (carFound)
+		{
+			hospital->cancelRequest(cr.PID);
+			BackCars.enqueue(assignedCar, -assignedCar->getDistToHospital());
+		}
+	}
+}
+
+void Organizer::addToFinishedList(Car* car)
+{
+	Patient* p = car->deassignPatient();
+	p->setFinished(timeStep);
+	FinishedList.enqueue(p);
+	HospitalList[car->getHospital() - 1]->addCarToList(car);
+}
+
 
 Organizer::~Organizer()
 {

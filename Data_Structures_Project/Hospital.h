@@ -1,5 +1,6 @@
 #ifndef HOSPITAL_H
 #define HOSPITAL_H
+#include "ModifiedQ.h"
 
 class Hospital
 {
@@ -39,8 +40,7 @@ public:
 	int getNCarsCount() { return NCList.getCount(); }	// Getter for NCars count
 	int getEPListLength() { return EPList.getCount(); }	// Getter for EPList count
 	bool isEmpty() { return (NPList.isEmpty() && SPList.isEmpty() && EPList.isEmpty()); }	// Checks if all patient lists are empty
-	LinkedQueue<Car*>* Hospital::getSCList() { return &SCList; } // Getter for SCars (Free) List
-	LinkedQueue<Car*>* Hospital::getNCList() { return &NCList; } // Getter for NCars (Free) List
+	bool isPatientInNPList(int patientID);
 
 	//Outstream operator overloading
 	friend ostream& operator <<(ostream& os, Hospital& h);
@@ -183,6 +183,23 @@ ostream& operator <<(ostream& os, Hospital& h)
 	os << "==============	Hospital #" << h.hospitalID << " data end  =============" << endl;
 	return os;
 }
+
+bool Hospital::isPatientInNPList(int patientID) const
+{
+	if (NPList.isEmpty()) { return false; }
+
+	// Start from the front of the queue (which is a LinkedQueue)
+	Node<Patient*>* currentNode = NPList.getFront();
+
+	// Traverse the queue until we find the patient or reach the end
+	while (currentNode != nullptr)
+	{
+		if (currentNode->getItem()->getPatientID() == patientID) { return true; }
+		currentNode = currentNode->getNext();
+	}
+	return false;
+}
+
 
 //Simulator Function will probably not need in phase 2
 bool Hospital::getNP(Patient*& p) { return NPList.dequeue(p); }

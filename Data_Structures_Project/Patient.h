@@ -42,6 +42,7 @@ public:
 	bool getStopped() { return stopped; }
 
 	//Setters
+	void setPatientID(int id) { patientID = id; }
 	void setPickup(int pt) { pickupTime = pt; }
 	void setFinished(int ft) { finishTime = ft; }
 	void setDistanceToPickup(int dst) { distToHospital = dst; }
