@@ -234,7 +234,8 @@ void Organizer::Simulator()
 
 }
 
-/***** FILE LOADING FUNCTION *****/
+/***** FILE LOADING FUNCTIONS *****/
+
 /* The processInputFile function loads, reads and processes the input file 
 containing data related to the hospitals, patient requests, and cancellations. It then either calls
 the respective functions to store the data in appropriate data structures or stores the latter itself */
@@ -486,6 +487,9 @@ void Organizer::handleCarMovements()
 		HospitalList[car->getHospital() - 1]->addCarToList(car);
 	}
 }
+
+/* This function assigns a car to a patient based on their nearest hospital and patient type.
+   It then iterates through hospitals until a car is assigned or all options are exhausted. */
 
 void Organizer::moveCarFromFreeToOut(Patient* patient)
 {
