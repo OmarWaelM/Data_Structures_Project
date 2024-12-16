@@ -10,7 +10,6 @@
 #include "ModifiedPriQ.h"
 
 #include <string>
-#include <climits>
 using namespace std;
 
 struct CancellationReq
@@ -499,9 +498,9 @@ void Organizer::moveCarFromFreeToOut(Patient* patient)
 	// Validate hospital ID; to ensure hospital exists
 	if (nearestHospitalID < 1 || nearestHospitalID > numHospitals) { return; }
 
-	int hospitalCount = 0;
+	bool checked[numHospitals] = { false }; // Track checked hospitals
 
-	while (hospitalCount < numHospitals)
+	while (true)
 	{
 		Hospital* nearestHospital = HospitalList[nearestHospitalID - 1];
 		Car* car = nullptr;
@@ -544,20 +543,31 @@ void Organizer::moveCarFromFreeToOut(Patient* patient)
 		}
 
 		//If no cars are available in the nearest hospital to the patient
-		hospitalCount++; // Increment our breakaway counter by 1
+		checked[nearestHospitalID - 1] = true; // Mark the current hospital as checked
 
 		// Find the next nearest hospital to the patient
 		int nextNearestHospitalID = -1;
-		int minDistance = INT_MAX;
+		int minDistance = -1;
+		bool foundValidHospital = false;
 
 		for (int i = 0; i < numHospitals; i++)
 		{
-			if (distanceMatrix[nearestHospitalID - 1][i] < minDistance)
+			if (!checked[i])
 			{
-				nextNearestHospitalID = i + 1;
-				minDistance = distanceMatrix[nearestHospitalID - 1][i];
+				int distance = distanceMatrix[nearestHospitalID - 1][i];
+
+				// Set minDistance with the first non-checked hospital's distance
+				if (minDistance == -1 || distance < minDistance)
+				{
+					minDistance = distance;
+					nextNearestHospitalID = i + 1;
+					foundValidHospital = true;
+				}
 			}
 		}
+
+		// If no more hospitals are available, exit the while loop
+		if (!foundValidHospital) { return; }
 
 		// Update nearestHospitalID to the next nearest hospital
 		nearestHospitalID = nextNearestHospitalID;
