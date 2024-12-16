@@ -8,7 +8,6 @@ private:
 	LinkedQueue<Patient*> SPList;
 	priQueue<Patient*> EPList;
 	ModifiedQ NPList;
-
 	LinkedQueue<Car*> SCList;
 	LinkedQueue<Car*> NCList;
 
@@ -17,26 +16,39 @@ private:
 
 public:
 	//Member Function
+	
+	//Constructor
 	Hospital();
-	void setID(int id) { hospitalID = id; }
-	int getHospitalID() const { return hospitalID; }
-	int getSCarsCount() { return SCList.getCount(); } // Getter for SCars count
-	int getNCarsCount() { return NCList.getCount(); } // Getter for NCars count
+
+	//List Members movemen
 	void addCarToList(Car* car);
-	void addPatientToList(Patient* patient);
-	bool assignPatientToCar(Patient* patient);
-	bool cancelRequest(int patientID);
+	bool addPatientToList(Patient* patient);
+	void addFailurePatient(Patient* patient); //adds patient to top after car failure
+
+	//Car and Patient Assignment
+	bool assignPatients(Car*&  ambulance);
+	bool assignPatientToCar(Patient* patient, Car*& ambulance);
+	bool cancelRequest(int patientID) { return NPList.cancelRequest(patientID); } //update this to return car&
+
+	//Setter
+	void setID(int id) { hospitalID = id; }
+
+	//Getters
+	int getHospitalID() const { return hospitalID; }	// Getter for Hospital ID
+	int getSCarsCount() { return SCList.getCount(); }	// Getter for SCars count
+	int getNCarsCount() { return NCList.getCount(); }	// Getter for NCars count
+	int getEPListLength() { return EPList.getCount(); }	// Getter for EPList count
+	bool isEmpty() { return (NPList.isEmpty() && SPList.isEmpty() && EPList.isEmpty()); }	// Checks if all patient lists are empty
+
+	//Outstream operator overloading
+	friend ostream& operator <<(ostream& os, Hospital& h);
 
 	//Simulation Specific Function
-	bool empty();
 	bool getNP(Patient*& p);
 	bool getEP(Patient*& p);
 	bool getSP(Patient*& p);
 	bool getNC(Car*& c);
 	bool getSC(Car*& c);
-
-	friend ostream& operator <<(ostream& os, Hospital& h);
-
 };
 
 Hospital::Hospital(): hospitalID(0) {}
@@ -49,19 +61,80 @@ void Hospital::addCarToList(Car* car)
 		NCList.enqueue(car);
 }
 
-void Hospital::addPatientToList(Patient* patient)
+bool Hospital::addPatientToList(Patient* patient)
 {
 	if (patient->getPatientType() == SP)
+	{
 		SPList.enqueue(patient);
+		return true;
+	}
 	else if (patient->getPatientType() == NP)
+	{
 		NPList.enqueue(patient);
+		return true;
+	}
 	else
-		EPList.enqueue(patient, patient->getPatientPriority());
+	{
+		if (!NCList.isEmpty() || !SCList.isEmpty())
+		{
+			EPList.enqueue(patient, patient->getPatientPriority());
+			return true;
+		}
+		return false;
+	}
 }
 
-bool Hospital::assignPatientToCar(Patient* p)
+void Hospital::addFailurePatient(Patient* patient)
 {
-	Car* ambulance = nullptr;
+	if (patient->getPatientType() == SP)
+	{
+		SPList.addToTop(patient);
+	}
+	else if (patient->getPatientType() == NP)
+	{
+		NPList.addToTop(patient);
+	}
+	else
+	{
+		EPList.addToTop(patient, patient->getPatientPriority());
+	}
+}
+
+bool Hospital::assignPatients(Car*& ambulance)
+{
+	Patient* p;
+	int pri;
+	if (!EPList.isEmpty())
+	{
+		EPList.peek(p, pri);
+		if (assignPatientToCar(p, ambulance))
+		{
+			EPList.dequeue(p, pri);
+			return true;
+		}
+	}
+	if (!SPList.isEmpty())
+	{
+		SPList.peek(p);
+		if (assignPatientToCar(p, ambulance))
+		{
+			SPList.dequeue(p);
+			return true;
+		}
+	}
+	if (!NPList.isEmpty())
+	{
+		NPList.peek(p);
+		if (assignPatientToCar(p, ambulance))
+		{
+			NPList.dequeue(p);
+			return true;
+		}
+	}
+}
+
+bool Hospital::assignPatientToCar(Patient* p, Car*& ambulance)
+{
 	Patient* patient = nullptr;
 	int x;
 	if (p->getPatientType() == NP && NCList.getCount() != 0)
@@ -85,27 +158,19 @@ bool Hospital::assignPatientToCar(Patient* p)
 			NCList.dequeue(ambulance);
 			EPList.dequeue(patient,x);
 			ambulance->AssignPatient(patient);
-
+			return true;
 		}
 		else if (SCList.getCount() != 0)
 		{
 			SCList.dequeue(ambulance);
 			EPList.dequeue(patient, x);
 			ambulance->AssignPatient(patient);
+			return true;
 		}
-		return true;
 	}
-	
 	return false;
 }
 
-bool Hospital::cancelRequest(int patientID)
-{
-	return NPList.cancelRequest(patientID);
-}
-
-
-//this can be changed i made it to look like the description
 ostream& operator <<(ostream& os, Hospital& h)
 {
 	os << "==============	  Hospital #" << h.hospitalID << " data   ==============" << endl;
@@ -117,38 +182,14 @@ ostream& operator <<(ostream& os, Hospital& h)
 	return os;
 }
 
-
-bool Hospital::empty()
-{
-	bool res = (NPList.isEmpty() && SPList.isEmpty() && EPList.isEmpty());
-	return res;
-}
-
-bool Hospital::getNP(Patient*& p)
-{
-	bool res = NPList.dequeue(p);
-	return res;
-}
-
-bool Hospital::getEP(Patient*& p)
-{
+//Simulator Function will probably not need in phase 2
+bool Hospital::getNP(Patient*& p) { return NPList.dequeue(p); }
+bool Hospital::getEP(Patient*& p) { 
 	int pri;
 	return EPList.dequeue(p, pri);
 }
-
-bool Hospital::getSP(Patient*& p)
-{
-	return SPList.dequeue(p);
-}
-bool Hospital::getNC(Car*& c)
-{
-	return NCList.dequeue(c);
-}
-
-bool Hospital::getSC(Car*& c)
-{
-	return SCList.dequeue(c);
-}
-
+bool Hospital::getSP(Patient*& p) { return SPList.dequeue(p); }
+bool Hospital::getNC(Car*& c) { return NCList.dequeue(c); }
+bool Hospital::getSC(Car*& c) { return SCList.dequeue(c); }
 
 #endif

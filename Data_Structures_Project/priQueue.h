@@ -100,6 +100,13 @@ public:
         return head == nullptr;
     }
 
+    void addToTop(T item, int pri)	//Adds entry to the start of the queue
+    {
+        priNode<T>* n = new priNode<T>(item, pri);
+        n->setNext(head);
+        head = n;
+    }
+
     friend ostream& operator << <T>(ostream& os, priQueue<T>& q);
 };
 
