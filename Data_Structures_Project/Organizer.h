@@ -1,6 +1,16 @@
 #ifndef ORGANIZER_H
 #define ORGANIZER_H
 
+#include "UI.h"
+#include "Hospital.h"
+#include "Patient.h"
+#include "Car.h"
+#include "LinkedQueue.h"
+#include "priQueue.h"
+#include "ModifiedPriQ.h"
+
+#include <string>
+#include <climits>
 using namespace std;
 
 struct CancellationReq
@@ -480,32 +490,75 @@ void Organizer::handleCarMovements()
 void Organizer::moveCarFromFreeToOut(Patient* patient)
 {
 	if (!patient) { return; }
+
+	int nearestHospitalID = patient->getNearestHospital();
+	// Validate hospital ID; to ensure hospital exists
+	if (nearestHospitalID < 1 || nearestHospitalID > numHospitals) { return; }
+
+	int hospitalCount = 0;
+
+	while (hospitalCount < numHospitals)
+	{
+		Hospital* nearestHospital = HospitalList[nearestHospitalID - 1];
+		Car* car = nullptr;
+		bool carAssigned = false;
+
+		patientType type = patient->getPatientType();
+
+		if (type == patientType::EP)
+		{
+			if (nearestHospital->getNC(car))
+			{
+				carAssigned = true; // Assign EP to NC car if available
+			}
+			else if (nearestHospital->getSC(car))
+			{
+				carAssigned = true; // Assign EP to SC car if NC car is unavailable
+			}
+		}
+		else if (type == patientType::SP)
+		{
+			if (nearestHospital->getSC(car))
+			{
+				carAssigned = true; // Assign SP to SC car if available
+			}
+		}
+		else if (type == patientType::NP)
+		{
+			if (nearestHospital->getNC(car))
+			{
+				carAssigned = true; // Assign NP to NC car if available
+			}
+		}
+
+		// If a car is assigned, implement the car assignment and return
+		if (carAssigned)
+		{
+			car->AssignPatient(patient);
+			OutCars.enqueue(car, -car->getDistToPatient());
+			return;
+		}
+
+		//If no cars are available in the nearest hospital to the patient
+		hospitalCount++; // Increment our breakaway counter by 1
+
+		// Find the next nearest hospital to the patient
+		int nextNearestHospitalID = -1;
+		int minDistance = INT_MAX;
+
+		for (int i = 0; i < numHospitals; i++)
+		{
+			if (distanceMatrix[nearestHospitalID - 1][i] < minDistance)
+			{
+				nextNearestHospitalID = i + 1;
+				minDistance = distanceMatrix[nearestHospitalID - 1][i];
+			}
+		}
+
+		// Update nearestHospitalID to the next nearest hospital
+		nearestHospitalID = nextNearestHospitalID;
+	}
 }
-
-/*//wrong implementation
-void Organizer::moveCarFromFreeToOut(Patient* patient)
-{
-	 Car* car = nullptr;
-
-	 // Assign a car to the patient (priority: SC > NC)
-	 if (HospitalList[patient->getNearestHospital() - 1]->getSC(car) ||
-		 HospitalList[patient->getNearestHospital() - 1]->getNC(car)) //-1 as the array is 1_based indexed
-	 {
-		 // Link the car to the patient
-		 car->AssignPatient(patient);
-
-		 // Calculate priority for OutCars based on distance to the patient
-		 int priority = -car->getDistToPatient();
-
-		 // Move the car to the OutCars queue
-		 OutCars.enqueue(car, priority);
-		 cout << "Car " << car->getcarID() << " assigned to Patient " << patient->getPatientID() << " and moved to OutCars.\n";
-	 }
-	 else
-	 {
-		 cout << "No available car for Patient " << patient->getPatientID() << ".\n";
-	 }
- }*/
 
 void Organizer::outCarFailure()
 {
