@@ -39,6 +39,8 @@ public:
 	int getNCarsCount() { return NCList.getCount(); }	// Getter for NCars count
 	int getEPListLength() { return EPList.getCount(); }	// Getter for EPList count
 	bool isEmpty() { return (NPList.isEmpty() && SPList.isEmpty() && EPList.isEmpty()); }	// Checks if all patient lists are empty
+	LinkedQueue<Car*>* Hospital::getSCList() { return &SCList; } // Getter for SCars (Free) List
+	LinkedQueue<Car*>* Hospital::getNCList() { return &NCList; } // Getter for NCars (Free) List
 
 	//Outstream operator overloading
 	friend ostream& operator <<(ostream& os, Hospital& h);

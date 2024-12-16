@@ -509,29 +509,33 @@ void Organizer::moveCarFromFreeToOut(Patient* patient)
 	{
 		if (nearestHospital->getNC(car))
 		{
-			carAssigned = true; // Assign EP to NC car if available
-			car->setCarType(carType::NC);
+			// Assign EP to NC car if available
+			nearestHospital->getNCList()->dequeue(car);
+			carAssigned = true;
 		}
 		else if (nearestHospital->getSC(car))
 		{
-			carAssigned = true; // Assign EP to SC car if NC car is unavailable
-			car->setCarType(carType::SC);
+			// Assign EP to SC car if NC car is unavailable
+			nearestHospital->getSCList()->dequeue(car);
+			carAssigned = true;
 		}
 	}
 	else if (type == patientType::SP)
 	{
 		if (nearestHospital->getSC(car))
 		{
-			carAssigned = true; // Assign SP to SC car if available
-			car->setCarType(carType::SC);
+			// Assign SP to SC car if available
+			nearestHospital->getSCList()->dequeue(car);
+			carAssigned = true;
 		}
 	}
 	else if (type == patientType::NP)
 	{
 		if (nearestHospital->getNC(car))
 		{
-			carAssigned = true; // Assign NP to NC car if available
-			car->setCarType(carType::NC);
+			// Assign NP to NC car if available
+			nearestHospital->getNCList()->dequeue(car);
+			carAssigned = true;
 		}
 	}
 
