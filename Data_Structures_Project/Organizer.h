@@ -513,10 +513,12 @@ void Organizer::moveCarFromFreeToOut(Patient* patient)
 			if (nearestHospital->getNC(car))
 			{
 				carAssigned = true; // Assign EP to NC car if available
+				car->setCarType(carType::NC);
 			}
 			else if (nearestHospital->getSC(car))
 			{
 				carAssigned = true; // Assign EP to SC car if NC car is unavailable
+				car->setCarType(carType::SC);
 			}
 		}
 		else if (type == patientType::SP)
@@ -524,6 +526,7 @@ void Organizer::moveCarFromFreeToOut(Patient* patient)
 			if (nearestHospital->getSC(car))
 			{
 				carAssigned = true; // Assign SP to SC car if available
+				car->setCarType(carType::SC);
 			}
 		}
 		else if (type == patientType::NP)
@@ -531,6 +534,7 @@ void Organizer::moveCarFromFreeToOut(Patient* patient)
 			if (nearestHospital->getNC(car))
 			{
 				carAssigned = true; // Assign NP to NC car if available
+				car->setCarType(carType::NC);
 			}
 		}
 
