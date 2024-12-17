@@ -527,6 +527,7 @@ void Organizer::handleCarMovements()
 	}
 }
 
+/****** FAILURE PROBABILITIES AND ACTIONS FUNCTIONS ******/
 
 void Organizer::outCarFailure()
 {
@@ -769,6 +770,8 @@ void Organizer::transferPatientsRequests(Patient* patient, int nearestHospitalID
 	nearestHospital->addPatientToList(patient);
 }
 
+/****** CANCELLATION REQUESTS HANDLING FUNCTION ******/
+
 void Organizer::handleCancellations()
 {
 	CancellationReq cr;
@@ -794,6 +797,8 @@ void Organizer::handleCancellations()
 	}
 }
 
+/****** ADD FINISHED PATIENTS TO FINISHED LIST FUNCTION *****/
+
 void Organizer::addToFinishedList(Car* car)
 {
 	Patient* p = car->deassignPatient();
@@ -801,6 +806,8 @@ void Organizer::addToFinishedList(Car* car)
 	FinishedList.enqueue(p);
 	HospitalList[car->getHospital() - 1]->addCarToList(car);
 }
+
+/****** GENERATE & UPDATE OUTPUT FILE FUNCTION *****/
 
 
 Organizer::~Organizer()
