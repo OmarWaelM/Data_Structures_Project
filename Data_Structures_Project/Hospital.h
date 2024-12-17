@@ -45,7 +45,7 @@ public:
 	int getEPListLength() { return EPList.getCount(); }	// Getter for EPList count
 	bool isEmpty() { return (NPList.isEmpty() && SPList.isEmpty() && EPList.isEmpty()); }	// Checks if all patient lists are empty
 	bool isPatientInNPList(int patientID);
-	int getFailureTimeStep() { return failureTimeStep; }
+	int getFailureTimeStep() {return failureTimeStep;}
 
 	//Outstream operator overloading
 	friend ostream& operator <<(ostream& os, Hospital& h);

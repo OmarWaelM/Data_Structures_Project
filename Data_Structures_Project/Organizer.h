@@ -60,9 +60,6 @@ public:
   
 	//Constructor
 	Organizer();
-
-	//Simulator
-	void Simulator();
   
 	/***** Input file member functions *****/
 	void processInputFile();					//Processes input file
@@ -87,7 +84,6 @@ public:
 	void handleCancellations();
 	void addToFinishedList(Car* car);
 	void transferPatientsRequests(Patient* patient, int nearestHospitalID);
-	void transferFreeCars(Car* car, int nearestHospitalID);
 
 	//create function to Assign all current patients from patientlist to hospital (code is in simulator)
 	//create function to Perform all cancellation requests (code is in simulator)
@@ -120,134 +116,6 @@ Organizer::Organizer():
 	numOfOutOfServiceSC(0),
 	numOfOutOfServiceNC(0)
 {
-}
-
-void Organizer::Simulator()
-{
-	//Initialization
-	timeStep = 0;
-	GUI.Start();
-	filename = GUI.getInputFileName();
-	processInputFile();
-
-	Patient* p;
-	Car* car;
-	CancellationReq cr;
-	bool endSimulation = false;
-	int randomNum = 0;
-
-	GUI.Output(timeStep, HospitalList, numHospitals, &BackCars, &OutCars, &FinishedList, &checkupList);
-
-	while (!endSimulation)
-	{
-		//Updating timestep
-		timeStep++;
-
-		// 
-		// update cars
-		// check for returning cars
-		// check for patient requests
-		// assign patients to cars
-		// check for car failure
-		// check for hospital failure
-		//
-
-		//Checking for new patients
-		while (patientsList.peek(p) && p->getRequestTime() == timeStep)
-		{
-			patientsList.dequeue(p);
-			HospitalList[p->getNearestHospital() - 1]->addPatientToList(p);
-		}
-
-		//Checking for cancellation requests
-		while (CancellationList.peek(cr) && cr.CancellationTimestep == timeStep)
-		{
-			CancellationList.dequeue(cr);
-			HospitalList[cr.hospitalID - 1]->cancelRequest(cr.PID);
-			//does not check the outcars list as no patient-car assignment occurs
-		}
-
-		updateOutCars();
-		updateBackCars();
-		updateCheckupCars();
-		handleCarMovements();
-
-		for (int i = 0; i < numHospitals; i++)
-		{
-			//Generating random number between 0 and 100
-			randomNum = rand() % 100;
-
-			if (randomNum >= 10 && randomNum < 20)
-			{
-				//Getting patient from sp list
-				Patient* p = nullptr;
-				if (HospitalList[i]->getSP(p))
-					FinishedList.enqueue(p);
-			}
-			if (randomNum >= 20 && randomNum < 25)
-			{
-				//Getting patient from ep list
-				Patient* p = nullptr;
-				if (HospitalList[i]->getEP(p))
-					FinishedList.enqueue(p);
-			}
-			if (randomNum >= 30 && randomNum < 40)
-			{
-				//Getting patient from np list
-				Patient* p = nullptr;
-				if (HospitalList[i]->getNP(p))
-					FinishedList.enqueue(p);
-			}
-			if (randomNum >= 40 && randomNum < 45)
-			{
-				//Getting car from sc list
-				Car* c = nullptr;
-				if (HospitalList[i]->getSC(c))
-					OutCars.enqueue(c, 1);
-			}
-			if (randomNum >= 70 && randomNum < 75)
-			{
-				//Getting car from nc list
-				Car* c = nullptr;
-				if (HospitalList[i]->getNC(c))
-					OutCars.enqueue(c, 1);
-			}
-			if (randomNum >= 80 && randomNum < 90)
-			{
-				//Moving car from out to back cars list
-				Car* c = nullptr;
-				int pri;
-				if (OutCars.dequeue(c, pri))
-					BackCars.enqueue(c, pri);
-			}
-			if (randomNum >= 90 && randomNum < 95)
-			{
-				//Moving car from back cars list to hospital
-				Car* c = nullptr;
-				int pri;
-				if (BackCars.dequeue(c, pri))
-				{
-					int cid = c->getHospital();
-					HospitalList[cid - 1]->addCarToList(c);
-				}
-			}
-		}
-    
-		//Output hospital data
-		GUI.Output(timeStep, HospitalList, numHospitals, &BackCars, &OutCars, &FinishedList, &checkupList);
-
-		//Checking if all lists are empty
-		endSimulation = true;
-		if (!patientsList.isEmpty())
-			endSimulation = false;
-		for (int i = 0; i < numHospitals; i++)
-		{
-			if (!HospitalList[i]->isEmpty())
-				endSimulation = false;
-		}
-	}
-
-
 }
 
 /***** FILE LOADING FUNCTIONS *****/
