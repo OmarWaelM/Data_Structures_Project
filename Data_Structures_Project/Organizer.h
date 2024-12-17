@@ -458,6 +458,34 @@ void Organizer::updateCheckupCars()
 	}
  }
 
+void Organizer::moveCarFromFreeToOut(Patient* patient)
+{
+	if (!patient) { return; }
+
+	int nearestHospitalID = patient->getNearestHospital();
+	// Validate hospital ID to ensure the hospital exists
+	if (nearestHospitalID < 1 || nearestHospitalID > numHospitals) { return; }
+
+	Hospital* nearestHospital = HospitalList[nearestHospitalID - 1];
+	Car* assignedCar = nullptr;
+
+	// Attempt to assign a car to the patient using Hospital's logic
+	assignedCar = nearestHospital->assignPatientToCar(patient, assignedCar);
+
+	// If a car was successfully assigned
+	if (assignedCar)
+	{
+		OutCars.enqueue(assignedCar, -assignedCar->getDistToPatient()); // Add car to OUT cars queue
+		return;
+	}
+
+	// Handle unassigned EP patients
+	if (patient->getPatientType() == patientType::EP)
+	{
+		handleEP(patient); // Handle EP patient as no car was available
+	}
+}
+
 void Organizer::handleCarMovements()
 {
 	Car* car;
@@ -496,37 +524,6 @@ void Organizer::handleCarMovements()
 		car->setFailureOut(false);
 		car->setInCheckup(false);
 		HospitalList[car->getHospital() - 1]->addCarToList(car);
-	}
-}
-
-/* This function assigns a car to a patient based on their nearest hospital and patient type.
-   It then iterates through he nearest hospitals until a car is assigned or all options are exhausted. */
-
-void Organizer::moveCarFromFreeToOut(Patient* patient)
-{
-	if (!patient) { return; }
-
-	int nearestHospitalID = patient->getNearestHospital();
-	// Validate hospital ID to ensure the hospital exists
-	if (nearestHospitalID < 1 || nearestHospitalID > numHospitals) { return; }
-
-	Hospital* nearestHospital = HospitalList[nearestHospitalID - 1];
-	Car* assignedCar = nullptr;
-
-	// Attempt to assign a car to the patient using Hospital's logic
-	assignedCar = nearestHospital->assignPatientToCar(patient, assignedCar);
-
-	// If a car was successfully assigned
-	if (assignedCar)
-	{
-		OutCars.enqueue(assignedCar, -assignedCar->getDistToPatient()); // Add car to OUT cars queue
-		return;
-	}
-
-	// Handle unassigned EP patients
-	if (patient->getPatientType() == patientType::EP)
-	{
-		handleEP(patient); // Handle EP patient as no car was available
 	}
 }
 
