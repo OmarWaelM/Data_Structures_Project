@@ -1,18 +1,7 @@
 #ifndef ORGANIZER_H
 #define ORGANIZER_H
-#include "Car.h"
-#include "UI.h"
-#include "Hospital.h"
+
 using namespace std;
-
-#include<iostream>
-#include <string>
-#include <fstream>
-#include <sstream>
-#include <iomanip>
-#include <random>
-
-class UI;
 
 struct CancellationReq
 {
@@ -24,73 +13,72 @@ struct CancellationReq
 class Organizer
 {
 private:
-	//Lists used in orgranizer class
-	LinkedQueue<Patient*> patientsList;  // Patients list queue (list of pointers to patients)
-	LinkedQueue<CancellationReq> CancellationList;
-	LinkedQueue<Patient*> FinishedList;
-	priQueue<Car*> BackCars;
-	ModifiedPriQ OutCars;
+	// Lists used in orgranizer class
+	Hospital** HospitalList;						// An array of pointers to hospitals
+	LinkedQueue<Patient*> patientsList;				// Patients list of type Linked Queue (list of pointers to patients)
+	LinkedQueue<CancellationReq> CancellationList;	// Cancellation requests' list of type Linked Queue
+	LinkedQueue<Patient*> FinishedList;				// Finished patients' list of type Linked Queue
+	priQueue<Car*> BackCars;						// Back cars' list (cars on their way back) of type Priority Queue
+	ModifiedPriQ OutCars;							// Out cars' list (cars out on their way to pick up patients) of type Priority Queue (modified)
+	priQueue<Car*> checkupList;						// Checkup cars list
 
-	//General data members
+	// General data members
 	int timeStep;
 	UI GUI;
-	string filename;
-
-	Hospital** HospitalList; //An array of pointers to hospitals
 	int numHospitals;
-	int speedScars, speedNcars;
 	int** distanceMatrix;
+	double outCarsFailureProbability;
+	double backCarsFailureProbability;
+	double hospitalFailureProbability;
+	int checkupTime;
+
+	//File Loading data members (can be declared in file processing and freed at the end)
+	string filename;//Keep
+	string outfile; //Keep used when outputting results file
+	int speedScars, speedNcars;
 	int* scarsPerHospital;
 	int* ncarsPerHospital;
 	int numRequests;
 	int numCancellations;
-
 
 public:
 	//Member Functions
   
 	//Constructor
 	Organizer();
-	void processInputFile();
+
+	//Simulator
 	void Simulator();
-
-	LinkedQueue<Patient*>* getFinishedList() { return &FinishedList; }
-
-	//Functions for managing hospital list:
-
-	// Getter for hospital list (if needed)
-	Hospital** getHospitalList() { return HospitalList; }
-
-	// Getter for number of hospitals
-	int getNumHospitals() const { return numHospitals; }
-
-	// Getter for hospital with specific id
-	Hospital* getHospital(int ID);
-
-	//Adding a Hospital to the hospital list
-	void AddHospital(const int Hospital_ID);
-
-	//Printing out the hospitals' information as shown in the sample output file
-	void printHospitals()const;
-
+  
 	/***** Input file member functions *****/
+	void processInputFile();					//Processes input file
+	void readHospitalData();					//Reads hospital distance data
+	void AddHospital(const int Hospital_ID);	//Adding a Hospital to the hospital list
 
-	//Reads hospital distance data
-	void readHospitalData();
-	//Printing out the hospitals in the hospital list
-	void PrintHospitalsList()const;
-	void printPatientsList()const;
-	void printCancellationList()const;
+	/**** Functions for handling Card **/
+	void updateOutCars();
+	void updateBackCars();
+	void updateCheckupCars();
+	void handleCarMovements(); //move from out to back and from back to hospitals
+	void moveCarFromFreeToOut(Patient* patient); //move from free to out
+	void outCarFailure();
+	void outCarFailureAction(Car* car);
+	void backCarFailure();
+	void backCarFailureAction(Car* car);
+	void addCarToCheckup(Car* car) { checkupList.enqueue(car, checkupTime); }
 
-	// Functions for handling Out Cars
-	//void handleCancellations();
-	void handleCarMovements();
+	//create function to Assign all current patients from patientlist to hospital (code is in simulator)
+	//create function to Perform all cancellation requests (code is in simulator)
+	//create functino to Assign all possible patients from hospitals to out cars
+	//Hamdle no EP
+	//Hospital Failure
+	//Hospital Failure action
+	//Processing input file needs to get probabilities and checkup time
 
 	~Organizer();
 };
 
-Organizer::Organizer() :
-	GUI(),
+Organizer::Organizer():
 	timeStep(0),
 	HospitalList(nullptr),
 	numHospitals(0),
@@ -100,13 +88,143 @@ Organizer::Organizer() :
 	scarsPerHospital(nullptr),
 	ncarsPerHospital(nullptr),
 	numRequests(0),
-	numCancellations(0)
-
+	numCancellations(0),
+	outCarsFailureProbability(0),
+	backCarsFailureProbability(0),
+	hospitalFailureProbability(0),
+	checkupTime(0)
 {
 }
 
-/***** FILE LOADING FUNCTION *****/
+void Organizer::Simulator()
+{
+	//Initialization
+	timeStep = 0;
+	GUI.Start();
+	filename = GUI.getInputFileName();
+	processInputFile();
 
+	Patient* p;
+	Car* car;
+	CancellationReq cr;
+	bool endSimulation = false;
+	int randomNum = 0;
+
+	GUI.Output(timeStep, HospitalList, numHospitals, &BackCars, &OutCars, &FinishedList, &checkupList);
+
+	while (!endSimulation)
+	{
+		//Updating timestep
+		timeStep++;
+
+		// 
+		// update cars
+		// check for returning cars
+		// check for patient requests
+		// assign patients to cars
+		// check for car failure
+		// check for hospital failure
+		//
+
+		//Checking for new patients
+		while (patientsList.peek(p) && p->getRequestTime() == timeStep)
+		{
+			patientsList.dequeue(p);
+			HospitalList[p->getNearestHospital() - 1]->addPatientToList(p);
+		}
+
+		//Checking for cancellation requests
+		while (CancellationList.peek(cr) && cr.CancellationTimestep == timeStep)
+		{
+			CancellationList.dequeue(cr);
+			HospitalList[cr.hospitalID - 1]->cancelRequest(cr.PID);
+			//does not check the outcars list as no patient-car assignment occurs
+		}
+
+		updateOutCars();
+		updateBackCars();
+		updateCheckupCars();
+		handleCarMovements();
+
+		for (int i = 0; i < numHospitals; i++)
+		{
+			//Generating random number between 0 and 100
+			randomNum = rand() % 100;
+
+			if (randomNum >= 10 && randomNum < 20)
+			{
+				//Getting patient from sp list
+				Patient* p = nullptr;
+				if (HospitalList[i]->getSP(p))
+					FinishedList.enqueue(p);
+			}
+			if (randomNum >= 20 && randomNum < 25)
+			{
+				//Getting patient from ep list
+				Patient* p = nullptr;
+				if (HospitalList[i]->getEP(p))
+					FinishedList.enqueue(p);
+			}
+			if (randomNum >= 30 && randomNum < 40)
+			{
+				//Getting patient from np list
+				Patient* p = nullptr;
+				if (HospitalList[i]->getNP(p))
+					FinishedList.enqueue(p);
+			}
+			if (randomNum >= 40 && randomNum < 45)
+			{
+				//Getting car from sc list
+				Car* c = nullptr;
+				if (HospitalList[i]->getSC(c))
+					OutCars.enqueue(c, 1);
+			}
+			if (randomNum >= 70 && randomNum < 75)
+			{
+				//Getting car from nc list
+				Car* c = nullptr;
+				if (HospitalList[i]->getNC(c))
+					OutCars.enqueue(c, 1);
+			}
+			if (randomNum >= 80 && randomNum < 90)
+			{
+				//Moving car from out to back cars list
+				Car* c = nullptr;
+				int pri;
+				if (OutCars.dequeue(c, pri))
+					BackCars.enqueue(c, pri);
+			}
+			if (randomNum >= 90 && randomNum < 95)
+			{
+				//Moving car from back cars list to hospital
+				Car* c = nullptr;
+				int pri;
+				if (BackCars.dequeue(c, pri))
+				{
+					int cid = c->getHospital();
+					HospitalList[cid - 1]->addCarToList(c);
+				}
+			}
+		}
+    
+		//Output hospital data
+		GUI.Output(timeStep, HospitalList, numHospitals, &BackCars, &OutCars, &FinishedList, &checkupList);
+
+		//Checking if all lists are empty
+		endSimulation = true;
+		if (!patientsList.isEmpty())
+			endSimulation = false;
+		for (int i = 0; i < numHospitals; i++)
+		{
+			if (!HospitalList[i]->isEmpty())
+				endSimulation = false;
+		}
+	}
+
+
+}
+
+/***** FILE LOADING FUNCTION *****/
 /* The processInputFile function loads, reads and processes the input file 
 containing data related to the hospitals, patient requests, and cancellations. It then either calls
 the respective functions to store the data in appropriate data structures or stores the latter itself */
@@ -207,108 +325,6 @@ void Organizer::processInputFile()
 	readHospitalData();
 }
 
-void Organizer::Simulator()
-{
-	//Initialization
-	timeStep = 0;
-	GUI.Start();
-	filename = GUI.getInputFileName();
-	processInputFile();
-
-	Patient* p;
-	bool endSimulation = false;
-	int randomNum = 0;
-
-	while (!endSimulation)
-	{
-		//Updating timestep
-		timeStep++;
-
-		//Checking for new patients
-		while (patientsList.peek(p) && p->getRequestTime() == timeStep)
-		{
-			patientsList.dequeue(p);
-			HospitalList[p->getNearestHospital() - 1]->addPatientToList(p);
-			
-		}
-
-		for (int i = 0; i < numHospitals; i++)
-		{
-			//Generating random number between 0 and 100
-			randomNum = rand() % 100;
-
-			if (randomNum >= 10 && randomNum < 20)
-			{
-				//Getting patient from sp list
-				Patient* p = nullptr;
-				if (HospitalList[i]->getSP(p))
-					FinishedList.enqueue(p);
-			}
-			if (randomNum >= 20 && randomNum < 25)
-			{
-				//Getting patient from ep list
-				Patient* p = nullptr;
-				if (HospitalList[i]->getEP(p))
-					FinishedList.enqueue(p);
-			}
-			if (randomNum >= 30 && randomNum < 40)
-			{
-				//Getting patient from np list
-				Patient* p = nullptr;
-				if (HospitalList[i]->getNP(p))
-					FinishedList.enqueue(p);
-			}
-			if (randomNum >= 40 && randomNum < 45)
-			{
-				//Getting car from sc list
-				Car* c = nullptr;
-				if (HospitalList[i]->getSC(c))
-					OutCars.enqueue(c, 1);
-			}
-			if (randomNum >= 70 && randomNum < 75)
-			{
-				//Getting car from nc list
-				Car* c = nullptr;
-				if (HospitalList[i]->getNC(c))
-					OutCars.enqueue(c, 1);
-			}
-			if (randomNum >= 80 && randomNum < 90)
-			{
-				//Moving car from out to back cars list
-				Car* c = nullptr;
-				int pri;
-				if (OutCars.dequeue(c, pri))
-					BackCars.enqueue(c, pri);
-			}
-			if (randomNum >= 90 && randomNum < 95)
-			{
-				//Moving car from back cars list to hospital
-				Car* c = nullptr;
-				int pri;
-				if (BackCars.dequeue(c, pri))
-				{
-					int cid = c->getHospital();
-					HospitalList[cid - 1]->addCarToList(c);
-				}
-			}
-		}
-		//Output hospital data
-		GUI.Output(timeStep, HospitalList, numHospitals, &BackCars, &OutCars, &FinishedList);
-
-		//Checking if all lists are empty
-		endSimulation = true;
-		if (!patientsList.isEmpty())
-			endSimulation = false;
-		for (int i = 0; i < numHospitals; i++)
-		{
-			if (!HospitalList[i]->empty())
-				endSimulation = false;
-		}
-	}
-
-
-}
-
 void Organizer::AddHospital(const int Hospital_ID)
 {
 	int index = Hospital_ID - 1;
@@ -345,9 +361,6 @@ void Organizer::readHospitalData()
 		scars = scarsPerHospital[i];
 		ncars = ncarsPerHospital[i];
 
-		HospitalList[i]->setSCarsCount(scars);
-		HospitalList[i]->setNCarsCount(ncars);
-
 		// Adds SCars to the hospital's SCList and NCars to the NCList
 		// For each SCar, add it to the SCList
 		for (int j = 0; j < scars; ++j)
@@ -364,133 +377,210 @@ void Organizer::readHospitalData()
 	}
 }
 
-void Organizer::printHospitals() const
+/****** CAR HANDLING FUNCTIONS ******/
+
+void Organizer::updateOutCars()
 {
-	for (int i = 0; i < numHospitals; ++i)
+	priQueue<Car*> temp;
+	Car* c;
+	int pri;
+	while (!OutCars.isEmpty())
 	{
-		cout << *HospitalList[i]; // Use the overloaded << operator for Hospital class
+		OutCars.dequeue(c, pri);
+		c->updateOut();
+		if (c->getDistToPatient() == 0)
+		temp.enqueue(c, -c->getDistToPatient());
+	}
+	while (!temp.isEmpty())
+	{
+		temp.dequeue(c, pri);
+		OutCars.enqueue(c, pri);
 	}
 }
+
+void Organizer::updateBackCars()
+{
+	priQueue<Car*> temp;
+	Car* c;
+	int pri;
+	while (!BackCars.isEmpty())
+	{
+		BackCars.dequeue(c, pri);
+		c->updateBack();
+		temp.enqueue(c, -c->getDistToHospital());
+	}
+	while (!temp.isEmpty())
+	{
+		temp.dequeue(c, pri);
+		BackCars.enqueue(c, pri);
+	}
+}
+
+void Organizer::updateCheckupCars()
+ {
+	priQueue<Car*> temp;
+	Car* c;
+	int p;
+	while (!checkupList.isEmpty())
+	{
+		checkupList.dequeue(c, p);
+		p--;
+		temp.enqueue(c, p);
+	}
+	while (!temp.isEmpty())
+	{
+		temp.dequeue(c, p);
+		checkupList.enqueue(c, p);
+	}
+ }
 
 void Organizer::handleCarMovements()
 {
 	Car* car;
-	int cp;
-	// Process OutCars: move cars to BackCars if they have arrived
-	while (!OutCars.isEmpty() && OutCars.peek(car,cp) && car->getDistToPatient() == 0)
+	int priority;
+	// Move cars from the OutCars queue to BackCars queue when they arrive at the patient's location (distance to the patient becomes 0)
+	while (!OutCars.isEmpty() && OutCars.peek(car, priority) && car->getDistToPatient() == 0)
 	{
-		int priority;
 		OutCars.dequeue(car, priority);
-		BackCars.enqueue(car, -car->getDistToHospital());
+		car->getAssignedPatient()->setPickup(timeStep);
+		car->getAssignedPatient()->setStopped(false);
+		BackCars.enqueue(car, -car->getDistToHospital());//car added to BackCars,with a priority based on its distance to the hospital
+         //Negative distance used to ensure cars closer to the hospital are prioritized (higher priority for shorter distances)	
 	}
 
 	// Process BackCars: return cars to hospitals if they have completed their task
-	int priority;
 	while (!BackCars.isEmpty() && BackCars.peek(car, priority) && car->getDistToHospital() == 0)
 	{
 		BackCars.dequeue(car, priority);
+		if (car->getFailureBack() || car->getFailureOut())
+		{
+			car->setInCheckup(true);
+			addCarToCheckup(car);
+		}
+		else
+		{
+			Patient* p = car->deassignPatient();
+			p->setFinished(timeStep);
+			FinishedList.enqueue(p);
+			HospitalList[car->getHospital() - 1]->addCarToList(car);
+		}
+	}
+
+	// Process checkup list
+	while (!checkupList.isEmpty() && checkupList.peek(car, priority) && priority == 0)
+	{
+		checkupList.dequeue(car, priority);
+		car->setFailureBack(false);
+		car->setFailureOut(false);
+		car->setInCheckup(false);
 		HospitalList[car->getHospital() - 1]->addCarToList(car);
-
 	}
 }
 
-void Organizer::PrintHospitalsList() const
+//wrong implementation
+void Organizer::moveCarFromFreeToOut(Patient* patient)
 {
-	// Check if HospitalList is initialized
-	if (!HospitalList)
-	{
-		cout << "No hospitals available to display.\n";
-		return;
-	}
+	 Car* car = nullptr;
 
-	// Iterate through the HospitalList and print details of each hospital
-	for (int i = 0; i < numHospitals; ++i)
-	{
-		cout << "Hospital " << i + 1 << ":\n";
+	 // Assign a car to the patient (priority: SC > NC)
+	 if (HospitalList[patient->getNearestHospital() - 1]->getSC(car) ||
+		 HospitalList[patient->getNearestHospital() - 1]->getNC(car)) //-1 as the array is 1_based indexed
+	 {
+		 // Link the car to the patient
+		 car->AssignPatient(patient);
 
-		// Access and display hospital details
-		cout << "  Hospital ID: " << HospitalList[i]->getHospitalID() << "\n";
-		cout << "  SCars: " << HospitalList[i]->getSCarsCount() << "\n";
-		cout << "  NCars: " << HospitalList[i]->getNCarsCount() << "\n";
-		cout << "----------------------------------------\n";
-	}
+		 // Calculate priority for OutCars based on distance to the patient
+		 int priority = -car->getDistToPatient();
 
-	cout << "Distance Matrix:\n";
-	for (int i = 0; i < numHospitals; ++i)
-	{
-		for (int j = 0; j < numHospitals; ++j)
-		{
-			// Adjust width for uniform spacing
-			cout << setw(5) << distanceMatrix[i][j] << " ";
-		}
-		cout << "\n";
-	}
-	cout << "----------------------------------------\n";
-}
+		 // Move the car to the OutCars queue
+		 OutCars.enqueue(car, priority);
+		 cout << "Car " << car->getcarID() << " assigned to Patient " << patient->getPatientID() << " and moved to OutCars.\n";
+	 }
+	 else
+	 {
+		 cout << "No available car for Patient " << patient->getPatientID() << ".\n";
+	 }
+ }
 
-void Organizer::printPatientsList() const {
-	if (patientsList.isEmpty()) {
-		cout << "The patients list is empty." << endl;
-		return;
-	}
-
-	cout << "Patients List:" << endl;
-
-	// Create a copy of the patientsList to traverse without modifying it
-	LinkedQueue<Patient*> tempQueue = patientsList;
-	Patient* tempPatient;
-
-	while (!tempQueue.isEmpty())
-	{
-		tempQueue.peek(tempPatient); // Get the front patient
-
-		// Print patient details using the getter methods
-		cout << "Patient ID: " << tempPatient->getPatientID() << endl;
-		cout << "Patient Type: " << (tempPatient->getPatientType() == NP ? "Normal Patient" :
-			tempPatient->getPatientType() == SP ? "Special Patient" : "Emergency Patient") << endl;
-		cout << "Nearest Hospital ID: " << tempPatient->getNearestHospital() << endl;
-		cout << "Distance to Hospital: " << tempPatient->getDistance() << endl;
-		if (tempPatient->getPatientType() == EP)
-		{
-			cout << "Case Severity: " << tempPatient->getPatientPriority() << endl;
-		}
-		cout << "----------------------------------------\n";
-		tempQueue.dequeue(tempPatient); // Remove the front patient
-	}
-}
-
-void Organizer::printCancellationList() const {
-	if (CancellationList.isEmpty()) {
-		cout << "The cancellation list is empty." << endl;
-		return;
-	}
-
-	cout << "Cancellation List:" << endl;
-
-	// Create a copy of the CancellationList to traverse without modifying it
-	LinkedQueue<CancellationReq> tempQueue = CancellationList;
-	CancellationReq tempCancellation;
-
-	while (!tempQueue.isEmpty()) {
-		tempQueue.peek(tempCancellation); // Get the front cancellation request
-
-		// Print cancellation request details
-		cout << "Patient ID: " << tempCancellation.PID
-			<< ", Hospital ID: " << tempCancellation.hospitalID
-			<< ", Cancellation Time: " << tempCancellation.CancellationTimestep << endl;
-
-		tempQueue.dequeue(tempCancellation); // Remove the front cancellation request
-	}
-}
-
-Hospital* Organizer::getHospital(int ID)
+void Organizer::outCarFailure()
 {
-	// Ensure ID is within bounds
-	if (ID < 0 || ID > numHospitals) {
-		return nullptr;  // Return nullptr if ID is invalid
+	if (OutCars.isEmpty()) return;
+
+	// Generate a random number to determine failure
+	double randomValue = (rand() % 100) / 100.0; // Random value between 0 and 1
+
+	if (randomValue <= outCarsFailureProbability) 
+	{
+		Car* car = nullptr;
+		int priority;
+
+		randomValue = (rand() % OutCars.getCount());
+
+		priQueue<Car*> temp;
+		for (int i = 0; i < randomValue; i++)
+		{
+			OutCars.dequeue(car, priority);
+			temp.enqueue(car, priority);
+		}
+
+		OutCars.dequeue(car, priority);
+		outCarFailureAction(car);
+
+		while (!temp.isEmpty())
+		{
+			temp.dequeue(car, priority);
+			OutCars.enqueue(car, priority);
+		}
 	}
-	return HospitalList[ID];  // Return the pointer to the hospital object at index ID
 }
+
+void Organizer::outCarFailureAction(Car* car)
+{
+	car->setFailureOut(true);
+	HospitalList[car->getHospital()-1]->addFailurePatient(car->getAssignedPatient());
+	BackCars.enqueue(car, -car->getDistToHospital());
+}
+
+void Organizer::backCarFailure()
+{
+	if (BackCars.isEmpty()) return;
+
+	// Generate a random number to determine failure
+	double randomValue = (rand() % 100) / 100.0; // Random value between 0 and 1
+
+	if (randomValue <= backCarsFailureProbability)
+	{
+		Car* car = nullptr;
+		int priority;
+
+		randomValue = (rand() % BackCars.getCount());
+
+		priQueue<Car*> temp;
+		for (int i = 0; i < randomValue; i++)
+		{
+			BackCars.dequeue(car, priority);
+			temp.enqueue(car, priority);
+		}
+
+		BackCars.dequeue(car, priority);
+		backCarFailureAction(car);
+
+		while (!temp.isEmpty())
+		{
+			temp.dequeue(car, priority);
+			BackCars.enqueue(car, priority);
+		}
+	}
+}
+
+void Organizer::backCarFailureAction(Car* car)
+{
+	car->setFailureBack(true);
+	car->getAssignedPatient()->setDistanceToPickup(car->getDistToHospital());
+	car->getAssignedPatient()->setStopped(true);
+	HospitalList[car->getHospital() - 1]->addFailurePatient(car->getAssignedPatient());
+	BackCars.enqueue(car, -car->getDistToHospital());
+}	
 
 Organizer::~Organizer()
 {

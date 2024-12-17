@@ -1,18 +1,7 @@
 #ifndef UI_H
 #define UI_H
+
 using namespace std;
-#include "Hospital.h"
-#include "Car.h"
-#include "Patient.h"
-#include "ModifiedPriQ.h"
-#include "LinkedQueue.h"
-#include "priQueue.h"
-#include <conio.h>
-#include <iostream>
-#include <fstream>
-#include <sstream>
-#include <string>
-#include "WinUser.h"
 
 enum UI_MODE {
 	SILENT,
@@ -23,20 +12,27 @@ class UI
 {
 private:
 	UI_MODE mode;
-  string fileName;
-  string outFileName;
+	string fileName;
+	string outFileName;
   
 public:
+	//Constructor
 	UI() :mode(SILENT){}
+
+	//GUI startup function
 	void Start();
+
 	bool fileExists(string& filename);
-	void setInputFileName(string& filename);
-	string getInputFileName();
-  
-	void Output(int timestep, Hospital** h, int nOfHosp, priQueue<Car*>* backCars, ModifiedPriQ* outCars, LinkedQueue<Patient*>* finished);
 
+	//Filename getters
+	string getInputFileName() { return fileName; }
+	string getOutputFileNAme() { return outFileName; }
+
+	//Formatted output function
+	void Output(int timestep, Hospital** h, int nOfHosp, priQueue<Car*>* backCars, ModifiedPriQ* outCars, LinkedQueue<Patient*>* finished, priQueue<Car*>* checkup);
+	
+	~UI();
 };
-
 
 void UI::Start()
 {
@@ -62,6 +58,7 @@ void UI::Start()
 			cout << endl;
 			cout << "INTERACTIVE";
 			cout << endl;
+			Sleep(100);
 		}
 
 		if (GetAsyncKeyState(VK_DOWN))
@@ -70,17 +67,18 @@ void UI::Start()
 			printf("\033c");
 			cout << "Choose the mode you would like to use (Use Arrow Keys):" << endl;
 			cout << "SILENT			";
-
 			cout << endl;
 			cout << "INTERACTIVE	";
 			cout << "<----";
 			cout << endl;
+			Sleep(100);
 		}
 	}
 
 	//Getting input file name
 	printf("\033c");
 	string name;
+
 	// Loop until the user provides a valid file
 	while (1)
 	{
@@ -91,8 +89,7 @@ void UI::Start()
 		if (fileExists(name))
 		{
 			cout << "Opening file " << name << "...";
-			setInputFileName(name);
-			
+			fileName = name;
 			break;
 		}
 		else
@@ -100,11 +97,17 @@ void UI::Start()
 			cout << "Error: File " << name << " does not exist. Please try again." << endl;
 		}
 	}
+
 	//Getting output file name
 	printf("\033c");
 	cout << "Please enter the name of the file you would like to save to: " << endl;
 	cin >> outFileName;
 	printf("\033c");
+
+	if (mode == SILENT)
+	{
+		cout << "Silent Mode, Simulation Starts..." << endl;
+	}
 }
 
 //Checks whether the filename inserted by the user exists or not
@@ -115,34 +118,31 @@ bool UI::fileExists(string& filename)
 	return file.is_open(); // Return true if the file can be opened, false otherwise
 }
 
-//Sends the input file name to the Organizer
-void UI::setInputFileName(string& filename)
-{
-	fileName = filename;
-}
-
-string UI::getInputFileName()
-{
-	return fileName;
-}
-
 //Prints lists with proper formatting
-void UI::Output(int timestep, Hospital** h, int nOfHosp, priQueue<Car*>* backCars, ModifiedPriQ* outCars, LinkedQueue<Patient*>* finished)
+void UI::Output(int timestep, Hospital** h, int nOfHosp, priQueue<Car*>* backCars, ModifiedPriQ* outCars, LinkedQueue<Patient*>* finished, priQueue<Car*>* checkup)
 {
-	
-	for (int i = 0; i < nOfHosp; i++)
+	if (mode == INTERACTIVE)
 	{
-		printf("\033c");
-		cout << "Current Timestep: " << timestep << endl;
-		cout << *h[i];
-		cout << "-------------------------------------------------" << endl;
-		cout << outCars->getCount() << " ==> Out cars: " << *outCars << endl;
-		cout << backCars->getCount() << " <== Back cars: " << *backCars << endl;
-		cout << "-------------------------------------------------" << endl;
-		cout << finished->getCount() << " finished patients: " << *finished << endl;
-		cout << "Press any key to display next hospital" << endl;
-		_getch();
+		for (int i = 0; i < nOfHosp; i++)
+		{
+			printf("\033c");
+			cout << "Current Timestep: " << timestep << endl;
+			cout << *h[i];
+			cout << "-------------------------------------------------" << endl;
+			cout << outCars->getCount() << " ==> Out cars: " << *outCars << endl;
+			cout << backCars->getCount() << " <== Back cars: " << *backCars << endl;
+			cout << checkup->getCount() << " Checkup cars: " << *checkup << endl;
+			cout << "-------------------------------------------------" << endl;
+			cout << finished->getCount() << " finished patients: " << *finished << endl;
+			cout << "Press any key to display next hospital" << endl;
+			_getch();
+		}
 	}
+}
+
+UI::~UI()
+{
+	cout << "Simulation ends, Output file created." << endl;
 }
 
 #endif

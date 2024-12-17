@@ -1,14 +1,11 @@
 #pragma once
-#include"Car.h"
-#include "LinkedQueue.h"
-
+#include "Patient.h"
 
 class ModifiedQ : public LinkedQueue<Patient*>
 {
 public:
 	bool cancelRequest(int patientID);
 };
-
 
 bool ModifiedQ::cancelRequest(int patientID)
 {
