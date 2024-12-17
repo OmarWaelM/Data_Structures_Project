@@ -1,6 +1,7 @@
 #ifndef HOSPITAL_H
 #define HOSPITAL_H
 #include "ModifiedQ.h"
+#include "Car.h"
 
 class Hospital
 {
@@ -29,7 +30,7 @@ public:
 
 	//Car and Patient Assignment
 	bool assignPatients(Car*&  ambulance);
-	bool assignPatientToCar(Patient* patient, Car*& ambulance);
+	Car* assignPatientToCar(Patient* patient, Car*& ambulance);
 	bool cancelRequest(int patientID) { return NPList.cancelRequest(patientID); } //update this to return car&
 
 	//Setter
@@ -175,7 +176,7 @@ bool Hospital::assignPatients(Car*& ambulance)
 	}
 }
 
-bool Hospital::assignPatientToCar(Patient* p, Car*& ambulance)
+Car* Hospital::assignPatientToCar(Patient* p, Car*& ambulance)
 {
 	Patient* patient = nullptr;
 	int x;
@@ -184,33 +185,33 @@ bool Hospital::assignPatientToCar(Patient* p, Car*& ambulance)
 		NPList.dequeue(patient);
 		NCList.dequeue(ambulance);
 		ambulance->AssignPatient(patient);
-		return true;
+		return ambulance;
 	}
 	else if (p->getPatientType() == SP && SCList.getCount() != 0)
 	{
 		SPList.dequeue(patient);
 		SCList.dequeue(ambulance);
 		ambulance->AssignPatient(patient);
-		return true;
+		return ambulance;
 	}
 	else if (p->getPatientType() == EP)
 	{
 		if (NCList.getCount() != 0)
 		{
 			NCList.dequeue(ambulance);
-			EPList.dequeue(patient,x);
+			EPList.dequeue(patient, x);
 			ambulance->AssignPatient(patient);
-			return true;
+			return ambulance;
 		}
 		else if (SCList.getCount() != 0)
 		{
 			SCList.dequeue(ambulance);
 			EPList.dequeue(patient, x);
 			ambulance->AssignPatient(patient);
-			return true;
+			return ambulance;
 		}
 	}
-	return false;
+	return nullptr;
 }
 
 ostream& operator <<(ostream& os, Hospital& h)

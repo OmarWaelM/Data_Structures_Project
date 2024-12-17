@@ -504,62 +504,29 @@ void Organizer::moveCarFromFreeToOut(Patient* patient)
 	if (!patient) { return; }
 
 	int nearestHospitalID = patient->getNearestHospital();
-	// Validate hospital ID; to ensure hospital exists
+	// Validate hospital ID to ensure the hospital exists
 	if (nearestHospitalID < 1 || nearestHospitalID > numHospitals) { return; }
 
 	Hospital* nearestHospital = HospitalList[nearestHospitalID - 1];
-	Car* car = nullptr;
-	bool carAssigned = false;
+	Car* assignedCar = nullptr;
 
-	patientType type = patient->getPatientType();
+	// Attempt to assign a car to the patient using Hospital's logic
+	assignedCar = nearestHospital->assignPatientToCar(patient, assignedCar);
 
-	if (type == patientType::EP)
+	// If a car was successfully assigned
+	if (assignedCar)
 	{
-		if (nearestHospital->getNC(car))
-		{
-			// Assign EP to NC car if available
-			nearestHospital->getNCList()->dequeue(car);
-			carAssigned = true;
-		}
-		else if (nearestHospital->getSC(car))
-		{
-			// Assign EP to SC car if NC car is unavailable
-			nearestHospital->getSCList()->dequeue(car);
-			carAssigned = true;
-		}
-	}
-	else if (type == patientType::SP)
-	{
-		if (nearestHospital->getSC(car))
-		{
-			// Assign SP to SC car if available
-			nearestHospital->getSCList()->dequeue(car);
-			carAssigned = true;
-		}
-	}
-	else if (type == patientType::NP)
-	{
-		if (nearestHospital->getNC(car))
-		{
-			// Assign NP to NC car if available
-			nearestHospital->getNCList()->dequeue(car);
-			carAssigned = true;
-		}
-	}
-
-	// If a car is assigned, implement the car assignment and return
-	if (carAssigned)
-	{
-		car->AssignPatient(patient);
-		OutCars.enqueue(car, -car->getDistToPatient());
+		OutCars.enqueue(assignedCar, -assignedCar->getDistToPatient()); // Add car to OUT cars queue
 		return;
 	}
 
-	if (!carAssigned && (type == patientType::EP))
+	// Handle unassigned EP patients
+	if (patient->getPatientType() == patientType::EP)
 	{
-		handleEP(patient); //To be updated
+		handleEP(patient); // Handle EP patient as no car was available
 	}
 }
+
 
 void Organizer::outCarFailure()
 {
