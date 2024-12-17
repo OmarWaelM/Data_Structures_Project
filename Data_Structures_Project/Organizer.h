@@ -42,6 +42,9 @@ private:
 	double hospitalFailureProbability;
 	int checkupTime;
 	int numOfFailedHospitals;
+	int numOfOutOfServiceSC;
+	int numOfOutOfServiceNC;
+	int numOfOutOfServiceCars;
 
 	//File Loading data members (can be declared in file processing and freed at the end)
 	string filename;//Keep
@@ -112,7 +115,10 @@ Organizer::Organizer():
 	backCarsFailureProbability(0),
 	hospitalFailureProbability(0),
 	checkupTime(0),
-	numOfFailedHospitals(0)
+	numOfFailedHospitals(0),
+	numOfOutOfServiceCars(0),
+	numOfOutOfServiceSC(0),
+	numOfOutOfServiceNC(0)
 {
 }
 
@@ -682,14 +688,17 @@ void Organizer::hospitalFailureAction(Hospital* failedHospital)
 	while (!SCList.isEmpty())
 	{
 		SCList.dequeue(car);
+		numOfOutOfServiceSC++;
 		delete car;
 	}
 
 	while (!NCList.isEmpty())
 	{
 		NCList.dequeue(car);
+		numOfOutOfServiceNC++;
 		delete car;
 	}
+	numOfOutOfServiceCars = numOfOutOfServiceSC + numOfOutOfServiceNC;
 
 	// Handle OUT cars of the failed hospital
 	priQueue<Car*> tempOutCars;
