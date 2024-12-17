@@ -70,7 +70,8 @@ public:
 	//create function to Assign all current patients from patientlist to hospital (code is in simulator)
 	//create function to Perform all cancellation requests (code is in simulator)
 	//create functino to Assign all possible patients from hospitals to out cars
-	//Hamdle no EP
+	//Handle no EP
+	bool handleEP(Patient* patient);
 	//Hospital Failure
 	//Hospital Failure action
 	//Processing input file needs to get probabilities and checkup time
@@ -581,6 +582,12 @@ void Organizer::backCarFailureAction(Car* car)
 	HospitalList[car->getHospital() - 1]->addFailurePatient(car->getAssignedPatient());
 	BackCars.enqueue(car, -car->getDistToHospital());
 }	
+
+bool Organizer::handleEP(Patient* patient)
+{
+	
+	return false;
+}
 
 Organizer::~Organizer()
 {
