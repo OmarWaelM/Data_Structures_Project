@@ -30,6 +30,7 @@ private:
 	priQueue<Car*> BackCars;						// Back cars' list (cars on their way back) of type Priority Queue
 	ModifiedPriQ OutCars;							// Out cars' list (cars out on their way to pick up patients) of type Priority Queue (modified)
 	priQueue<Car*> checkupList;						// Checkup cars list
+	Hospital** failedHospitalsList;                 // Failed Hospitals list
 
 	// General data members
 	int timeStep;
@@ -40,6 +41,7 @@ private:
 	double backCarsFailureProbability;
 	double hospitalFailureProbability;
 	int checkupTime;
+	int numOfFailedHospitals;
 
 	//File Loading data members (can be declared in file processing and freed at the end)
 	string filename;//Keep
@@ -109,7 +111,8 @@ Organizer::Organizer():
 	outCarsFailureProbability(0),
 	backCarsFailureProbability(0),
 	hospitalFailureProbability(0),
-	checkupTime(0)
+	checkupTime(0),
+	numOfFailedHospitals(0)
 {
 }
 
@@ -618,6 +621,8 @@ void Organizer::hospitalFaliure()
 		// Randomly select a hospital to fail
 		int failedHospitalID = rand() % numHospitals + 1;
 		Hospital* failedHospital = HospitalList[failedHospitalID - 1];
+		failedHospitalsList[numOfFailedHospitals] = failedHospital;
+		numOfFailedHospitals++;
 		hospitalFailureAction(failedHospital);
 	}
 }
