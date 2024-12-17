@@ -735,7 +735,8 @@ void Organizer::hospitalFailureAction(Hospital* failedHospital)
 			outCarFailureAction(outCar);
 			delete outCar; // Remove the car from the system
 		}
-		else {
+		else
+		{
 			tempOutCars.enqueue(outCar, priorityOut);
 		}
 	}
