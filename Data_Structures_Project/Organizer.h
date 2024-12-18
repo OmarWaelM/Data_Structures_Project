@@ -41,6 +41,8 @@ private:
 	double backCarsFailureProbability;
 	double hospitalFailureProbability;
 	int checkupTime;
+	int SC_CheckupTime;
+	int NC_CheckupTime;
 	int numOfFailedHospitals;
 	int numOfOutOfServiceSC;
 	int numOfOutOfServiceNC;
@@ -62,6 +64,8 @@ public:
 	Organizer();
   
 	/***** Input file member functions *****/
+	void setInputFileName(UI gui) { filename = gui.getInputFileName(); }
+	void setOutputFileName(UI gui) { outfile = gui.getOutputFileName(); }
 	void processInputFile();					//Processes input file
 	void generateOutputFile();                  //Generates output file
 	void readHospitalData();					//Reads hospital distance data
@@ -128,6 +132,8 @@ the respective functions to store the data in appropriate data structures or sto
 void Organizer::processInputFile()
 {
 	ifstream inputFile;
+	setInputFileName(GUI);
+
 	inputFile.open(filename + ".txt", ios::in);
 	if (!inputFile.is_open())
 	{
@@ -139,6 +145,9 @@ void Organizer::processInputFile()
 
 	//Read the speeds of SCars and Ncars (the second line)
 	inputFile >> speedScars >> speedNcars;
+
+	//Read SC & NC cars checkup time
+	inputFile >> SC_CheckupTime >> NC_CheckupTime;
 
 	// Read failure probabilities
 	inputFile >> outCarsFailureProbability >> backCarsFailureProbability >> hospitalFailureProbability; 
