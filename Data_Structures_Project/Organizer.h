@@ -729,6 +729,7 @@ void Organizer::generateOutputFile()
 	}
 
 
+
 }
 
 Organizer::~Organizer()
