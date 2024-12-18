@@ -63,6 +63,7 @@ public:
   
 	/***** Input file member functions *****/
 	void processInputFile();					//Processes input file
+	void generateOutputFile();                  //Generates output file
 	void readHospitalData();					//Reads hospital distance data
 	void AddHospital(const int Hospital_ID);	//Adding a Hospital to the hospital list
 
@@ -652,7 +653,6 @@ void Organizer::transferPatientsRequests(Patient* patient, int nearestHospitalID
 void Organizer::handleCancellations()
 {
 	CancellationReq cr;
-	CancellationList.dequeue(cr);
 
 	while (CancellationList.peek(cr) && cr.CancellationTimestep == timeStep)
 	{
@@ -686,6 +686,13 @@ void Organizer::addToFinishedList(Car* car)
 
 /****** GENERATE & UPDATE OUTPUT FILE FUNCTION *****/
 
+void Organizer::generateOutputFile()
+{
+
+
+
+
+}
 
 Organizer::~Organizer()
 {
