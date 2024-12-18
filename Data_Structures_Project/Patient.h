@@ -47,6 +47,7 @@ public:
 	void setFinished(int ft) { finishTime = ft; }
 	void setDistanceToPickup(int dst) { distToHospital = dst; }
 	void setStopped(bool stp) { stopped = stp; }
+	bool hasArrived(bool state) { if (finishTime != -1) return true; }
 
 	//Output stream operator overloading
 	friend ostream& operator <<(ostream& os, Patient& patient);

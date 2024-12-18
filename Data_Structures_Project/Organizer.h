@@ -8,6 +8,7 @@
 #include "LinkedQueue.h"
 #include "priQueue.h"
 #include "ModifiedPriQ.h"
+#include "ModifiedQ.h"
 
 #include <string>
 using namespace std;
@@ -24,7 +25,7 @@ class Organizer
 private:
 	// Lists used in orgranizer class
 	Hospital** HospitalList;						// An array of pointers to hospitals
-	LinkedQueue<Patient*> patientsList;				// Patients list of type Linked Queue (list of pointers to patients)
+	ModifiedQ patientsList;	                        // Patients list of type Linked Queue (list of pointers to patients)
 	LinkedQueue<CancellationReq> CancellationList;	// Cancellation requests' list of type Linked Queue
 	LinkedQueue<Patient*> FinishedList;				// Finished patients' list of type Linked Queue
 	priQueue<Car*> BackCars;						// Back cars' list (cars on their way back) of type Priority Queue
@@ -41,8 +42,6 @@ private:
 	double backCarsFailureProbability;
 	double hospitalFailureProbability;
 	int checkupTime;
-	int SC_CheckupTime;
-	int NC_CheckupTime;
 	int numOfFailedHospitals;
 	int numOfOutOfServiceSC;
 	int numOfOutOfServiceNC;
@@ -131,9 +130,9 @@ the respective functions to store the data in appropriate data structures or sto
 
 void Organizer::processInputFile()
 {
-	ifstream inputFile;
 	setInputFileName(GUI);
 
+	ifstream inputFile;
 	inputFile.open(filename + ".txt", ios::in);
 	if (!inputFile.is_open())
 	{
@@ -147,7 +146,7 @@ void Organizer::processInputFile()
 	inputFile >> speedScars >> speedNcars;
 
 	//Read SC & NC cars checkup time
-	inputFile >> SC_CheckupTime >> NC_CheckupTime;
+	inputFile >> checkupTime;
 
 	// Read failure probabilities
 	inputFile >> outCarsFailureProbability >> backCarsFailureProbability >> hospitalFailureProbability; 
@@ -671,6 +670,10 @@ void Organizer::handleCancellations()
 		// Verifies that the Patient exists in its corresponding hospital's NP List
 		if (!hospital->isPatientInNPList(cr.PID)) { return; }
 
+		// Remove the patient from the system
+		bool removed = patientsList.cancelRequest(cr.PID);
+		numRequests = patientsList.getCount();
+
 		// Search for the car in the OutCars list then dequeue it if found
 		Car* assignedCar = nullptr; 
 		bool carFound = OutCars.cancelRequest(cr.PID, assignedCar);
@@ -697,8 +700,33 @@ void Organizer::addToFinishedList(Car* car)
 
 void Organizer::generateOutputFile()
 {
+	setOutputFileName(GUI);
 
+	ofstream OutputFile;
+	OutputFile.open(outfile + ".txt", ios::out);
 
+	// Writinf the Finished Patients List
+	int FT, PID, QT, WT;
+	OutputFile >> "FT" >> "\t" >> "PID" >> "\t" >> "QT" >> "\t" >> "WT" >> '\n';
+	for (int i = 0; i < FinishedList.getCount(); i++)
+	{
+		FT = FinishedList[i]->getFinishTime();
+		PID = FinishedList[i]->getPatientID();
+		QT = FinishedList[i]->getRequestTime();
+		WT = FinishedList[i]->getWaitTime();
+
+		OutputFile >> FT >> "\t" >> PID >> "\t" >> QT >> "\t" >> WT >> '\n';
+	}
+
+	// Caculating and writing the statistics
+
+	int totalSP = 0, totalNP = 0, totalEP = 0;
+	for (int i = 0; i < numRequests; i++)
+	{
+		if (patientsList[i]->getPatientType() == SP) totalSP++;
+		if (patientsList[i]->getPatientType() == NP) totalNP++;
+		if (patientsList[i]->getPatientType() == EP) totalEP++;
+	}
 
 
 }
