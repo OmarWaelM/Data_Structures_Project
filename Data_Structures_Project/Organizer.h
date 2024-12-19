@@ -511,7 +511,7 @@ void Organizer::hospitalFailureAction(Hospital* failedHospital)
 	failedHospital->setFailed(true);
 
 	// Find the nearest hospital that is not failed
-	int nearestHospitalID = -1;
+	int secondNearestHospitalID = -1;
 	int minDistance = -1;
 
 	// Loop through the distance matrix to find the first valid distance
@@ -519,7 +519,7 @@ void Organizer::hospitalFailureAction(Hospital* failedHospital)
 	{
 		if (i != failedHospitalID - 1 && !HospitalList[i]->isFailed())
 		{
-			nearestHospitalID = i + 1;
+			secondNearestHospitalID = i + 1;
 			minDistance = DistanceMatrix[failedHospitalID - 1][i];
 		}
 	}
@@ -534,7 +534,7 @@ void Organizer::hospitalFailureAction(Hospital* failedHospital)
 	while (!SPList.isEmpty())
 	{
 		SPList.dequeue(patient);
-		transferPatientsRequests(patient, nearestHospitalID);
+		transferPatientsRequests(patient, secondNearestHospitalID);
 	}
 
 	// Reassign EP patients
@@ -542,14 +542,14 @@ void Organizer::hospitalFailureAction(Hospital* failedHospital)
 	{
 		int priority; 
 		EPList.dequeue(patient, priority); 
-		transferPatientsRequests(patient, nearestHospitalID);
+		transferPatientsRequests(patient, secondNearestHospitalID);
 	}
 
 	// Reassign NP patients
 	while (!NPList.isEmpty())
 	{
 		NPList.dequeue(patient); 
-		transferPatientsRequests(patient, nearestHospitalID);
+		transferPatientsRequests(patient, secondNearestHospitalID);
 	}
 
 	// Remove all free cars (both SC and NC) from the system
@@ -785,6 +785,7 @@ void Organizer::generateOutputFile()
 	OutputFile >> "Average waiting time = " >> avgWaitingTime >> '\n';
 
 	//Calculating and writing Percentage of EP (relative to the total number of EP) who couldn't be served by home hospital
+	double percentage = 
 
 
 	//Calculating and writing the average busy time of all cars in the system
