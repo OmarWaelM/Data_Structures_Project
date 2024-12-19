@@ -106,7 +106,7 @@ void Car::updateBack()
 		}
 		else
 		{
-			distToPatient == speed;
+			distToPatient = speed;
 			distToHospital -= speed;
 		}
 	}

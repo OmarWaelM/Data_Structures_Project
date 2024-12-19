@@ -117,7 +117,6 @@ Organizer::Organizer() :
 	numOfOutOfServiceCars(0),
 	numOfOutOfServiceSC(0),
 	numOfOutOfServiceNC(0),
-	checkupTime(0),
 	NCFailuresBack(0),
 	NCFailuresOut(0),
 	SCFailuresBack(0),
@@ -526,7 +525,7 @@ void Organizer::hospitalFailureAction(Hospital* failedHospital)
 
 	// Mark the hospital as failed
 	failedHospital->setFailed(true);
-
+	int failedHospitalID = failedHospital->getHospitalID();
 	// Find the nearest hospital that is not failed
 	int secondNearestHospitalID = -1;
 	int minDistance = -1;
@@ -537,7 +536,7 @@ void Organizer::hospitalFailureAction(Hospital* failedHospital)
 		if (i != failedHospitalID - 1 && !HospitalList[i]->isFailed())
 		{
 			secondNearestHospitalID = i + 1;
-			minDistance = DistanceMatrix[failedHospitalID - 1][i];
+			minDistance = distanceMatrix[failedHospitalID - 1][i];
 		}
 	}
 
@@ -578,14 +577,14 @@ void Organizer::hospitalFailureAction(Hospital* failedHospital)
 	{
 		SCList.dequeue(car);
 		numOfOutOfServiceSC++;
-		delete car;
+		// Do NOT restore the out of service car to remove it from the system
 	}
 
 	while (!NCList.isEmpty())
 	{
 		NCList.dequeue(car);
 		numOfOutOfServiceNC++;
-		delete car;
+		// Do NOT restore the out of service car to remove it from the system
 	}
 	numOfOutOfServiceCars = numOfOutOfServiceSC + numOfOutOfServiceNC;
 
@@ -601,7 +600,7 @@ void Organizer::hospitalFailureAction(Hospital* failedHospital)
 		{
 			// Handle the failure of the assigned car
 			outCarFailureAction(outCar);
-			delete outCar; // Remove the car from the system
+			delete outCar;
 		}
 		else
 		{
@@ -723,7 +722,7 @@ void Organizer::generateOutputFile()
 
 	// Writinf the Finished Patients List
 	int FT, PID, QT, WT;
-	OutputFile >> "FT" >> "\t" >> "PID" >> "\t" >> "QT" >> "\t" >> "WT" >> '\n';
+	OutputFile << "FT" << "\t" << "PID" << "\t" << "QT" << "\t" << "WT" << '\n';
 	while (!FinishedList.isEmpty())
 	{
 		FinishedList.dequeue(tempItem);
@@ -742,7 +741,7 @@ void Organizer::generateOutputFile()
 		FinishedList.enqueue(tempItem);
 	}
 
-	OutputFile >> "============== System Statistics ==============" >> '\n';
+	OutputFile << "============== System Statistics ==============" << '\n';
 
 	// Caculating and writing the statistics
 	//1. Writing the  Total number of patients and number of patients of each type in the system
@@ -764,10 +763,10 @@ void Organizer::generateOutputFile()
 		patientsList.enqueue(tempItem);
 	}
 
-	OutputFile >> "Patients: " >> numRequests >> "\t" >> "[NP: " >> totalNP >> ", SP: " >> totalSP >> ", EP: " >> totalEP >> "]" >> '\n';
+	OutputFile << "Patients: " << numRequests << "\t" << "[NP: " << totalNP << ", SP: " << totalSP << ", EP: " << totalEP << "]" << '\n';
 
 	//2. Writing the total number of hospitals in the system
-	OutputFile >> "Hospitals = " >> numHospitals >> '\n';
+	OutputFile << "Hospitals = " << numHospitals << '\n';
 
 	//3. Writing the total number of cars and number of cars of each type in the system
 	int totalCars = 0, totalSC = 0, totalNC = 0;
@@ -777,7 +776,7 @@ void Organizer::generateOutputFile()
 		totalNC += HospitalList[i]->getNCarsCount();
 	}
 	totalCars = totalSC + totalNC;
-	OutputFile >> "Cars: " >> totalCars >> "\t" >> "[SCars: " >> totalSC >> ", NCars: " >> totalNC >> "]" >> '\n';
+	OutputFile << "Cars: " << totalCars << "\t" << "[SCars: " << totalSC << ", NCars: " << totalNC << "]" << '\n';
 
 	//4. Calculating and writing the average waiting time for patients
 	int totalWaitingTime = 0, avgWaitingTime = 0;
@@ -799,11 +798,11 @@ void Organizer::generateOutputFile()
 		avgWaitingTime = totalWaitingTime / FinishedList.getCount();
 	}
 	else { avgWaitingTime = 0; }
-	OutputFile >> "Average waiting time = " >> avgWaitingTime >> '\n';
+	OutputFile << "Average waiting time = " << avgWaitingTime << '\n';
 
 	//5. Calculating and writing Percentage of EP (relative to the total number of EP) who couldn't be served by home hospital
 	double percentage = ((static_cast<double>(unAssignedEPCount) / totalEP) * 100.0);
-	OutputFile >> "Percentage of EP who couldn't be served by home hospital = " >> percentage >> "%" >> '\n';
+	OutputFile << "Percentage of EP who couldn't be served by home hospital = " << percentage << "%" << '\n';
 
 	//6. Calculating and writing the average busy time of all cars in the system
 	int totalBusyTime = 0, avgBusyTime = 0;
@@ -825,39 +824,39 @@ void Organizer::generateOutputFile()
 		avgBusyTime = totalBusyTime / FinishedList.getCount();
 	}
 	else { avgBusyTime = 0; }
-	OutputFile >> "Average busy time = " >> avgBusyTime >> '\n';
+	OutputFile << "Average busy time = " << avgBusyTime << '\n';
 
 	//7. Calculating and writing Average Utilization Percentage
 	double avgUtilizationTime = ((static_cast<double>(avgBusyTime) / timeStep) * 100.0);
-	OutputFile >> "Average Utilization Percentage = " >> avgUtilizationTime >> "%" >> '\n\n';
+	OutputFile << "Average Utilization Percentage = " << avgUtilizationTime << "%" << '\n\n';
 
-	OutputFile >> "============== Bonus Operations ==============" >> '\n';
+	OutputFile << "============== Bonus Operations ==============" << '\n';
 
 	//8. Writing the number of failed cars and their failure percentages (out and back cars)
 	//Out Cars Failure
-	OutputFile >> "Number of Out Cars failure = " >> (NCFailuresOut + SCFailuresOut) >> ", Out Cars Failure Percentage = " << outCarsFailureProbability;
-	OutputFile >> '\n' >> "[SCars: " >> SCFailuresOut >> ", NCars: " >> NCFailuresOut >> "]" >> '\n';
+	OutputFile << "Number of Out Cars failure = " << (NCFailuresOut + SCFailuresOut) << ", Out Cars Failure Percentage = " << outCarsFailureProbability;
+	OutputFile << '\n' << "[SCars: " << SCFailuresOut << ", NCars: " << NCFailuresOut << "]" << '\n';
 
 	//Back Cars Failure
-	OutputFile >> "Number of Back Cars failure = " >> (NCFailuresBack + SCFailuresBack) >> ", Back Cars Failure Percentage = " << backCarsFailureProbability;
-	OutputFile >> '\n' >> "[SCars: " >> SCFailuresBack >> ", NCars: " >> NCFailuresBack >> "]" >> '\n';
+	OutputFile << "Number of Back Cars failure = " << (NCFailuresBack + SCFailuresBack) << ", Back Cars Failure Percentage = " << backCarsFailureProbability;
+	OutputFile << '\n' << "[SCars: " << SCFailuresBack << ", NCars: " << NCFailuresBack << "]" << '\n';
 
 	//9. Writing the number of failed hospitals and their failure percentages
-	OutputFile >> "Number of failed hospitals = " >> numOfFailedHospitals >> ", Hospital Failure Percentage = " >> hospitalFailureProbability * 100 >> "%" >> '\n\n';
+	OutputFile << "Number of failed hospitals = " << numOfFailedHospitals << ", Hospital Failure Percentage = " << hospitalFailureProbability * 100 << "%" << '\n\n';
 	
 	//Writing each hospital's number of NP, SP, EP patients at the failure timeStep
-	OutputFile >> "List of failed hospitals:" >> '\n' >> "HID" >> "\t" >> "NP COUNT" >> "\t" >> "SP COUNT" >> "\t" >> "EP COUNT" >> "\t" >> "FREE SC" >> "\t" >> "FREE NC" >> '\n';
+	OutputFile << "List of failed hospitals:" << '\n' << "HID" << "\t" << "NP COUNT" << "\t" << "SP COUNT" << "\t" << "EP COUNT" << "\t" << "FREE SC" << "\t" << "FREE NC" << '\n';
 	for (int i = 0; i < numOfFailedHospitals; i++)
 	{
-		OutputFile >> failedHospitalsList[i]->getHospitalID() >> "\t" >> failedHospitalsList[i]->getNPListCount() >> "\t";
-		OutputFile >> failedHospitalsList[i]->getSPListCount() >> "\t" >> failedHospitalsList[i]->getEPListLength() >> "\t";
-		OutputFile >> failedHospitalsList[i]->getSCarsCount() >> "\t" >> failedHospitalsList[i]->getNCarsCount() >> '\n';
+		OutputFile << failedHospitalsList[i]->getHospitalID() << "\t" << failedHospitalsList[i]->getNPListCount() << "\t";
+		OutputFile << failedHospitalsList[i]->getSPListCount() << "\t" << failedHospitalsList[i]->getEPListLength() << "\t";
+		OutputFile << failedHospitalsList[i]->getSCarsCount() << "\t" << failedHospitalsList[i]->getNCarsCount() << '\n';
 	}
-	OutputFile >> '\n';
+	OutputFile << '\n';
 
 	//10. Writing the number of cars that went out of service due to hospital failure (SC, NC, and total)
-	OutputFile >> "Total number of cars that are out of service due to hospital failure = " >> numOfOutOfServiceCars >> '\n';
-	OutputFile >> "[SCars: " >> numOfOutOfServiceSC >> ", NCars: " >> numOfOutOfServiceNC >> "]" >> '\n';
+	OutputFile << "Total number of cars that are out of service due to hospital failure = " << numOfOutOfServiceCars << '\n';
+	OutputFile << "[SCars: " << numOfOutOfServiceSC << ", NCars: " << numOfOutOfServiceNC << "]" << '\n';
 
 	OutputFile << "============== End of the Output File ==============" << '\n';
 
