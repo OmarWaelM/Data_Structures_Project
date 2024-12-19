@@ -506,6 +506,10 @@ void Organizer::backCarFailureAction(Car* car)
 	car->getAssignedPatient()->setStopped(true);
 	HospitalList[car->getHospital() - 1]->addFailurePatient(car->getAssignedPatient());
 	BackCars.enqueue(car, -car->getDistToHospital());
+	if (car->getCarType() == NC)
+		NCFailuresBack++;
+	else
+		SCFailuresBack++;
 }
 
 void Organizer::hospitalFaliure()
