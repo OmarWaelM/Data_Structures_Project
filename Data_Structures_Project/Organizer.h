@@ -77,7 +77,6 @@ public:
 	void updateCheckupCars();
 	void handleCarMovements(); //move from out to back and from back to hospitals
 	void moveCarFromFreeToOut(Patient* patient); //move from free to out
-	void handleEP(Patient* patient);
 	void outCarFailure();
 	void outCarFailureAction(Car* car);
 	void backCarFailure();
@@ -89,15 +88,7 @@ public:
 	void handleCancellations();
 	void addToFinishedList(Car* car);
 	void transferPatientsRequests(Patient* patient, int nearestHospitalID);
-
-	//create function to Assign all current patients from patientlist to hospital (code is in simulator)
-	//create function to Perform all cancellation requests (code is in simulator)
-	//create functino to Assign all possible patients from hospitals to out cars
-	//Handle no EP
 	bool handleEP(Patient* patient,Hospital* hospital);
-	//Hospital Failure
-	//Hospital Failure action
-	//Processing input file needs to get probabilities and checkup time
 
 	~Organizer();
 };
@@ -368,7 +359,7 @@ void Organizer::moveCarFromFreeToOut(Patient* patient)
 	// Handle unassigned EP patients
 	if (patient->getPatientType() == patientType::EP)
 	{
-		handleEP(patient); // Handle EP patient as no car was available
+		handleEP(patient, nearestHospital); // Handle EP patient as no car was available
 	}
 }
 
