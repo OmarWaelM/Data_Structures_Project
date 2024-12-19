@@ -31,6 +31,10 @@ private:
 	double backCarsFailureProbability;
 	double hospitalFailureProbability;
 	int checkupTime;
+	int NCFailuresOut;
+	int NCFailuresBack;
+	int SCFailuresOut;
+	int SCFailuresBack;
 
 	//File Loading data members (can be declared in file processing and freed at the end)
 	string filename;//Keep
