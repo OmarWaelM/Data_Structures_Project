@@ -708,18 +708,24 @@ void Organizer::generateOutputFile()
 	// Writinf the Finished Patients List
 	int FT, PID, QT, WT;
 	OutputFile >> "FT" >> "\t" >> "PID" >> "\t" >> "QT" >> "\t" >> "WT" >> '\n';
-	for (int i = 0; i < FinishedList.getCount(); i++)
+	Patient 
+	while (!FinishedList.isEmpty())
 	{
-		FT = FinishedList[i]->getFinishTime();
-		PID = FinishedList[i]->getPatientID();
-		QT = FinishedList[i]->getRequestTime();
-		WT = FinishedList[i]->getWaitTime();
+		FinishedList.dequeue(tempItem);
 
-		OutputFile >> FT >> "\t" >> PID >> "\t" >> QT >> "\t" >> WT >> '\n';
+		int FT = tempItem.getFinishTime();
+		int PID = tempItem.getPatientID();
+		int QT = tempItem.getRequestTime();
+		int WT = tempItem.getWaitTime();
+
+		// Write to the output file
+		OutputFile << FT << "\t" << PID << "\t" << QT << "\t" << WT << '\n';
 	}
+	OutputFile >> '\n\n';
+	OutputFile >> "============== System Statistics ==============" >> '\n';
 
 	// Caculating and writing the statistics
-
+	//Writing the  Total number of patients and number of patients of each type in the system
 	int totalSP = 0, totalNP = 0, totalEP = 0;
 	for (int i = 0; i < numRequests; i++)
 	{
@@ -727,9 +733,61 @@ void Organizer::generateOutputFile()
 		if (patientsList[i]->getPatientType() == NP) totalNP++;
 		if (patientsList[i]->getPatientType() == EP) totalEP++;
 	}
+	OutputFile >> "Patients: " >> numRequests >> "\t" >> "[NP: " >> totalNP >> ", SP: " >> totalSP >> ", EP: " >> totalEP >> "]" >> '\n';
+
+	//Writing the total number of hospitals in the system
+	OutputFile >> "Hospitals = " >> numHospitals >> '\n';
+
+	//Writing the total number of cars and number of cars of each type in the system
+	int totalCars = 0, totalSC = 0, totalNC = 0;
+	for (int i = 0; i < numHospitals; i++)
+	{
+		totalSC += HospitalList[i]->getSCarsCount();
+		totalNC += HospitalList[i]->getSNCarsCount();
+	}
+	totalCars = totalSC + totalNC;
+	OutputFile >> "Cars: " >> totalCars >> "\t" >> "[SCars: " >> totalSC >> ", NCars: " >> totalNC >> "]" >> '\n';
+
+	//Calculating and writing the average waiting time for patients
+	int totalWaitingTime = 0, avgWaitingTime = 0;
+	for (int i = 0; i < FinishedList.getCount(); i++)
+	{
+		totalWaitingTime += FinishedList[i]->getWaitTime();
+	}
+	if (FinishedList.getCount() != 0)
+	{
+		avgWaitingTime = totalWaitingTime / FinishedList.getCount();
+	}
+	else { avgWaitingTime = 0; }
+	OutputFile >> "Average waiting time = " >> avgWaitingTime >> '\n';
+
+	//Calculating and writing Percentage of EP (relative to the total number of EP) who couldn't be served by home hospital
 
 
+	//Calculating and writing the average busy time of all cars in the system
+	int totalBusyTime = 0, avgBusyTime = 0;
+	for (int i = 0; i < FinishedList.getCount(); i++)
+	{
+		totalBusyTime += FinishedList[i]->getBusyTime();
+	}
+	if (FinishedList.getCount() != 0)
+	{
+		avgBusyTime = totalBusyTime / FinishedList.getCount();
+	}
+	else { avgBusyTime = 0; }
+	OutputFile >> "Average busy time = " >> avgBusyTime >> '\n';
 
+	//Calculating and writing Average Utilization Percentage
+	double avgUtilizationTime = (avgBusyTime / timeStep) * 100.0;
+	OutputFile >> "Average Utilization Percentage = " >> avgUtilizationTime >> "%" >> '\n';
+
+	//Writing the number of failed hospitals and their failure percentages
+	OutputFile >> "Number of failed hospitals = " >> numOfFailedHospitals >> ", Hospital Failure Percentage = " >> hospitalFailureProbability * 100 >> "%" >> '\n';
+	OutputFile >> "List of failed hospitals:" >> '\n' >> "HID" >> "\t" >> "NP COUNT" >> "\t" >> "SP COUNT" >> "\t" >> "EP COUNT" >> '\n';
+	for (int i = 0; i < numOfFailedHospitals; i++)
+	{
+		OutputFile >> failedHospitalsList[i]->getHospitalID() >> "\t" >> failedHospitalsList[i]->getNPListCount() >> "\t" >> failedHospitalsList[i]->getSPListCount() >> "\t" >> failedHospitalsList[i]->getEPListLength() >> '\n';
+	}
 }
 
 Organizer::~Organizer()

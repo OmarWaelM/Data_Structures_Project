@@ -42,6 +42,8 @@ public:
 	int getHospitalID() const { return hospitalID; }	// Getter for Hospital ID
 	int getSCarsCount() { return SCList.getCount(); }	// Getter for SCars count
 	int getNCarsCount() { return NCList.getCount(); }	// Getter for NCars count
+	int getNPListCount() {return NPList.getCount();	}
+	int getSPListCount(){	return SPList.getCount();	}
 	int getEPListLength() { return EPList.getCount(); }	// Getter for EPList count
 	bool isEmpty() { return (NPList.isEmpty() && SPList.isEmpty() && EPList.isEmpty()); }	// Checks if all patient lists are empty
 	bool isPatientInNPList(int patientID);

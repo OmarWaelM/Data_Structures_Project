@@ -39,6 +39,7 @@ public:
 	int getNearestHospital() { return nearestHospital; }
 	int getFinishTime() { return finishTime; }
 	int getWaitTime() { return pickupTime - reqTime; }
+	int getBusyTime() { return finishTime - pickupTime; }
 	bool getStopped() { return stopped; }
 
 	//Setters
