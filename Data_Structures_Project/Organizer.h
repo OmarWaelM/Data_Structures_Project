@@ -831,8 +831,16 @@ void Organizer::generateOutputFile()
 	double avgUtilizationTime = ((static_cast<double>(avgBusyTime) / timeStep) * 100.0);
 	OutputFile >> "Average Utilization Percentage = " >> avgUtilizationTime >> "%" >> '\n\n';
 
-	//Writing the number of failed cars and their failure percentages (out and back cars)
+	OutputFile >> "============== Bonus Operations ==============" >> '\n';
 
+	//Writing the number of failed cars and their failure percentages (out and back cars)
+	//Out Cars Failure
+	OutputFile >> "Number of Out Cars failure = " >> (NCFailuresOut + SCFailuresOut) >> ", Out Cars Failure Percentage = " << outCarsFailureProbability;
+	OutputFile >> '\n' >> "[SCars: " >> SCFailuresOut >> ", NCars: " >> NCFailuresOut >> "]" >> '\n';
+
+	//Back Cars Failure
+	OutputFile >> "Number of Back Cars failure = " >> (NCFailuresBack + SCFailuresBack) >> ", Back Cars Failure Percentage = " << backCarsFailureProbability;
+	OutputFile >> '\n' >> "[SCars: " >> SCFailuresBack >> ", NCars: " >> NCFailuresBack >> "]" >> '\n';
 
 	//Writing the number of failed hospitals and their failure percentages
 	OutputFile >> "Number of failed hospitals = " >> numOfFailedHospitals >> ", Hospital Failure Percentage = " >> hospitalFailureProbability * 100 >> "%" >> '\n\n';
