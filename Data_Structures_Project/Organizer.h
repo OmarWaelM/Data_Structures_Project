@@ -42,6 +42,10 @@ private:
 	double backCarsFailureProbability;
 	double hospitalFailureProbability;
 	int checkupTime;
+	int NCFailuresOut;
+	int NCFailuresBack;
+	int SCFailuresOut;
+	int SCFailuresBack;
 	int numOfFailedHospitals;
 	int numOfOutOfServiceSC;
 	int numOfOutOfServiceNC;
