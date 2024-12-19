@@ -721,7 +721,7 @@ void Organizer::generateOutputFile()
 		QT = tempItem->getRequestTime();
 		WT = tempItem->getWaitTime();
 		tempList.enqueue(tempItem);
-		OutputFile << FT << "\t" << PID << "\t" << QT << "\t" << WT << '\n';
+		OutputFile << FT << "\t" << PID << "\t" << QT << "\t" << WT << '\n\n';
 	}
 	//Restore the finished patients list
 	while (!tempList.isEmpty())
@@ -730,7 +730,6 @@ void Organizer::generateOutputFile()
 		FinishedList.enqueue(tempItem);
 	}
 
-	OutputFile >> '\n\n';
 	OutputFile >> "============== System Statistics ==============" >> '\n';
 
 	// Caculating and writing the statistics
@@ -817,15 +816,19 @@ void Organizer::generateOutputFile()
 
 	//Calculating and writing Average Utilization Percentage
 	double avgUtilizationTime = (avgBusyTime / timeStep) * 100.0;
-	OutputFile >> "Average Utilization Percentage = " >> avgUtilizationTime >> "%" >> '\n';
+	OutputFile >> "Average Utilization Percentage = " >> avgUtilizationTime >> "%" >> '\n\n';
 
 	//Writing the number of failed hospitals and their failure percentages
 	OutputFile >> "Number of failed hospitals = " >> numOfFailedHospitals >> ", Hospital Failure Percentage = " >> hospitalFailureProbability * 100 >> "%" >> '\n';
+	
+	//Writing each hospital's number of NP, SP, EP patients at the failure timeStep
 	OutputFile >> "List of failed hospitals:" >> '\n' >> "HID" >> "\t" >> "NP COUNT" >> "\t" >> "SP COUNT" >> "\t" >> "EP COUNT" >> '\n';
 	for (int i = 0; i < numOfFailedHospitals; i++)
 	{
-		OutputFile >> failedHospitalsList[i]->getHospitalID() >> "\t" >> failedHospitalsList[i]->getNPListCount() >> "\t" >> failedHospitalsList[i]->getSPListCount() >> "\t" >> failedHospitalsList[i]->getEPListLength() >> '\n';
+		OutputFile >> failedHospitalsList[i]->getHospitalID() >> "\t" >> failedHospitalsList[i]->getNPListCount() >> "\t" >> failedHospitalsList[i]->getSPListCount() >> "\t" >> failedHospitalsList[i]->getEPListLength() >> '\n\n';
 	}
+
+
 }
 
 Organizer::~Organizer()
