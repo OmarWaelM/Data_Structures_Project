@@ -117,7 +117,6 @@ Organizer::Organizer() :
 	numOfOutOfServiceCars(0),
 	numOfOutOfServiceSC(0),
 	numOfOutOfServiceNC(0),
-	checkupTime(0),
 	NCFailuresBack(0),
 	NCFailuresOut(0),
 	SCFailuresBack(0),
@@ -526,7 +525,7 @@ void Organizer::hospitalFailureAction(Hospital* failedHospital)
 
 	// Mark the hospital as failed
 	failedHospital->setFailed(true);
-
+	int failedHospitalID = failedHospital->getHospitalID();
 	// Find the nearest hospital that is not failed
 	int secondNearestHospitalID = -1;
 	int minDistance = -1;
@@ -537,7 +536,7 @@ void Organizer::hospitalFailureAction(Hospital* failedHospital)
 		if (i != failedHospitalID - 1 && !HospitalList[i]->isFailed())
 		{
 			secondNearestHospitalID = i + 1;
-			minDistance = DistanceMatrix[failedHospitalID - 1][i];
+			minDistance = distanceMatrix[failedHospitalID - 1][i];
 		}
 	}
 
@@ -766,7 +765,7 @@ void Organizer::generateOutputFile()
 	OutputFile << "Patients: " << numRequests << "\t" << "[NP: " << totalNP << ", SP: " << totalSP << ", EP: " << totalEP << "]" << '\n';
 
 	//2. Writing the total number of hospitals in the system
-	OutputFile << "Hospitals = " << numHospitals >> '\n';
+	OutputFile << "Hospitals = " << numHospitals << '\n';
 
 	//3. Writing the total number of cars and number of cars of each type in the system
 	int totalCars = 0, totalSC = 0, totalNC = 0;
@@ -802,7 +801,7 @@ void Organizer::generateOutputFile()
 
 	//5. Calculating and writing Percentage of EP (relative to the total number of EP) who couldn't be served by home hospital
 	double percentage = ((static_cast<double>(unAssignedEPCount) / totalEP) * 100.0);
-	OutputFile << "Percentage of EP who couldn't be served by home hospital = " << percentage << "%" >> '\n';
+	OutputFile << "Percentage of EP who couldn't be served by home hospital = " << percentage << "%" << '\n';
 
 	//6. Calculating and writing the average busy time of all cars in the system
 	int totalBusyTime = 0, avgBusyTime = 0;

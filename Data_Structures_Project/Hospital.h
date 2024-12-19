@@ -15,7 +15,7 @@ private:
 
 	//General data memebers
 	int hospitalID;
-	bool isFailed;
+	bool failed;
 	int failureTimeStep;
 
 public:
@@ -53,8 +53,8 @@ public:
 	friend ostream& operator <<(ostream& os, Hospital& h);
 
 	// For the hospital failure feature
-	bool isFailed() { return isFailed; }
-	void setFailed(bool status) { isFailed = status; }
+	bool isFailed() { return failed; }
+	void setFailed(bool status) { failed = status; }
 
 	LinkedQueue<Patient*> transferSPList()
 	{
@@ -75,12 +75,12 @@ public:
 	{
 		priQueue<Patient*> temp;
 		Patient* tempItem;
-
+		int x;
 		// Copy EPList to temp
 		while (!EPList.isEmpty())
 		{
-			EPList.dequeue(tempItem);
-			temp.enqueue(tempItem);
+			EPList.dequeue(tempItem, x);
+			temp.enqueue(tempItem, x);
 		}
 		//Do NOT restore the EP List to nullify it
 		return temp;
@@ -114,7 +114,7 @@ public:
 	bool getSC(Car*& c);
 };
 
-Hospital::Hospital(): hospitalID(0), isFailed(false) {}
+Hospital::Hospital(): hospitalID(0), failed(false) {}
 
 void Hospital::addCarToList(Car* car)
 {
@@ -246,21 +246,44 @@ ostream& operator <<(ostream& os, Hospital& h)
 	return os;
 }
 
-bool Hospital::isPatientInNPList(int patientID) const
+bool Hospital::isPatientInNPList(int patientID)
 {
-	if (NPList.isEmpty()) { return false; }
-
-	// Start from the front of the queue (which is a LinkedQueue)
-	Node<Patient*>* currentNode = NPList.getFront();
-
-	// Traverse the queue until we find the patient or reach the end
-	while (currentNode != nullptr)
+	if (NPList.isEmpty())
 	{
-		if (currentNode->getItem()->getPatientID() == patientID) { return true; }
-		currentNode = currentNode->getNext();
+		return false; // The list is empty, so the patient is not present
 	}
-	return false;
+
+	Patient* tempItem;
+	LinkedQueue<Patient*> tempQueue;
+
+	bool found = false;
+	while (!NPList.isEmpty())
+	{
+		NPList.dequeue(tempItem);
+
+		if (tempItem->getPatientID() == patientID)
+		{
+			found = true;
+		}
+
+		tempQueue.enqueue(tempItem);
+
+		// Break early if patient is found
+		if (found)
+		{
+			break;
+		}
+	}
+
+	// Restore the original NP List
+	while (!tempQueue.isEmpty()) {
+		tempQueue.dequeue(tempItem);
+		NPList.enqueue(tempItem);
+	}
+
+	return found;
 }
+
 
 //Simulator Function will probably not need in phase 2
 bool Hospital::getNP(Patient*& p) { return NPList.dequeue(p); }
