@@ -117,7 +117,7 @@ Organizer::Organizer():
 	backCarsFailureProbability(0),
 	hospitalFailureProbability(0),
 	checkupTime(0),
-	unAssignedEPCount(0)
+	unAssignedEPCount(0),
 	numOfFailedHospitals(0),
 	numOfOutOfServiceCars(0),
 	numOfOutOfServiceSC(0),
