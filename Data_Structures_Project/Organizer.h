@@ -40,6 +40,7 @@ private:
 	int* ncarsPerHospital;
 	int numRequests;
 	int numCancellations;
+	int unAssignedEPCount;
 
 public:
 	//Member Functions
@@ -71,7 +72,6 @@ public:
 	//create function to Perform all cancellation requests (code is in simulator)
 	//create functino to Assign all possible patients from hospitals to out cars
 	//Handle no EP
-
 	bool handleEP(Patient* patient,Hospital* hospital);
 	//Hospital Failure
 	//Hospital Failure action
@@ -94,7 +94,8 @@ Organizer::Organizer():
 	outCarsFailureProbability(0),
 	backCarsFailureProbability(0),
 	hospitalFailureProbability(0),
-	checkupTime(0)
+	checkupTime(0),
+	unAssignedEPCount(0)
 {
 }
 
@@ -618,6 +619,7 @@ bool Organizer::handleEP(Patient* patient, Hospital* hospital)
 	}
 	return false;
 }
+
 
 Organizer::~Organizer()
 {
