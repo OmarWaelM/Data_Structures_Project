@@ -32,6 +32,7 @@ public:
 	void setFailureOut(bool state) { failureOut = state; }
 	void setFailureBack(bool state) { failureBack = state; }
 	void setInCheckup(bool state) { inCheckUp = state; }
+	void setCarType(carType c) { cType = c; }
 
 	//Update functions decrement distances by speed every timestep, if distance is less that speed decrements to 0
 	void updateBack();
