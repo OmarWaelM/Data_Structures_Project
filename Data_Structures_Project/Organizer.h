@@ -97,7 +97,7 @@ public:
 	~Organizer();
 };
 
-Organizer::Organizer():
+Organizer::Organizer() :
 	timeStep(0),
 	HospitalList(nullptr),
 	numHospitals(0),
@@ -117,6 +117,11 @@ Organizer::Organizer():
 	numOfOutOfServiceCars(0),
 	numOfOutOfServiceSC(0),
 	numOfOutOfServiceNC(0)
+	checkupTime(0),
+	NCFailuresBack(0),
+	NCFailuresOut(0),
+	SCFailuresBack(0),
+	SCFailuresOut(0)
 {
 }
 
@@ -448,6 +453,10 @@ void Organizer::outCarFailureAction(Car* car)
 	car->setFailureOut(true);
 	HospitalList[car->getHospital()-1]->addFailurePatient(car->getAssignedPatient());
 	BackCars.enqueue(car, -car->getDistToHospital());
+	if (car->getCarType() == NC)
+		NCFailuresOut++;
+	else
+		SCFailuresOut++;
 }
 
 void Organizer::backCarFailure()
@@ -489,6 +498,10 @@ void Organizer::backCarFailureAction(Car* car)
 	car->getAssignedPatient()->setStopped(true);
 	HospitalList[car->getHospital() - 1]->addFailurePatient(car->getAssignedPatient());
 	BackCars.enqueue(car, -car->getDistToHospital());
+	if (car->getCarType() == NC)
+		NCFailuresBack++;
+	else
+		SCFailuresBack++;
 }
 
 void Organizer::hospitalFaliure()
