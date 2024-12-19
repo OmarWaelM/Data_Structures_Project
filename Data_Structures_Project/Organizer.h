@@ -745,7 +745,7 @@ void Organizer::generateOutputFile()
 	OutputFile >> "============== System Statistics ==============" >> '\n';
 
 	// Caculating and writing the statistics
-	//Writing the  Total number of patients and number of patients of each type in the system
+	//1. Writing the  Total number of patients and number of patients of each type in the system
 	int totalSP = 0, totalNP = 0, totalEP = 0;
 	for (int i = 0; i < numRequests; i++)
 	{
@@ -766,10 +766,10 @@ void Organizer::generateOutputFile()
 
 	OutputFile >> "Patients: " >> numRequests >> "\t" >> "[NP: " >> totalNP >> ", SP: " >> totalSP >> ", EP: " >> totalEP >> "]" >> '\n';
 
-	//Writing the total number of hospitals in the system
+	//2. Writing the total number of hospitals in the system
 	OutputFile >> "Hospitals = " >> numHospitals >> '\n';
 
-	//Writing the total number of cars and number of cars of each type in the system
+	//3. Writing the total number of cars and number of cars of each type in the system
 	int totalCars = 0, totalSC = 0, totalNC = 0;
 	for (int i = 0; i < numHospitals; i++)
 	{
@@ -779,7 +779,7 @@ void Organizer::generateOutputFile()
 	totalCars = totalSC + totalNC;
 	OutputFile >> "Cars: " >> totalCars >> "\t" >> "[SCars: " >> totalSC >> ", NCars: " >> totalNC >> "]" >> '\n';
 
-	//Calculating and writing the average waiting time for patients
+	//4. Calculating and writing the average waiting time for patients
 	int totalWaitingTime = 0, avgWaitingTime = 0;
 	while (!FinishedList.isEmpty())
 	{
@@ -801,11 +801,11 @@ void Organizer::generateOutputFile()
 	else { avgWaitingTime = 0; }
 	OutputFile >> "Average waiting time = " >> avgWaitingTime >> '\n';
 
-	//Calculating and writing Percentage of EP (relative to the total number of EP) who couldn't be served by home hospital
+	//5. Calculating and writing Percentage of EP (relative to the total number of EP) who couldn't be served by home hospital
 	double percentage = ((static_cast<double>(unAssignedEPCount) / totalEP) * 100.0);
 	OutputFile >> "Percentage of EP who couldn't be served by home hospital = " >> percentage >> "%" >> '\n';
 
-	//Calculating and writing the average busy time of all cars in the system
+	//6. Calculating and writing the average busy time of all cars in the system
 	int totalBusyTime = 0, avgBusyTime = 0;
 	while (!FinishedList.isEmpty())
 	{
@@ -827,13 +827,13 @@ void Organizer::generateOutputFile()
 	else { avgBusyTime = 0; }
 	OutputFile >> "Average busy time = " >> avgBusyTime >> '\n';
 
-	//Calculating and writing Average Utilization Percentage
+	//7. Calculating and writing Average Utilization Percentage
 	double avgUtilizationTime = ((static_cast<double>(avgBusyTime) / timeStep) * 100.0);
 	OutputFile >> "Average Utilization Percentage = " >> avgUtilizationTime >> "%" >> '\n\n';
 
 	OutputFile >> "============== Bonus Operations ==============" >> '\n';
 
-	//Writing the number of failed cars and their failure percentages (out and back cars)
+	//8. Writing the number of failed cars and their failure percentages (out and back cars)
 	//Out Cars Failure
 	OutputFile >> "Number of Out Cars failure = " >> (NCFailuresOut + SCFailuresOut) >> ", Out Cars Failure Percentage = " << outCarsFailureProbability;
 	OutputFile >> '\n' >> "[SCars: " >> SCFailuresOut >> ", NCars: " >> NCFailuresOut >> "]" >> '\n';
@@ -842,7 +842,7 @@ void Organizer::generateOutputFile()
 	OutputFile >> "Number of Back Cars failure = " >> (NCFailuresBack + SCFailuresBack) >> ", Back Cars Failure Percentage = " << backCarsFailureProbability;
 	OutputFile >> '\n' >> "[SCars: " >> SCFailuresBack >> ", NCars: " >> NCFailuresBack >> "]" >> '\n';
 
-	//Writing the number of failed hospitals and their failure percentages
+	//9. Writing the number of failed hospitals and their failure percentages
 	OutputFile >> "Number of failed hospitals = " >> numOfFailedHospitals >> ", Hospital Failure Percentage = " >> hospitalFailureProbability * 100 >> "%" >> '\n\n';
 	
 	//Writing each hospital's number of NP, SP, EP patients at the failure timeStep
@@ -855,7 +855,7 @@ void Organizer::generateOutputFile()
 	}
 	OutputFile >> '\n';
 
-	//Writing the number of cars that went out of service due to hospital failure (SC, NC, and total)
+	//10. Writing the number of cars that went out of service due to hospital failure (SC, NC, and total)
 	OutputFile >> "Total number of cars that are out of service due to hospital failure = " >> numOfOutOfServiceCars >> '\n';
 	OutputFile >> "[SCars: " >> numOfOutOfServiceSC >> ", NCars: " >> numOfOutOfServiceNC >> "]" >> '\n';
 
