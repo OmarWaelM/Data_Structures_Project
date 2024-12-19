@@ -71,7 +71,8 @@ public:
 	//create function to Perform all cancellation requests (code is in simulator)
 	//create functino to Assign all possible patients from hospitals to out cars
 	//Handle no EP
-	bool handleEP(Patient* patient);
+
+	bool handleEP(Patient* patient,Hospital* hospital);
 	//Hospital Failure
 	//Hospital Failure action
 	//Processing input file needs to get probabilities and checkup time
@@ -583,9 +584,38 @@ void Organizer::backCarFailureAction(Car* car)
 	BackCars.enqueue(car, -car->getDistToHospital());
 }	
 
-bool Organizer::handleEP(Patient* patient)
+
+bool Organizer::handleEP(Patient* patient, Hospital* hospital)
 {
-	
+	int shortestList = hospital->getEPListLength();
+	int nearestHospitalDistance = patient -> getDistance();
+	int distanceBetHospitals = patient->getDistance();
+
+	if (!hospital->addPatientToList(patient) && patient->getPatientType() == EP)
+	{
+		for (int i = 0; i < numHospitals; i++)
+		{
+			if (shortestList > HospitalList[i]->getEPListLength())
+			{
+				shortestList = HospitalList[i]->getEPListLength();
+				hospital->setID(HospitalList[i]->getHospitalID());
+				hospital->addPatientToList(patient);
+				return true;
+			}
+			else if (shortestList == HospitalList[i]->getEPListLength())
+			{
+				if (nearestHospitalDistance > distanceMatrix[HospitalList[i]->getHospitalID()][i])
+				{
+					distanceBetHospitals = nearestHospitalDistance - distanceMatrix[HospitalList[i]->getHospitalID()][i];
+					nearestHospitalDistance = distanceMatrix[HospitalList[i]->getHospitalID()][i];
+					hospital->setID(HospitalList[i]->getHospitalID());
+					patient->setDistanceToPickup(distanceBetHospitals);
+					hospital->addPatientToList(patient);
+					return true;
+				}
+			}
+		}
+	}
 	return false;
 }
 
