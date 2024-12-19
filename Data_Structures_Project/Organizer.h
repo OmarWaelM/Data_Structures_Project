@@ -577,14 +577,15 @@ void Organizer::hospitalFailureAction(Hospital* failedHospital)
 	{
 		SCList.dequeue(car);
 		numOfOutOfServiceSC++;
+		// Do NOT restore the out of service car to remove it from the system
 	}
 
 	while (!NCList.isEmpty())
 	{
 		NCList.dequeue(car);
 		numOfOutOfServiceNC++;
+		// Do NOT restore the out of service car to remove it from the system
 	}
-	delete car;
 	numOfOutOfServiceCars = numOfOutOfServiceSC + numOfOutOfServiceNC;
 
 	// Handle OUT cars of the failed hospital
@@ -599,7 +600,7 @@ void Organizer::hospitalFailureAction(Hospital* failedHospital)
 		{
 			// Handle the failure of the assigned car
 			outCarFailureAction(outCar);
-			delete outCar; // Remove the car from the system
+			delete outCar;
 		}
 		else
 		{

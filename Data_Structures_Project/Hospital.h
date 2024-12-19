@@ -195,6 +195,7 @@ bool Hospital::assignPatients(Car*& ambulance)
 			return true;
 		}
 	}
+	return false;
 }
 
 bool Hospital::assignPatientToCar(Patient* p, Car*& ambulance)
