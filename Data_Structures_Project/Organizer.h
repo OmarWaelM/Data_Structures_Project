@@ -351,12 +351,12 @@ void Organizer::moveCarFromFreeToOut(Patient* patient)
 
 	Hospital* nearestHospital = HospitalList[nearestHospitalID - 1];
 	Car* assignedCar = nullptr;
-
-	// Attempt to assign a car to the patient using Hospital's logic
-	assignedCar = nearestHospital->assignPatientToCar(patient, assignedCar);
+	bool assigned;
+	// Attempt to assign a car to the patient using Hospital's patient & car assignment logic
+	assigned = nearestHospital->assignPatientToCar(patient, assignedCar);
 
 	// If a car was successfully assigned
-	if (assignedCar)
+	if (assigned)
 	{
 		OutCars.enqueue(assignedCar, -assignedCar->getDistToPatient()); // Add car to OUT cars queue
 		return;
@@ -705,22 +705,31 @@ void Organizer::generateOutputFile()
 	ofstream OutputFile;
 	OutputFile.open(outfile + ".txt", ios::out);
 
+	Patient* tempItem;
+	LinkedQueue<Patient*> tempList;
+	ModifiedQ temp;
+
 	// Writinf the Finished Patients List
 	int FT, PID, QT, WT;
 	OutputFile >> "FT" >> "\t" >> "PID" >> "\t" >> "QT" >> "\t" >> "WT" >> '\n';
-	Patient 
 	while (!FinishedList.isEmpty())
 	{
 		FinishedList.dequeue(tempItem);
 
-		int FT = tempItem.getFinishTime();
-		int PID = tempItem.getPatientID();
-		int QT = tempItem.getRequestTime();
-		int WT = tempItem.getWaitTime();
-
-		// Write to the output file
+		FT = tempItem->getFinishTime();
+		PID = tempItem->getPatientID();
+		QT = tempItem->getRequestTime();
+		WT = tempItem->getWaitTime();
+		tempList.enqueue(tempItem);
 		OutputFile << FT << "\t" << PID << "\t" << QT << "\t" << WT << '\n';
 	}
+	//Restore the finished patients list
+	while (!tempList.isEmpty())
+	{
+		tempList.dequeue(tempItem);
+		FinishedList.enqueue(tempItem);
+	}
+
 	OutputFile >> '\n\n';
 	OutputFile >> "============== System Statistics ==============" >> '\n';
 
@@ -729,10 +738,21 @@ void Organizer::generateOutputFile()
 	int totalSP = 0, totalNP = 0, totalEP = 0;
 	for (int i = 0; i < numRequests; i++)
 	{
-		if (patientsList[i]->getPatientType() == SP) totalSP++;
-		if (patientsList[i]->getPatientType() == NP) totalNP++;
-		if (patientsList[i]->getPatientType() == EP) totalEP++;
+		patientsList.dequeue(tempItem);
+
+		if (tempItem->getPatientType() == SP) totalSP++;
+		if (tempItem->getPatientType() == NP) totalNP++;
+		if (tempItem->getPatientType() == EP) totalEP++;
+
+		temp.enqueue(tempItem);
 	}
+	//Restore the patients list
+	while (!temp.isEmpty())
+	{
+		temp.dequeue(tempItem);
+		patientsList.enqueue(tempItem);
+	}
+
 	OutputFile >> "Patients: " >> numRequests >> "\t" >> "[NP: " >> totalNP >> ", SP: " >> totalSP >> ", EP: " >> totalEP >> "]" >> '\n';
 
 	//Writing the total number of hospitals in the system
@@ -743,17 +763,26 @@ void Organizer::generateOutputFile()
 	for (int i = 0; i < numHospitals; i++)
 	{
 		totalSC += HospitalList[i]->getSCarsCount();
-		totalNC += HospitalList[i]->getSNCarsCount();
+		totalNC += HospitalList[i]->getNCarsCount();
 	}
 	totalCars = totalSC + totalNC;
 	OutputFile >> "Cars: " >> totalCars >> "\t" >> "[SCars: " >> totalSC >> ", NCars: " >> totalNC >> "]" >> '\n';
 
 	//Calculating and writing the average waiting time for patients
 	int totalWaitingTime = 0, avgWaitingTime = 0;
-	for (int i = 0; i < FinishedList.getCount(); i++)
+	while (!FinishedList.isEmpty())
 	{
-		totalWaitingTime += FinishedList[i]->getWaitTime();
+		FinishedList.dequeue(tempItem);
+		totalWaitingTime += tempItem->getWaitTime();
+		tempList.enqueue(tempItem);
 	}
+	//Restore the finished patients list
+	while (!tempList.isEmpty())
+	{
+		tempList.dequeue(tempItem); 
+		FinishedList.enqueue(tempItem);
+	}
+
 	if (FinishedList.getCount() != 0)
 	{
 		avgWaitingTime = totalWaitingTime / FinishedList.getCount();
@@ -766,10 +795,19 @@ void Organizer::generateOutputFile()
 
 	//Calculating and writing the average busy time of all cars in the system
 	int totalBusyTime = 0, avgBusyTime = 0;
-	for (int i = 0; i < FinishedList.getCount(); i++)
+	while (!FinishedList.isEmpty())
 	{
-		totalBusyTime += FinishedList[i]->getBusyTime();
+		FinishedList.dequeue(tempItem);
+		totalBusyTime += tempItem->getBusyTime();
+		tempList.enqueue(tempItem);
 	}
+	// Restore the original finished patients list
+	while (!tempList.isEmpty())
+	{
+		tempList.dequeue(tempItem);
+		FinishedList.enqueue(tempItem);
+	}
+
 	if (FinishedList.getCount() != 0)
 	{
 		avgBusyTime = totalBusyTime / FinishedList.getCount();
