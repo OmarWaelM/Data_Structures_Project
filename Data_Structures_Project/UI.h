@@ -26,7 +26,7 @@ public:
 
 	//Filename getters
 	string getInputFileName() { return fileName; }
-	string getOutputFileNAme() { return outFileName; }
+	string getOutputFileName() { return outFileName; }
 
 	//Formatted output function
 	void Output(int timestep, Hospital** h, int nOfHosp, priQueue<Car*>* backCars, ModifiedPriQ* outCars, LinkedQueue<Patient*>* finished, priQueue<Car*>* checkup);

@@ -18,6 +18,5 @@ using namespace std;
 
 int main() {
 	Organizer Org;
-	Org.Simulator();
 	return 0;
 }
