@@ -116,7 +116,7 @@ Organizer::Organizer() :
 	numOfFailedHospitals(0),
 	numOfOutOfServiceCars(0),
 	numOfOutOfServiceSC(0),
-	numOfOutOfServiceNC(0)
+	numOfOutOfServiceNC(0),
 	checkupTime(0),
 	NCFailuresBack(0),
 	NCFailuresOut(0),
