@@ -58,38 +58,53 @@ public:
 
 	LinkedQueue<Patient*> transferSPList()
 	{
-		LinkedQueue<Patient*> temp = SPList; // Save current list
-		SPList = nullptr; // Nullify after transfer
-		return temp; // Transfer the SP list 
+		LinkedQueue<Patient*> temp;
+		Patient* tempItem;
+
+		// Copy SPList to temp
+		while (!SPList.isEmpty())
+		{
+			SPList.dequeue(tempItem);
+			temp.enqueue(tempItem);
+		}
+		//Do NOT restore the SP List to nullify it
+		return temp;
 	}
 
 	priQueue<Patient*> transferEPList()
 	{
-		priQueue<Patient*> temp = EPList; // Save current list
-		EPList = nullptr; // Nullify after transfer
-		return temp; // Transfer the EP list 
+		priQueue<Patient*> temp;
+		Patient* tempItem;
+
+		// Copy EPList to temp
+		while (!EPList.isEmpty())
+		{
+			EPList.dequeue(tempItem);
+			temp.enqueue(tempItem);
+		}
+		//Do NOT restore the EP List to nullify it
+		return temp;
 	}
 
 	ModifiedQ transferNPList()
 	{
-		ModifiedQ temp = NPList; // Save current list
-		NPList = nullptr; // Nullify after transfer
-		return temp; // Transfer the NP list 
+		ModifiedQ temp;
+		Patient* tempItem;
+
+		// Copy NPList to temp
+		while (!NPList.isEmpty())
+		{
+			NPList.dequeue(tempItem);
+			temp.enqueue(tempItem);
+		}
+		//Do NOT restore the NP List to nullify it
+		return temp;
 	}
 
-	LinkedQueue<Car*> transferSCList()
-	{
-		LinkedQueue<Car*> temp = SCList; // Save current list
-		SCList = nullptr; // Nullify after transfer
-		return temp; // Transfer the SC list 
-	}
+	LinkedQueue<Car*> transferSCList() { return SCList; }
 
-	LinkedQueue<Car*> transferNCList()
-	{
-		LinkedQueue<Car*> temp = NCList; // Save current list
-		NCList = nullptr; // Nullify after transfer
-		return temp; // Transfer the NC list 
-	}
+	LinkedQueue<Car*> transferNCList() { return NCList; }
+
 
 	//Simulation Specific Function
 	bool getNP(Patient*& p);
