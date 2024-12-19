@@ -359,6 +359,7 @@ void Organizer::moveCarFromFreeToOut(Patient* patient)
 	// Handle unassigned EP patients
 	if (patient->getPatientType() == patientType::EP)
 	{
+		unAssignedEPCount++;
 		handleEP(patient, nearestHospital); // Handle EP patient as no car was available
 	}
 }
