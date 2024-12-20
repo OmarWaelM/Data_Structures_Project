@@ -16,6 +16,7 @@ private:
 	int hospital;
 	int distToPatient;	//decrememnted by speed every timestep
 	int distToHospital; //incrememnted by speed every timestep
+	int busyTime;
 	Patient* assignedPatient;
 	bool inCheckUp;  //true if the car needs a check up
 	bool failureOut;
@@ -28,7 +29,7 @@ public:
 	//Assignment and Deassignment
 	bool AssignPatient(Patient* p);
 	Patient* deassignPatient();
-	
+
 	void setFailureOut(bool state) { failureOut = state; }
 	void setFailureBack(bool state) { failureBack = state; }
 	void setInCheckup(bool state) { inCheckUp = state; }
@@ -36,12 +37,13 @@ public:
 
 	//Update functions decrement distances by speed every timestep, if distance is less that speed decrements to 0
 	void updateBack();
-	void updateOut();	
+	void updateOut();
 
 	//Getters
 	int getcarID() const { return carID; }
 	int getHospital() const { return hospital; }
 	int getAssignedPatientID() const { return assignedPatient->getPatientID(); }
+	int getBusyTime() const { return busyTime; }
 	int getDistToPatient() const { return distToPatient; }
 	int getDistToHospital() const { return distToHospital; }
 	carType getCarType() const { return cType; }
@@ -60,6 +62,7 @@ Car::Car(int id, int hosp, carType type, int spd)
 	hospital = hosp;
 	cType = type;
 	speed = spd;
+	busyTime = 0;
 	assignedPatient = nullptr;
 	distToHospital = 0;
 	inCheckUp = false;
@@ -106,10 +109,11 @@ void Car::updateBack()
 		}
 		else
 		{
-			distToPatient = speed;
+			distToPatient += speed;
 			distToHospital -= speed;
 		}
 	}
+	busyTime++;
 }
 
 void Car::updateOut()
@@ -124,6 +128,7 @@ void Car::updateOut()
 		distToPatient -= speed;
 		distToHospital += speed;
 	}
+	busyTime++;
 }
 
 ostream& operator <<(ostream& os, Car& car)

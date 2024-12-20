@@ -103,11 +103,6 @@ void UI::Start()
 	cout << "Please enter the name of the file you would like to save to: " << endl;
 	cin >> outFileName;
 	printf("\033c");
-
-	if (mode == SILENT)
-	{
-		cout << "Silent Mode, Simulation Starts..." << endl;
-	}
 }
 
 //Checks whether the filename inserted by the user exists or not
