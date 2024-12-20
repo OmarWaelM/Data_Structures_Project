@@ -471,8 +471,8 @@ void Organizer::generateOutputFile()
 	OutputFile << '\n';
 
 	//10. Writing the number of cars that went out of service due to hospital failure (SC, NC, and total)
-	OutputFile << "Total number of cars that are out of service due to hospital failure = " << numOfOutOfServiceCars << "\t";
-	OutputFile << "[SCars: " << numOfOutOfServiceSC << ", NCars: " << numOfOutOfServiceNC << "]" << '\n';
+	OutputFile << "Total number of cars that are out of service due to hospital failure = " << numOfOutOfServiceCars;
+	OutputFile << "  [SCars: " << numOfOutOfServiceSC << ", NCars: " << numOfOutOfServiceNC << "]" << '\n';
 	OutputFile << '\n';
 	OutputFile << "============== End of the Output File ==============" << '\n';
 
