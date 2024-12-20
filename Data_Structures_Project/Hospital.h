@@ -25,6 +25,7 @@ public:
 	//List Members movemen
 	void addCarToList(Car* car);
 	bool addPatientToList(Patient* patient);
+	void addPatientToListEP(Patient* patient); //Only after EP is handled
 	void addFailurePatient(Patient* patient); //adds patient to top after car failure
 
 	//Car and Patient Assignment
@@ -40,12 +41,12 @@ public:
 	int getHospitalID() const { return hospitalID; }	// Getter for Hospital ID
 	int getSCarsCount() { return SCList.getCount(); }	// Getter for SCars count
 	int getNCarsCount() { return NCList.getCount(); }	// Getter for NCars count
-	int getNPListCount() {return NPList.getCount();	}
-	int getSPListCount(){	return SPList.getCount();	}
+	int getNPListCount() { return NPList.getCount(); }
+	int getSPListCount() { return SPList.getCount(); }
 	int getEPListLength() { return EPList.getCount(); }	// Getter for EPList count
 	bool isEmpty() { return (NPList.isEmpty() && SPList.isEmpty() && EPList.isEmpty()); }	// Checks if all patient lists are empty
-	bool isPatientInNPList(int patientID);
 	int getFailureTimeStep() {return failureTimeStep;}
+	int getTotalBusyTime();
 
 	//Outstream operator overloading
 	friend ostream& operator <<(ostream& os, Hospital& h);
@@ -108,10 +109,17 @@ Hospital::Hospital(): hospitalID(0), failed(false) {}
 
 void Hospital::addCarToList(Car* car)
 {
-	if (car->getCarType() == SC)
-		SCList.enqueue(car);
+	if (failed)
+	{
+		delete car;
+	}
 	else
-		NCList.enqueue(car);
+	{
+		if (car->getCarType() == SC)
+			SCList.enqueue(car);
+		else
+			NCList.enqueue(car);
+	}
 }
 
 bool Hospital::addPatientToList(Patient* patient)
@@ -137,6 +145,11 @@ bool Hospital::addPatientToList(Patient* patient)
 	}
 }
 
+void Hospital::addPatientToListEP(Patient* patient)
+{
+	EPList.enqueue(patient, patient->getPatientPriority());
+}
+
 void Hospital::addFailurePatient(Patient* patient)
 {
 	if (patient->getPatientType() == SP)
@@ -155,33 +168,30 @@ void Hospital::addFailurePatient(Patient* patient)
 
 bool Hospital::assignPatients(Car*& ambulance)
 {
-	Patient* p;
-	int pri;
+	Patient* p = nullptr;
+	int pri = -1;
 
 	if (!EPList.isEmpty())
 	{
 		EPList.peek(p, pri);
-		if (assignPatientToCar(p, ambulance))
+		if (p && assignPatientToCar(p, ambulance))
 		{
-			EPList.dequeue(p, pri);
 			return true;
 		}
 	}
 	if (!SPList.isEmpty())
 	{
 		SPList.peek(p);
-		if (assignPatientToCar(p, ambulance))
+		if (p && assignPatientToCar(p, ambulance))
 		{
-			SPList.dequeue(p);
 			return true;
 		}
 	}
 	if (!NPList.isEmpty())
 	{
 		NPList.peek(p);
-		if (assignPatientToCar(p, ambulance))
+		if (p && assignPatientToCar(p, ambulance))
 		{
-			NPList.dequeue(p);
 			return true;
 		}
 	}
@@ -190,89 +200,92 @@ bool Hospital::assignPatients(Car*& ambulance)
 
 bool Hospital::assignPatientToCar(Patient* p, Car*& ambulance)
 {
-	Patient* patient = nullptr;
 	int x;
-	if (p->getPatientType() == NP && NCList.getCount() != 0)
+	if (p->getPatientType() == NP && !NCList.isEmpty())
 	{
-		NPList.dequeue(patient);
+		NPList.dequeue(p);
 		NCList.dequeue(ambulance);
-		ambulance->AssignPatient(patient);
+		ambulance->AssignPatient(p);
 		return true;
 	}
-	else if (p->getPatientType() == SP && SCList.getCount() != 0)
+	else if (p->getPatientType() == SP && !SCList.isEmpty())
 	{
-		SPList.dequeue(patient);
+		SPList.dequeue(p);
 		SCList.dequeue(ambulance);
-		ambulance->AssignPatient(patient);
+		ambulance->AssignPatient(p);
 		return true;
 	}
 	else if (p->getPatientType() == EP)
 	{
-		if (NCList.getCount() != 0)
+		if (!NCList.isEmpty())
 		{
 			NCList.dequeue(ambulance);
-			EPList.dequeue(patient, x);
-			ambulance->AssignPatient(patient);
+			EPList.dequeue(p, x);
+			ambulance->AssignPatient(p);
 			return true;
 		}
-		else if (SCList.getCount() != 0)
+		else if (!SCList.isEmpty())
 		{
 			SCList.dequeue(ambulance);
-			EPList.dequeue(patient, x);
-			ambulance->AssignPatient(patient);
+			EPList.dequeue(p, x);
+			ambulance->AssignPatient(p);
 			return true;
 		}
 	}
 	return false;
 }
 
-ostream& operator <<(ostream& os, Hospital& h)
+int Hospital::getTotalBusyTime()
 {
-	os << "==============	  Hospital #" << h.hospitalID << " data   ==============" << endl;
-	os << h.EPList.getCount() << " EP requests: " << h.EPList << endl;
-	os << h.SPList.getCount() << " SP requests: " << h.SPList << endl;
-	os << h.NPList.getCount() << " NP requests: " << h.NPList << endl;
-	os << "Free Cars: " << h.SCList.getCount() << " SCars, " << h.NCList.getCount() << " NCars" << endl;
-	os << "==============	Hospital #" << h.hospitalID << " data end  =============" << endl;
-	return os;
+	int total = 0;
+	LinkedQueue<Car*> temp;
+	Car* c;
+	while (!SCList.isEmpty())
+	{
+		SCList.dequeue(c);
+		total += c->getBusyTime();
+		temp.enqueue(c);
+	}
+	while (!temp.isEmpty())
+	{
+		temp.dequeue(c);
+		SCList.enqueue(c);
+	}
+	while (!NCList.isEmpty())
+	{
+		NCList.dequeue(c);
+		total += c->getBusyTime();
+		temp.enqueue(c);
+	}
+	while (!temp.isEmpty())
+	{
+		temp.dequeue(c);
+		NCList.enqueue(c);
+	}
+	return total;
 }
 
-bool Hospital::isPatientInNPList(int patientID)
+ostream& operator <<(ostream& os, Hospital& h)
 {
-	if (NPList.isEmpty())
+	if (!h.isFailed())
 	{
-		return false; // The list is empty, so the patient is not present
+		os << "==============	  Hospital #" << h.hospitalID << " data   ==============" << endl;
+		os << h.EPList.getCount() << " EP requests: " << h.EPList << endl;
+		os << h.SPList.getCount() << " SP requests: " << h.SPList << endl;
+		os << h.NPList.getCount() << " NP requests: " << h.NPList << endl;
+		os << "Free Cars: " << h.SCList.getCount() << " SCars, " << h.NCList.getCount() << " NCars" << endl;
+		os << "==============	Hospital #" << h.hospitalID << " data end  =============" << endl;
 	}
-
-	Patient* tempItem;
-	LinkedQueue<Patient*> tempQueue;
-
-	bool found = false;
-	while (!NPList.isEmpty())
+	else
 	{
-		NPList.dequeue(tempItem);
-
-		if (tempItem->getPatientID() == patientID)
-		{
-			found = true;
-		}
-
-		tempQueue.enqueue(tempItem);
-
-		// Break early if patient is found
-		if (found)
-		{
-			break;
-		}
+		os << "==============	  Hospital #" << h.hospitalID << " data   ==============" << endl;
+		os << "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx" << endl;
+		os << "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx" << endl;
+		os << "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx" << endl;
+		os << "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx" << endl;
+		os << "==============	Hospital #" << h.hospitalID << " data end  =============" << endl;
 	}
-
-	// Restore the original NP List
-	while (!tempQueue.isEmpty()) {
-		tempQueue.dequeue(tempItem);
-		NPList.enqueue(tempItem);
-	}
-
-	return found;
+	return os;
 }
 
 #endif
