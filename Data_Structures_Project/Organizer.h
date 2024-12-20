@@ -463,7 +463,7 @@ void Organizer::generateOutputFile()
 	OutputFile << "Number of failed hospitals = " << numOfFailedHospitals << ", Hospital Failure Percentage = " << hospitalFailureProbability * 100 << "%" << '\n';
 	OutputFile << '\n';
 	//Writing each hospital's number of NP, SP, EP patients at the failure timeStep
-	OutputFile << "List of failed hospitals:" << '\n' << "HID" << "\t" << "FAILURE-TIMESTEP" << '\n';
+	OutputFile << "List of failed hospitals:" << '\n' << "HID" << "\t" << "FT" << '\n';
 	for (int i = 0; i < numOfFailedHospitals; i++)
 	{
 		OutputFile << failedHospitalsList[i]->getHospitalID() << "\t" << failedHospitalsList[i]->getFailureTimeStep() << "\t";
