@@ -1,16 +1,6 @@
 #ifndef ORGANIZER_H
 #define ORGANIZER_H
 
-#include "UI.h"
-#include "Hospital.h"
-#include "Patient.h"
-#include "Car.h"
-#include "LinkedQueue.h"
-#include "priQueue.h"
-#include "ModifiedPriQ.h"
-#include "ModifiedQ.h"
-
-#include <string>
 using namespace std;
 
 struct CancellationReq
@@ -25,7 +15,7 @@ class Organizer
 private:
 	// Lists used in orgranizer class
 	Hospital** HospitalList;						// An array of pointers to hospitals
-	ModifiedQ patientsList;	                        // Patients list of type Linked Queue (list of pointers to patients)
+	LinkedQueue<Patient*> patientsList;	            // Patients list of type Linked Queue (list of pointers to patients)
 	LinkedQueue<CancellationReq> CancellationList;	// Cancellation requests' list of type Linked Queue
 	LinkedQueue<Patient*> FinishedList;				// Finished patients' list of type Linked Queue
 	priQueue<Car*> BackCars;						// Back cars' list (cars on their way back) of type Priority Queue
@@ -66,7 +56,8 @@ public:
   
 	//Constructor
 	Organizer();
-  
+	void Simulator();
+
 	/***** Input file member functions *****/
 	void setInputFileName(UI gui) { filename = gui.getInputFileName(); }
 	void setOutputFileName(UI gui) { outfile = gui.getOutputFileName(); }
@@ -75,12 +66,12 @@ public:
 	void readHospitalData();					//Reads hospital distance data
 	void AddHospital(const int Hospital_ID);	//Adding a Hospital to the hospital list
 
-	/**** Functions for handling Cars **/
+	/***** Functions for handling Cars *****/
 	void updateOutCars();
 	void updateBackCars();
 	void updateCheckupCars();
 	void handleCarMovements(); //move from out to back and from back to hospitals
-	void moveCarFromFreeToOut(Patient* patient); //move from free to out
+	void moveCarFromFreeToOut(); //move from free to out
 	void outCarFailure();
 	void outCarFailureAction(Car* car);
 	void backCarFailure();
@@ -89,10 +80,12 @@ public:
 	void hospitalFaliure();
 	void hospitalFailureAction(Hospital* failedHospital);
 
+	/***** Functions for handling patients *****/
+	void movePatientstoHospitals();
+	bool handleEP(Patient* patient);
 	void handleCancellations();
 	void addToFinishedList(Car* car);
 	void transferPatientsRequests(Patient* patient, int nearestHospitalID);
-	bool handleEP(Patient* patient,Hospital* hospital);
 
 	~Organizer();
 };
@@ -124,6 +117,57 @@ Organizer::Organizer() :
 {
 }
 
+void Organizer::Simulator()
+{
+	//Initialization
+	timeStep = 0;
+	GUI.Start();
+	filename = GUI.getInputFileName();
+	processInputFile();
+
+	bool endSimulation = false;
+
+	GUI.Output(timeStep, HospitalList, numHospitals, &BackCars, &OutCars, &FinishedList, &checkupList);
+
+	while (!endSimulation)
+	{
+		//Updating timestep
+		timeStep++;
+
+		//Patients
+		movePatientstoHospitals();
+		handleCancellations();
+		moveCarFromFreeToOut();
+
+		//Cars
+		updateOutCars();
+		updateBackCars();
+		updateCheckupCars();
+		handleCarMovements();
+
+		//Failure
+		outCarFailure();
+		backCarFailure();
+		hospitalFaliure();
+
+		//Output hospital data
+		GUI.Output(timeStep, HospitalList, numHospitals, &BackCars, &OutCars, &FinishedList, &checkupList);
+
+		//Checking if all lists are empty
+		endSimulation = true;
+		if (!patientsList.isEmpty())
+			endSimulation = false;
+		if (!checkupList.isEmpty() || !OutCars.isEmpty() || !BackCars.isEmpty())
+			endSimulation = false;
+		for (int i = 0; i < numHospitals; i++)
+		{
+			if (!HospitalList[i]->isEmpty())
+				endSimulation = false;
+		}
+	}
+
+	generateOutputFile();
+}
 /***** FILE LOADING FUNCTIONS *****/
 
 /* The processInputFile function loads, reads and processes the input file 
@@ -258,6 +302,7 @@ void Organizer::readHospitalData()
 {
 	// Dynamically allocate an array of pointers to Hospital objects
 	HospitalList = new Hospital * [numHospitals];
+	failedHospitalsList = new Hospital * [numHospitals];
 
 	static int carID = 1; //For the Car ID's
 
@@ -286,18 +331,168 @@ void Organizer::readHospitalData()
 	}
 }
 
+/****** GENERATE & UPDATE OUTPUT FILE FUNCTION *****/
+
+void Organizer::generateOutputFile()
+{
+	setOutputFileName(GUI);
+
+	ofstream OutputFile;
+	OutputFile.open(outfile + ".txt", ios::out);
+
+	Patient* tempItem;
+	LinkedQueue<Patient*> tempList;
+	ModifiedQ temp;
+
+	// Writinf the Finished Patients List
+	int FT, PID, QT, WT;
+	OutputFile << "FT" << "\t" << "PID" << "\t" << "QT" << "\t" << "WT" << '\n';
+	while (!FinishedList.isEmpty())
+	{
+		FinishedList.dequeue(tempItem);
+
+		FT = tempItem->getFinishTime();
+		PID = tempItem->getPatientID();
+		QT = tempItem->getRequestTime();
+		WT = tempItem->getWaitTime();
+		tempList.enqueue(tempItem);
+		OutputFile << FT << "\t" << PID << "\t" << QT << "\t" << WT << "\n";
+	}
+	//Restore the finished patients list
+	while (!tempList.isEmpty())
+	{
+		tempList.dequeue(tempItem);
+		FinishedList.enqueue(tempItem);
+	}
+
+	OutputFile << "============== System Statistics ==============" << '\n';
+
+	// Caculating and writing the statistics
+	//1. Writing the  Total number of patients and number of patients of each type in the system
+	int totalSP = 0, totalNP = 0, totalEP = 0;
+	for (int i = 0; i < numRequests; i++)
+	{
+		FinishedList.dequeue(tempItem);
+
+		if (tempItem->getPatientType() == SP) totalSP++;
+		if (tempItem->getPatientType() == NP) totalNP++;
+		if (tempItem->getPatientType() == EP) totalEP++;
+
+		temp.enqueue(tempItem);
+	}
+	//Restore the patients list
+	while (!temp.isEmpty())
+	{
+		temp.dequeue(tempItem);
+		FinishedList.enqueue(tempItem);
+	}
+
+	OutputFile << "Patients: " << numRequests << "\t" << "[NP: " << totalNP << ", SP: " << totalSP << ", EP: " << totalEP << "]" << '\n';
+
+	//2. Writing the total number of hospitals in the system
+	OutputFile << "Hospitals = " << numHospitals << '\n';
+
+	//3. Writing the total number of cars and number of cars of each type in the system
+	int totalCars = 0, totalSC = 0, totalNC = 0;
+	for (int i = 0; i < numHospitals; i++)
+	{
+		totalSC += HospitalList[i]->getSCarsCount();
+		totalNC += HospitalList[i]->getNCarsCount();
+	}
+	totalCars = totalSC + totalNC;
+	OutputFile << "Cars: " << totalCars << "\t" << "[SCars: " << totalSC << ", NCars: " << totalNC << "]" << '\n';
+
+	//4. Calculating and writing the average waiting time for patients
+	int totalWaitingTime = 0, avgWaitingTime = 0;
+	while (!FinishedList.isEmpty())
+	{
+		FinishedList.dequeue(tempItem);
+		totalWaitingTime += tempItem->getWaitTime();
+		tempList.enqueue(tempItem);
+	}
+	//Restore the finished patients list
+	while (!tempList.isEmpty())
+	{
+		tempList.dequeue(tempItem); 
+		FinishedList.enqueue(tempItem);
+	}
+
+	if (FinishedList.getCount() != 0)
+	{
+		avgWaitingTime = totalWaitingTime / FinishedList.getCount();
+	}
+	else { avgWaitingTime = 0; }
+	OutputFile << "Average waiting time = " << avgWaitingTime << '\n';
+
+	//Calculating and writing Percentage of EP (relative to the total number of EP) who couldn't be served by home hospital
+
+	//5. Calculating and writing Percentage of EP (relative to the total number of EP) who couldn't be served by home hospital
+	double percentage = ((static_cast<double>(unAssignedEPCount) / totalEP) * 100.0);
+	OutputFile << "Percentage of EP who couldn't be served by home hospital = " << percentage << "%" << "\n";
+
+	//6. Calculating and writing the average busy time of all cars in the system
+	int totalBusyTime = 0, avgBusyTime = 0;
+	for (int i = 0; i < numHospitals; i++)
+	{
+		totalBusyTime+=HospitalList[i]->getTotalBusyTime();
+	}
+
+	if (totalCars != 0)
+	{
+		avgBusyTime = totalBusyTime / totalCars;
+	}
+	else { avgBusyTime = 0; }
+	OutputFile << "Average busy time = " << avgBusyTime << "\n";
+
+	//7. Calculating and writing Average Utilization Percentage
+	double avgUtilizationTime = ((static_cast<double>(avgBusyTime) / timeStep) * 100.0);
+	OutputFile << "Average Utilization Percentage = " << avgUtilizationTime << "%" << "\n\n";
+
+	OutputFile << "============== Bonus Operations ==============" << '\n';
+
+	//8. Writing the number of failed cars and their failure percentages (out and back cars)
+	//Out Cars Failure
+	OutputFile << "Number of Out Cars failure = " << (NCFailuresOut + SCFailuresOut) << ", Out Cars Failure Percentage = " << outCarsFailureProbability;
+	OutputFile << '\n' << "[SCars: " << SCFailuresOut << ", NCars: " << NCFailuresOut << "]" << '\n';
+
+	//Back Cars Failure
+	OutputFile << "Number of Back Cars failure = " << (NCFailuresBack + SCFailuresBack) << ", Back Cars Failure Percentage = " << backCarsFailureProbability;
+	OutputFile << '\n' << "[SCars: " << SCFailuresBack << ", NCars: " << NCFailuresBack << "]" << '\n';
+
+	//9. Writing the number of failed hospitals and their failure percentages
+	OutputFile << "Number of failed hospitals = " << numOfFailedHospitals << ", Hospital Failure Percentage = " << hospitalFailureProbability * 100 << "%" << '\n\n';
+	
+	//Writing each hospital's number of NP, SP, EP patients at the failure timeStep
+	OutputFile << "List of failed hospitals:" << '\n' << "HID" << "\t" << "NP COUNT" << "\t" << "SP COUNT" << "\t" << "EP COUNT" << "\t" << "FREE SC" << "\t" << "FREE NC" << '\n';
+	for (int i = 0; i < numOfFailedHospitals; i++)
+	{
+		OutputFile << failedHospitalsList[i]->getHospitalID() << "\t" << failedHospitalsList[i]->getNPListCount() << "\t";
+		OutputFile << failedHospitalsList[i]->getSPListCount() << "\t" << failedHospitalsList[i]->getEPListLength() << "\t";
+		OutputFile << failedHospitalsList[i]->getSCarsCount() << "\t" << failedHospitalsList[i]->getNCarsCount() << '\n';
+	}
+	OutputFile << '\n';
+
+	//10. Writing the number of cars that went out of service due to hospital failure (SC, NC, and total)
+	OutputFile << "Total number of cars that are out of service due to hospital failure = " << numOfOutOfServiceCars << '\n';
+	OutputFile << "[SCars: " << numOfOutOfServiceSC << ", NCars: " << numOfOutOfServiceNC << "]" << '\n';
+
+	OutputFile << "============== End of the Output File ==============" << '\n';
+
+	// Close the file
+	OutputFile.close();
+}
+
 /****** CAR HANDLING FUNCTIONS ******/
 
 void Organizer::updateOutCars()
 {
 	priQueue<Car*> temp;
-	Car* c;
-	int pri;
+	Car* c = nullptr;
+	int pri = -1;
 	while (!OutCars.isEmpty())
 	{
 		OutCars.dequeue(c, pri);
 		c->updateOut();
-		if (c->getDistToPatient() == 0)
 		temp.enqueue(c, -c->getDistToPatient());
 	}
 	while (!temp.isEmpty())
@@ -310,8 +505,8 @@ void Organizer::updateOutCars()
 void Organizer::updateBackCars()
 {
 	priQueue<Car*> temp;
-	Car* c;
-	int pri;
+	Car* c = nullptr;
+	int pri = -1;
 	while (!BackCars.isEmpty())
 	{
 		BackCars.dequeue(c, pri);
@@ -328,8 +523,8 @@ void Organizer::updateBackCars()
 void Organizer::updateCheckupCars()
  {
 	priQueue<Car*> temp;
-	Car* c;
-	int p;
+	Car* c = nullptr;
+	int p = -1;
 	while (!checkupList.isEmpty())
 	{
 		checkupList.dequeue(c, p);
@@ -343,33 +538,12 @@ void Organizer::updateCheckupCars()
 	}
  }
 
-void Organizer::moveCarFromFreeToOut(Patient* patient)
+void Organizer::moveCarFromFreeToOut()
 {
-	if (!patient) { return; }
-
-	int nearestHospitalID = patient->getNearestHospital();
-	// Validate hospital ID to ensure the hospital exists
-	if (nearestHospitalID < 1 || nearestHospitalID > numHospitals) { return; }
-
-	Hospital* nearestHospital = HospitalList[nearestHospitalID - 1];
 	Car* assignedCar = nullptr;
-	bool assigned;
-	// Attempt to assign a car to the patient using Hospital's patient & car assignment logic
-	assigned = nearestHospital->assignPatientToCar(patient, assignedCar);
-
-	// If a car was successfully assigned
-	if (assigned)
-	{
-		OutCars.enqueue(assignedCar, -assignedCar->getDistToPatient()); // Add car to OUT cars queue
-		return;
-	}
-
-	// Handle unassigned EP patients
-	if (patient->getPatientType() == patientType::EP)
-	{
-		unAssignedEPCount++;
-		handleEP(patient, nearestHospital); // Handle EP patient as no car was available
-	}
+	for (int i = 0; i < numHospitals; i++)
+		while (!HospitalList[i]->isFailed() && HospitalList[i]->assignPatients(assignedCar))
+			OutCars.enqueue(assignedCar, -assignedCar->getDistToPatient());
 }
 
 void Organizer::handleCarMovements()
@@ -377,7 +551,7 @@ void Organizer::handleCarMovements()
 	Car* car;
 	int priority;
 	// Move cars from the OutCars queue to BackCars queue when they arrive at the patient's location (distance to the patient becomes 0)
-	while (!OutCars.isEmpty() && OutCars.peek(car, priority) && car->getDistToPatient() == 0)
+	while (!OutCars.isEmpty() && OutCars.peek(car, priority) && car->getDistToPatient() <= 0)
 	{
 		OutCars.dequeue(car, priority);
 		car->getAssignedPatient()->setPickup(timeStep);
@@ -387,7 +561,7 @@ void Organizer::handleCarMovements()
 	}
 
 	// Process BackCars: return cars to hospitals if they have completed their task
-	while (!BackCars.isEmpty() && BackCars.peek(car, priority) && car->getDistToHospital() == 0)
+	while (!BackCars.isEmpty() && BackCars.peek(car, priority) && car->getDistToHospital() <= 0)
 	{
 		BackCars.dequeue(car, priority);
 		if (car->getFailureBack() || car->getFailureOut())
@@ -403,7 +577,7 @@ void Organizer::handleCarMovements()
 	}
 
 	// Process checkup list
-	while (!checkupList.isEmpty() && checkupList.peek(car, priority) && priority == 0)
+	while (!checkupList.isEmpty() && checkupList.peek(car, priority) && priority <= 0)
 	{
 		checkupList.dequeue(car, priority);
 		car->setFailureBack(false);
@@ -528,15 +702,19 @@ void Organizer::hospitalFailureAction(Hospital* failedHospital)
 	int failedHospitalID = failedHospital->getHospitalID();
 	// Find the nearest hospital that is not failed
 	int secondNearestHospitalID = -1;
-	int minDistance = -1;
+	int minDistance = 20000;
 
 	// Loop through the distance matrix to find the first valid distance
 	for (int i = 0; i < numHospitals; i++)
 	{
-		if (i != failedHospitalID - 1 && !HospitalList[i]->isFailed())
+		if (i != failedHospital->getHospitalID() - 1 && !HospitalList[i]->isFailed())
 		{
-			secondNearestHospitalID = i + 1;
-			minDistance = distanceMatrix[failedHospitalID - 1][i];
+			int distance = distanceMatrix[failedHospitalID - 1][i];
+			if (distance < minDistance)
+			{
+				secondNearestHospitalID = i + 1;
+				minDistance = distance;
+			}
 		}
 	}
 
@@ -599,8 +777,9 @@ void Organizer::hospitalFailureAction(Hospital* failedHospital)
 		if (outCar->getHospital() == failedHospital->getHospitalID())
 		{
 			// Handle the failure of the assigned car
-			outCarFailureAction(outCar);
-			delete outCar;
+			outCar->setFailureOut(true);
+			HospitalList[secondNearestHospitalID - 1]->addFailurePatient(outCar->getAssignedPatient());
+			tempOutCars.enqueue(outCar, -outCar->getDistToHospital());
 		}
 		else
 		{
@@ -625,8 +804,11 @@ void Organizer::hospitalFailureAction(Hospital* failedHospital)
 		if (backCar->getHospital() == failedHospital->getHospitalID())
 		{
 			// Handle the failure of the assigned car
-			backCarFailureAction(backCar);
-			delete backCar; // Remove the car from the system
+			backCar->setFailureBack(true);
+			backCar->getAssignedPatient()->setDistanceToPickup(backCar->getDistToHospital());
+			backCar->getAssignedPatient()->setStopped(true);
+			HospitalList[secondNearestHospitalID - 1]->addFailurePatient(backCar->getAssignedPatient());
+			tempBackCars.enqueue(backCar, -backCar->getDistToHospital());
 		}
 		else
 		{
@@ -640,22 +822,6 @@ void Organizer::hospitalFailureAction(Hospital* failedHospital)
 		tempBackCars.dequeue(backCar, priorityBack);
 		BackCars.enqueue(backCar, priorityBack);
 	}
-
-	// Remove the hospital from the HospitalList and shift the remaining hospitals
-	for (int i = 0; i < numHospitals; i++)
-	{
-		if (HospitalList[i] == failedHospital)
-		{
-			delete HospitalList[i]; // Free memory
-			for (int j = i; j < numHospitals - 1; j++)
-			{
-				HospitalList[j] = HospitalList[j + 1]; // Shift hospitals to the left
-			}
-			HospitalList[numHospitals - 1] = nullptr; // Nullify the last pointer
-			numHospitals--; // Decrease the total count of hospitals
-			break;
-		}
-	}
 }
 
 void Organizer::transferPatientsRequests(Patient* patient, int nearestHospitalID)
@@ -667,7 +833,85 @@ void Organizer::transferPatientsRequests(Patient* patient, int nearestHospitalID
 	nearestHospital->addPatientToList(patient);
 }
 
-/****** CANCELLATION REQUESTS HANDLING FUNCTION ******/
+/****** PATIENT HANDLING FUNCTIONS ******/
+
+void Organizer::movePatientstoHospitals()
+{
+	Patient* p = nullptr;
+	while (patientsList.peek(p) && p->getRequestTime() == timeStep)
+	{
+		patientsList.dequeue(p);
+		if (!HospitalList[p->getNearestHospital() - 1]->isFailed())
+		{
+			if (!HospitalList[p->getNearestHospital() - 1]->addPatientToList(p))
+			{
+				handleEP(p);
+				unAssignedEPCount++;
+			}
+		}
+		else
+		{
+			int secondNearestHospitalID = -1;
+			int minDistance = 20000;
+
+			// Loop through the distance matrix to find the first valid distance
+			for (int i = 0; i < numHospitals; i++)
+			{
+				if (i != p->getNearestHospital() - 1 && !HospitalList[i]->isFailed())
+				{
+					int distance = distanceMatrix[p->getNearestHospital() - 1][i];
+					if (distance < minDistance)
+					{
+						secondNearestHospitalID = i + 1;
+						minDistance = distance;
+					}
+				}
+			}
+			p->setNearestHospital(secondNearestHospitalID);
+			if (!HospitalList[p->getNearestHospital() - 1]->addPatientToList(p))
+			{
+				handleEP(p);
+				unAssignedEPCount++;
+			}
+		}
+	}
+}
+
+bool Organizer::handleEP(Patient* patient)
+{
+	int shortestList = HospitalList[patient->getNearestHospital() - 1]->getEPListLength();
+	int shortestListHospitalID = patient->getNearestHospital();
+	int nearestHospitalDistance = patient->getDistance();
+	int distanceBetHospitals = 0;
+
+	if (patient->getPatientType() == EP)
+	{
+		for (int i = 0; i < numHospitals; i++)
+		{
+			if (shortestList > HospitalList[i]->getEPListLength())
+			{
+				shortestList = HospitalList[i]->getEPListLength();
+				shortestListHospitalID = i + 1;
+				distanceBetHospitals = distanceMatrix[i][patient->getNearestHospital() - 1];
+				nearestHospitalDistance = patient->getDistance() + distanceBetHospitals;
+			}
+			else if (shortestList == HospitalList[i]->getEPListLength())
+			{
+				if (distanceBetHospitals > distanceMatrix[patient->getNearestHospital() - 1][i])
+				{
+					shortestList = HospitalList[i]->getEPListLength();
+					shortestListHospitalID = i + 1;
+					distanceBetHospitals = distanceMatrix[i][patient->getNearestHospital() - 1];
+					nearestHospitalDistance = patient->getDistance() + distanceBetHospitals;
+				}
+			}
+		}
+		patient->setDistanceToPickup(distanceBetHospitals);
+		HospitalList[shortestListHospitalID - 1]->addPatientToListEP(patient);
+		return true;
+	}
+	return false;
+}
 
 void Organizer::handleCancellations()
 {
@@ -677,27 +921,30 @@ void Organizer::handleCancellations()
 	{
 		CancellationList.dequeue(cr);
 		Hospital* hospital = HospitalList[cr.hospitalID - 1];
-
-		// Verifies that the Patient exists in its corresponding hospital's NP List
-		if (!hospital->isPatientInNPList(cr.PID)) { return; }
-
-		// Remove the patient from the system
-		bool removed = patientsList.cancelRequest(cr.PID);
-		numRequests = patientsList.getCount();
-
-		// Search for the car in the OutCars list then dequeue it if found
 		Car* assignedCar = nullptr; 
-		bool carFound = OutCars.cancelRequest(cr.PID, assignedCar);
-
-		if (carFound)
-		{
-			hospital->cancelRequest(cr.PID);
-			BackCars.enqueue(assignedCar, -assignedCar->getDistToHospital());
+		// Verifies that the Patient exists in its corresponding hospital's NP List
+		if (!hospital->cancelRequest(cr.PID)) 
+		{ 
+			// If not removes patient from outcars list
+			OutCars.cancelRequest(cr.PID, assignedCar);
+			if (assignedCar != nullptr)
+			{
+				BackCars.enqueue(assignedCar, -assignedCar->getDistToHospital());
+			}
+			else
+			{
+				//patient assigned to different hospital
+				for (int i = 0; i < numHospitals; i++)
+				{
+					if (HospitalList[i]->cancelRequest(cr.PID))
+					{
+						break;
+					}
+				}
+			}
 		}
 	}
 }
-
-/****** ADD FINISHED PATIENTS TO FINISHED LIST FUNCTION *****/
 
 void Organizer::addToFinishedList(Car* car)
 {
@@ -706,199 +953,6 @@ void Organizer::addToFinishedList(Car* car)
 	FinishedList.enqueue(p);
 	HospitalList[car->getHospital() - 1]->addCarToList(car);
 }
-
-/****** GENERATE & UPDATE OUTPUT FILE FUNCTION *****/
-
-void Organizer::generateOutputFile()
-{
-	setOutputFileName(GUI);
-
-	ofstream OutputFile;
-	OutputFile.open(outfile + ".txt", ios::out);
-
-	Patient* tempItem;
-	LinkedQueue<Patient*> tempList;
-	ModifiedQ temp;
-
-	// Writinf the Finished Patients List
-	int FT, PID, QT, WT;
-	OutputFile << "FT" << "\t" << "PID" << "\t" << "QT" << "\t" << "WT" << '\n';
-	while (!FinishedList.isEmpty())
-	{
-		FinishedList.dequeue(tempItem);
-
-		FT = tempItem->getFinishTime();
-		PID = tempItem->getPatientID();
-		QT = tempItem->getRequestTime();
-		WT = tempItem->getWaitTime();
-		tempList.enqueue(tempItem);
-		OutputFile << FT << "\t" << PID << "\t" << QT << "\t" << WT << '\n\n';
-	}
-	//Restore the finished patients list
-	while (!tempList.isEmpty())
-	{
-		tempList.dequeue(tempItem);
-		FinishedList.enqueue(tempItem);
-	}
-
-	OutputFile << "============== System Statistics ==============" << '\n';
-
-	// Caculating and writing the statistics
-	//1. Writing the  Total number of patients and number of patients of each type in the system
-	int totalSP = 0, totalNP = 0, totalEP = 0;
-	for (int i = 0; i < numRequests; i++)
-	{
-		patientsList.dequeue(tempItem);
-
-		if (tempItem->getPatientType() == SP) totalSP++;
-		if (tempItem->getPatientType() == NP) totalNP++;
-		if (tempItem->getPatientType() == EP) totalEP++;
-
-		temp.enqueue(tempItem);
-	}
-	//Restore the patients list
-	while (!temp.isEmpty())
-	{
-		temp.dequeue(tempItem);
-		patientsList.enqueue(tempItem);
-	}
-
-	OutputFile << "Patients: " << numRequests << "\t" << "[NP: " << totalNP << ", SP: " << totalSP << ", EP: " << totalEP << "]" << '\n';
-
-	//2. Writing the total number of hospitals in the system
-	OutputFile << "Hospitals = " << numHospitals << '\n';
-
-	//3. Writing the total number of cars and number of cars of each type in the system
-	int totalCars = 0, totalSC = 0, totalNC = 0;
-	for (int i = 0; i < numHospitals; i++)
-	{
-		totalSC += HospitalList[i]->getSCarsCount();
-		totalNC += HospitalList[i]->getNCarsCount();
-	}
-	totalCars = totalSC + totalNC;
-	OutputFile << "Cars: " << totalCars << "\t" << "[SCars: " << totalSC << ", NCars: " << totalNC << "]" << '\n';
-
-	//4. Calculating and writing the average waiting time for patients
-	int totalWaitingTime = 0, avgWaitingTime = 0;
-	while (!FinishedList.isEmpty())
-	{
-		FinishedList.dequeue(tempItem);
-		totalWaitingTime += tempItem->getWaitTime();
-		tempList.enqueue(tempItem);
-	}
-	//Restore the finished patients list
-	while (!tempList.isEmpty())
-	{
-		tempList.dequeue(tempItem); 
-		FinishedList.enqueue(tempItem);
-	}
-
-	if (FinishedList.getCount() != 0)
-	{
-		avgWaitingTime = totalWaitingTime / FinishedList.getCount();
-	}
-	else { avgWaitingTime = 0; }
-	OutputFile << "Average waiting time = " << avgWaitingTime << '\n';
-
-	//5. Calculating and writing Percentage of EP (relative to the total number of EP) who couldn't be served by home hospital
-	double percentage = ((static_cast<double>(unAssignedEPCount) / totalEP) * 100.0);
-	OutputFile << "Percentage of EP who couldn't be served by home hospital = " << percentage << "%" << '\n';
-
-	//6. Calculating and writing the average busy time of all cars in the system
-	int totalBusyTime = 0, avgBusyTime = 0;
-	while (!FinishedList.isEmpty())
-	{
-		FinishedList.dequeue(tempItem);
-		totalBusyTime += tempItem->getBusyTime();
-		tempList.enqueue(tempItem);
-	}
-	// Restore the original finished patients list
-	while (!tempList.isEmpty())
-	{
-		tempList.dequeue(tempItem);
-		FinishedList.enqueue(tempItem);
-	}
-
-	if (FinishedList.getCount() != 0)
-	{
-		avgBusyTime = totalBusyTime / FinishedList.getCount();
-	}
-	else { avgBusyTime = 0; }
-	OutputFile << "Average busy time = " << avgBusyTime << '\n';
-
-	//7. Calculating and writing Average Utilization Percentage
-	double avgUtilizationTime = ((static_cast<double>(avgBusyTime) / timeStep) * 100.0);
-	OutputFile << "Average Utilization Percentage = " << avgUtilizationTime << "%" << '\n\n';
-
-	OutputFile << "============== Bonus Operations ==============" << '\n';
-
-	//8. Writing the number of failed cars and their failure percentages (out and back cars)
-	//Out Cars Failure
-	OutputFile << "Number of Out Cars failure = " << (NCFailuresOut + SCFailuresOut) << ", Out Cars Failure Percentage = " << outCarsFailureProbability;
-	OutputFile << '\n' << "[SCars: " << SCFailuresOut << ", NCars: " << NCFailuresOut << "]" << '\n';
-
-	//Back Cars Failure
-	OutputFile << "Number of Back Cars failure = " << (NCFailuresBack + SCFailuresBack) << ", Back Cars Failure Percentage = " << backCarsFailureProbability;
-	OutputFile << '\n' << "[SCars: " << SCFailuresBack << ", NCars: " << NCFailuresBack << "]" << '\n';
-
-	//9. Writing the number of failed hospitals and their failure percentages
-	OutputFile << "Number of failed hospitals = " << numOfFailedHospitals << ", Hospital Failure Percentage = " << hospitalFailureProbability * 100 << "%" << '\n\n';
-	
-	//Writing each hospital's number of NP, SP, EP patients at the failure timeStep
-	OutputFile << "List of failed hospitals:" << '\n' << "HID" << "\t" << "NP COUNT" << "\t" << "SP COUNT" << "\t" << "EP COUNT" << "\t" << "FREE SC" << "\t" << "FREE NC" << '\n';
-	for (int i = 0; i < numOfFailedHospitals; i++)
-	{
-		OutputFile << failedHospitalsList[i]->getHospitalID() << "\t" << failedHospitalsList[i]->getNPListCount() << "\t";
-		OutputFile << failedHospitalsList[i]->getSPListCount() << "\t" << failedHospitalsList[i]->getEPListLength() << "\t";
-		OutputFile << failedHospitalsList[i]->getSCarsCount() << "\t" << failedHospitalsList[i]->getNCarsCount() << '\n';
-	}
-	OutputFile << '\n';
-
-	//10. Writing the number of cars that went out of service due to hospital failure (SC, NC, and total)
-	OutputFile << "Total number of cars that are out of service due to hospital failure = " << numOfOutOfServiceCars << '\n';
-	OutputFile << "[SCars: " << numOfOutOfServiceSC << ", NCars: " << numOfOutOfServiceNC << "]" << '\n';
-
-	OutputFile << "============== End of the Output File ==============" << '\n';
-
-	// Close the file
-	OutputFile.close();
-}
-
-
-bool Organizer::handleEP(Patient* patient, Hospital* hospital)
-{
-	int shortestList = hospital->getEPListLength();
-	int nearestHospitalDistance = patient -> getDistance();
-	int distanceBetHospitals = patient->getDistance();
-
-	if (!hospital->addPatientToList(patient) && patient->getPatientType() == EP)
-	{
-		for (int i = 0; i < numHospitals; i++)
-		{
-			if (shortestList > HospitalList[i]->getEPListLength())
-			{
-				shortestList = HospitalList[i]->getEPListLength();
-				hospital->setID(HospitalList[i]->getHospitalID());
-				hospital->addPatientToList(patient);
-				return true;
-			}
-			else if (shortestList == HospitalList[i]->getEPListLength())
-			{
-				if (nearestHospitalDistance > distanceMatrix[HospitalList[i]->getHospitalID()][i])
-				{
-					distanceBetHospitals = nearestHospitalDistance - distanceMatrix[HospitalList[i]->getHospitalID()][i];
-					nearestHospitalDistance = distanceMatrix[HospitalList[i]->getHospitalID()][i];
-					hospital->setID(HospitalList[i]->getHospitalID());
-					patient->setDistanceToPickup(distanceBetHospitals);
-					hospital->addPatientToList(patient);
-					return true;
-				}
-			}
-		}
-	}
-	return false;
-}
-
 
 Organizer::~Organizer()
 {
@@ -917,14 +971,6 @@ Organizer::~Organizer()
 		delete HospitalList[i];  // Delete each individual Hospital object
 	}
 	delete[] HospitalList;  // Delete the array of Hospital pointers
-
-	// Dequeue all patients and delete each dynamically allocated Patient object
-	Patient* tempPatient;
-	while (!patientsList.isEmpty())
-	{
-		patientsList.dequeue(tempPatient);
-		delete tempPatient;  // Free the memory allocated for the Patient object
-	}
 
 	// Dequeue all cancellation requests and delete each CancellationReq struct
 	CancellationReq tempCancellation;
