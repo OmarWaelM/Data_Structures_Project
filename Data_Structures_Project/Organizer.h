@@ -15,7 +15,7 @@ class Organizer
 private:
 	// Lists used in orgranizer class
 	Hospital** HospitalList;						// An array of pointers to hospitals
-	ModifiedQ patientsList;	                        // Patients list of type Linked Queue (list of pointers to patients)
+	LinkedQueue<Patient*> patientsList;	            // Patients list of type Linked Queue (list of pointers to patients)
 	LinkedQueue<CancellationReq> CancellationList;	// Cancellation requests' list of type Linked Queue
 	LinkedQueue<Patient*> FinishedList;				// Finished patients' list of type Linked Queue
 	priQueue<Car*> BackCars;						// Back cars' list (cars on their way back) of type Priority Queue
@@ -152,18 +152,12 @@ void Organizer::Simulator()
 			HospitalList[p->getNearestHospital() - 1]->addPatientToList(p);
 		}
 
-		//Checking for cancellation requests
-		while (CancellationList.peek(cr) && cr.CancellationTimestep == timeStep)
-		{
-			CancellationList.dequeue(cr);
-			HospitalList[cr.hospitalID - 1]->cancelRequest(cr.PID);
-			//does not check the outcars list as no patient-car assignment occurs
-		}
-
 		updateOutCars();
 		updateBackCars();
 		updateCheckupCars();
 		handleCarMovements();
+
+		handleCancellations();
 
 		//Output hospital data
 		GUI.Output(timeStep, HospitalList, numHospitals, &BackCars, &OutCars, &FinishedList, &checkupList);
@@ -577,7 +571,7 @@ void Organizer::hospitalFaliure()
 
 void Organizer::hospitalFailureAction(Hospital* failedHospital)
 {
-	if (!failedHospital || failedHospital->getisFailed()) { return; }
+	if (!failedHospital || failedHospital->isFailed()) { return; }
 
 	// Mark the hospital as failed
 	failedHospital->setFailed(true);
@@ -589,7 +583,7 @@ void Organizer::hospitalFailureAction(Hospital* failedHospital)
 	// Loop through the distance matrix to find the first valid distance
 	for (int i = 0; i < numHospitals; i++)
 	{
-		if (i != failedHospital->getHospitalID() - 1 && !HospitalList[i]->getisFailed())
+		if (i != failedHospital->getHospitalID() - 1 && !HospitalList[i]->isFailed())
 		{
 			secondNearestHospitalID = i + 1;
 			minDistance = distanceMatrix[failedHospitalID - 1][i];
@@ -733,21 +727,12 @@ void Organizer::handleCancellations()
 	{
 		CancellationList.dequeue(cr);
 		Hospital* hospital = HospitalList[cr.hospitalID - 1];
-
-		// Verifies that the Patient exists in its corresponding hospital's NP List
-		if (!hospital->isPatientInNPList(cr.PID)) { return; }
-
-		// Remove the patient from the system
-		bool removed = patientsList.cancelRequest(cr.PID);
-		numRequests = patientsList.getCount();
-
-		// Search for the car in the OutCars list then dequeue it if found
 		Car* assignedCar = nullptr; 
-		bool carFound = OutCars.cancelRequest(cr.PID, assignedCar);
-
-		if (carFound)
-		{
-			hospital->cancelRequest(cr.PID);
+		// Verifies that the Patient exists in its corresponding hospital's NP List
+		if (!hospital->cancelRequest(cr.PID)) 
+		{ 
+			// If not removes patient from outcars list
+			OutCars.cancelRequest(cr.PID, assignedCar);
 			BackCars.enqueue(assignedCar, -assignedCar->getDistToHospital());
 		}
 	}

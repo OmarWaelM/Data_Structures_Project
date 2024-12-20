@@ -44,7 +44,7 @@ public:
 	int getSPListCount(){	return SPList.getCount();	}
 	int getEPListLength() { return EPList.getCount(); }	// Getter for EPList count
 	bool isEmpty() { return (NPList.isEmpty() && SPList.isEmpty() && EPList.isEmpty()); }	// Checks if all patient lists are empty
-	bool isPatientInNPList(int patientID) const;
+	bool isPatientInNPList(int patientID);
 	int getFailureTimeStep() {return failureTimeStep;}
 
 	//Outstream operator overloading
@@ -102,14 +102,6 @@ public:
 	LinkedQueue<Car*> transferSCList() { return SCList; }
 
 	LinkedQueue<Car*> transferNCList() { return NCList; }
-
-
-	//Simulation Specific Function
-	bool getNP(Patient*& p);
-	bool getEP(Patient*& p);
-	bool getSP(Patient*& p);
-	bool getNC(Car*& c);
-	bool getSC(Car*& c);
 };
 
 Hospital::Hospital(): hospitalID(0), failed(false) {}
@@ -282,16 +274,5 @@ bool Hospital::isPatientInNPList(int patientID)
 
 	return found;
 }
-
-
-//Simulator Function will probably not need in phase 2
-bool Hospital::getNP(Patient*& p) { return NPList.dequeue(p); }
-bool Hospital::getEP(Patient*& p) { 
-	int pri;
-	return EPList.dequeue(p, pri);
-}
-bool Hospital::getSP(Patient*& p) { return SPList.dequeue(p); }
-bool Hospital::getNC(Car*& c) { return NCList.dequeue(c); }
-bool Hospital::getSC(Car*& c) { return SCList.dequeue(c); }
 
 #endif
