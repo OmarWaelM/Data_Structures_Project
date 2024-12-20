@@ -10,6 +10,8 @@
 #include "priQueue.h"
 #include "ModifiedQ.h"
 #include "ModifiedPriQ.h"
+#include "Patient.h"
+#include "Car.h"
 #include "Hospital.h"
 #include "UI.h"
 #include "Organizer.h"

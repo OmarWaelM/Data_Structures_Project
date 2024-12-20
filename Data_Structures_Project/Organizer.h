@@ -1,16 +1,6 @@
 #ifndef ORGANIZER_H
 #define ORGANIZER_H
 
-#include "UI.h"
-#include "Hospital.h"
-#include "Patient.h"
-#include "Car.h"
-#include "LinkedQueue.h"
-#include "priQueue.h"
-#include "ModifiedPriQ.h"
-#include "ModifiedQ.h"
-
-#include <string>
 using namespace std;
 
 struct CancellationReq
@@ -66,7 +56,8 @@ public:
   
 	//Constructor
 	Organizer();
-  
+	void Simulator();
+
 	/***** Input file member functions *****/
 	void setInputFileName(UI gui) { filename = gui.getInputFileName(); }
 	void setOutputFileName(UI gui) { outfile = gui.getOutputFileName(); }
@@ -125,13 +116,77 @@ Organizer::Organizer() :
 	numOfFailedHospitals(0),
 	numOfOutOfServiceCars(0),
 	numOfOutOfServiceSC(0),
-	numOfOutOfServiceNC(0)
-	checkupTime(0),
+	numOfOutOfServiceNC(0),
 	NCFailuresBack(0),
 	NCFailuresOut(0),
 	SCFailuresBack(0),
 	SCFailuresOut(0)
 {
+}
+
+void Organizer::Simulator()
+{
+	//Initialization
+	timeStep = 0;
+	GUI.Start();
+	filename = GUI.getInputFileName();
+	processInputFile();
+
+	Patient* p;
+	Car* car;
+	CancellationReq cr;
+	bool endSimulation = false;
+	int randomNum = 0;
+
+	GUI.Output(timeStep, HospitalList, numHospitals, &BackCars, &OutCars, &FinishedList, &checkupList);
+
+	while (!endSimulation)
+	{
+		//Updating timestep
+		timeStep++;
+
+		// 
+		// update cars
+		// check for returning cars
+		// check for patient requests
+		// assign patients to cars
+		// check for car failure
+		// check for hospital failure
+		//
+		
+		//Checking for new patients
+		while (patientsList.peek(p) && p->getRequestTime() == timeStep)
+		{
+			patientsList.dequeue(p);
+			HospitalList[p->getNearestHospital() - 1]->addPatientToList(p);
+		}
+
+		//Checking for cancellation requests
+		while (CancellationList.peek(cr) && cr.CancellationTimestep == timeStep)
+		{
+			CancellationList.dequeue(cr);
+			HospitalList[cr.hospitalID - 1]->cancelRequest(cr.PID);
+			//does not check the outcars list as no patient-car assignment occurs
+		}
+
+		updateOutCars();
+		updateBackCars();
+		updateCheckupCars();
+		handleCarMovements();
+
+		//Output hospital data
+		GUI.Output(timeStep, HospitalList, numHospitals, &BackCars, &OutCars, &FinishedList, &checkupList);
+
+		//Checking if all lists are empty
+		endSimulation = true;
+		if (!patientsList.isEmpty())
+			endSimulation = false;
+		for (int i = 0; i < numHospitals; i++)
+		{
+			if (!HospitalList[i]->isEmpty())
+				endSimulation = false;
+		}
+	}
 }
 
 /***** FILE LOADING FUNCTIONS *****/
@@ -530,7 +585,7 @@ void Organizer::hospitalFaliure()
 
 void Organizer::hospitalFailureAction(Hospital* failedHospital)
 {
-	if (!failedHospital || failedHospital->isFailed()) { return; }
+	if (!failedHospital || failedHospital->getisFailed()) { return; }
 
 	// Mark the hospital as failed
 	failedHospital->setFailed(true);
@@ -542,10 +597,10 @@ void Organizer::hospitalFailureAction(Hospital* failedHospital)
 	// Loop through the distance matrix to find the first valid distance
 	for (int i = 0; i < numHospitals; i++)
 	{
-		if (i != failedHospitalID - 1 && !HospitalList[i]->isFailed())
+		if (i != failedHospital->getHospitalID() - 1 && !HospitalList[i]->getisFailed())
 		{
 			nearestHospitalID = i + 1;
-			minDistance = DistanceMatrix[failedHospitalID - 1][i];
+			minDistance = distanceMatrix[failedHospital->getHospitalID() - 1][i];
 		}
 	}
 
@@ -731,7 +786,7 @@ void Organizer::generateOutputFile()
 
 	// Writinf the Finished Patients List
 	int FT, PID, QT, WT;
-	OutputFile >> "FT" >> "\t" >> "PID" >> "\t" >> "QT" >> "\t" >> "WT" >> '\n';
+	OutputFile << "FT" << "\t" << "PID" << "\t" << "QT" << "\t" << "WT" << '\n';
 	while (!FinishedList.isEmpty())
 	{
 		FinishedList.dequeue(tempItem);
@@ -750,7 +805,7 @@ void Organizer::generateOutputFile()
 		FinishedList.enqueue(tempItem);
 	}
 
-	OutputFile >> "============== System Statistics ==============" >> '\n';
+	OutputFile << "============== System Statistics ==============" << '\n';
 
 	// Caculating and writing the statistics
 	//Writing the  Total number of patients and number of patients of each type in the system
@@ -772,10 +827,10 @@ void Organizer::generateOutputFile()
 		patientsList.enqueue(tempItem);
 	}
 
-	OutputFile >> "Patients: " >> numRequests >> "\t" >> "[NP: " >> totalNP >> ", SP: " >> totalSP >> ", EP: " >> totalEP >> "]" >> '\n';
+	OutputFile << "Patients: " << numRequests << "\t" << "[NP: " << totalNP << ", SP: " << totalSP << ", EP: " << totalEP << "]" << '\n';
 
 	//Writing the total number of hospitals in the system
-	OutputFile >> "Hospitals = " >> numHospitals >> '\n';
+	OutputFile << "Hospitals = " << numHospitals << '\n';
 
 	//Writing the total number of cars and number of cars of each type in the system
 	int totalCars = 0, totalSC = 0, totalNC = 0;
@@ -785,7 +840,7 @@ void Organizer::generateOutputFile()
 		totalNC += HospitalList[i]->getNCarsCount();
 	}
 	totalCars = totalSC + totalNC;
-	OutputFile >> "Cars: " >> totalCars >> "\t" >> "[SCars: " >> totalSC >> ", NCars: " >> totalNC >> "]" >> '\n';
+	OutputFile << "Cars: " << totalCars << "\t" << "[SCars: " << totalSC << ", NCars: " << totalNC << "]" << '\n';
 
 	//Calculating and writing the average waiting time for patients
 	int totalWaitingTime = 0, avgWaitingTime = 0;
@@ -807,7 +862,7 @@ void Organizer::generateOutputFile()
 		avgWaitingTime = totalWaitingTime / FinishedList.getCount();
 	}
 	else { avgWaitingTime = 0; }
-	OutputFile >> "Average waiting time = " >> avgWaitingTime >> '\n';
+	OutputFile << "Average waiting time = " << avgWaitingTime << '\n';
 
 	//Calculating and writing Percentage of EP (relative to the total number of EP) who couldn't be served by home hospital
 
@@ -832,25 +887,24 @@ void Organizer::generateOutputFile()
 		avgBusyTime = totalBusyTime / FinishedList.getCount();
 	}
 	else { avgBusyTime = 0; }
-	OutputFile >> "Average busy time = " >> avgBusyTime >> '\n';
+	OutputFile << "Average busy time = " << avgBusyTime << '\n';
 
 	//Calculating and writing Average Utilization Percentage
 	double avgUtilizationTime = (avgBusyTime / timeStep) * 100.0;
-	OutputFile >> "Average Utilization Percentage = " >> avgUtilizationTime >> "%" >> '\n\n';
+	OutputFile << "Average Utilization Percentage = " << avgUtilizationTime << "%" << '\n\n';
 
 	//Writing the number of failed hospitals and their failure percentages
-	OutputFile >> "Number of failed hospitals = " >> numOfFailedHospitals >> ", Hospital Failure Percentage = " >> hospitalFailureProbability * 100 >> "%" >> '\n';
+	OutputFile << "Number of failed hospitals = " << numOfFailedHospitals << ", Hospital Failure Percentage = " << hospitalFailureProbability * 100 << "%" << '\n';
 	
 	//Writing each hospital's number of NP, SP, EP patients at the failure timeStep
-	OutputFile >> "List of failed hospitals:" >> '\n' >> "HID" >> "\t" >> "NP COUNT" >> "\t" >> "SP COUNT" >> "\t" >> "EP COUNT" >> '\n';
+	OutputFile << "List of failed hospitals:" << '\n' << "HID" << "\t" << "NP COUNT" << "\t" << "SP COUNT" << "\t" << "EP COUNT" << '\n';
 	for (int i = 0; i < numOfFailedHospitals; i++)
 	{
-		OutputFile >> failedHospitalsList[i]->getHospitalID() >> "\t" >> failedHospitalsList[i]->getNPListCount() >> "\t" >> failedHospitalsList[i]->getSPListCount() >> "\t" >> failedHospitalsList[i]->getEPListLength() >> '\n\n';
+		OutputFile << failedHospitalsList[i]->getHospitalID() << "\t" << failedHospitalsList[i]->getNPListCount() << "\t" << failedHospitalsList[i]->getSPListCount() << "\t" << failedHospitalsList[i]->getEPListLength() << '\n\n';
 	}
 
 
 }
-
 
 bool Organizer::handleEP(Patient* patient, Hospital* hospital)
 {
@@ -885,7 +939,6 @@ bool Organizer::handleEP(Patient* patient, Hospital* hospital)
 	}
 	return false;
 }
-
 
 Organizer::~Organizer()
 {

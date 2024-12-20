@@ -1,7 +1,5 @@
 #ifndef HOSPITAL_H
 #define HOSPITAL_H
-#include "ModifiedQ.h"
-#include "Car.h"
 
 class Hospital
 {
@@ -46,14 +44,14 @@ public:
 	int getSPListCount(){	return SPList.getCount();	}
 	int getEPListLength() { return EPList.getCount(); }	// Getter for EPList count
 	bool isEmpty() { return (NPList.isEmpty() && SPList.isEmpty() && EPList.isEmpty()); }	// Checks if all patient lists are empty
-	bool isPatientInNPList(int patientID);
+	bool isPatientInNPList(int patientID) const;
 	int getFailureTimeStep() {return failureTimeStep;}
 
 	//Outstream operator overloading
 	friend ostream& operator <<(ostream& os, Hospital& h);
 
 	// For the hospital failure feature
-	bool isFailed() { return isFailed; }
+	bool getisFailed() { return isFailed; }
 	void setFailed(bool status) { isFailed = status; }
 
 	LinkedQueue<Patient*> transferSPList()
