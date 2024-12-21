@@ -120,6 +120,7 @@ void UI::Output(int timestep, Hospital** h, int nOfHosp, priQueue<Car*>* backCar
 	{
 		for (int i = 0; i < nOfHosp; i++)
 		{
+			Sleep(500);
 			printf("\033c");
 			cout << "Current Timestep: " << timestep << endl;
 			cout << *h[i];
