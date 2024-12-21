@@ -678,7 +678,7 @@ void Organizer::backCarFailure()
 
 void Organizer::backCarFailureAction(Car* car)
 {
-	if (!car->getFailureBack() && !car->getFailureOut() && !car->getAssignedPatient()->getStopped() && HospitalList[car->getHospital()-1]->getNCarsCount() == 0 && HospitalList[car->getHospital() - 1]->getSCarsCount() == 0)
+	if (!car->getFailureBack() && !car->getFailureOut() && !car->getAssignedPatient()->getStopped() && HospitalList[car->getHospital()-1]->getNCarsCount() != 0 && HospitalList[car->getHospital() - 1]->getSCarsCount() != 0 && !HospitalList[car->getHospital() - 1]->isFailed())
 	{
 		car->setFailureBack(true);
 		car->getAssignedPatient()->setDistanceToPickup(car->getDistToHospital());

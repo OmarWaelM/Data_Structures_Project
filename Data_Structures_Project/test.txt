@@ -1,57 +1,59 @@
+============== List of Finished Patients ==============
+
 FT	PID	QT	WT
 4	1	1	1
 8	2	3	2
-10	3	5	2
+12	3	5	3
 13	5	10	1
-14	4	7	3
-17	6	12	2
+18	4	7	5
 18	7	15	1
-25	8	20	2
+21	6	12	4
+27	8	20	3
 32	9	25	3
-34	11	31	1
-35	10	30	2
+36	11	31	2
+37	10	30	3
 38	12	33	2
 43	15	40	1
-44	13	35	4
-45	16	42	1
-50	17	45	2
-54	18	47	3
-56	23	53	1
+47	16	42	2
+48	13	35	6
+54	17	45	4
 56	25	55	0
+56	23	53	1
 57	19	48	4
-57	22	52	2
+58	18	47	5
 60	24	53	3
-60	21	51	4
-61	20	50	5
-63	29	62	0
-65	28	60	2
-69	27	58	5
-70	30	65	2
-80	26	57	14
+61	22	52	4
+65	29	62	1
+66	21	51	7
+67	20	50	8
+69	28	60	4
+73	27	58	7
+75	30	65	7
+79	26	57	17
 
 ============== System Statistics ==============
 
 Patients: 30	[NP: 11, SP: 10, EP: 9]
 Hospitals = 7
-Cars: 51	[SCars: 22, NCars: 29]
-Average waiting time = 2
+Cars: 101	[SCars: 42, NCars: 59]
+Average waiting time = 4
 Percentage of EP who couldn't be served by home hospital = 0%
-Average busy time = 4
-Average Utilization Percentage = 5%
+Average busy time = 2
+Average Utilization Percentage = 2.35294%
 
 ============== Bonus Operations ==============
 
-Number of Out Cars failure = 1, Out Cars Failure Percentage = 0.01
-[SCars: 1, NCars: 0]
+Number of Out Cars failure = 0, Out Cars Failure Percentage = 0.01
+[SCars: 0, NCars: 0]
 Number of Back Cars failure = 0, Back Cars Failure Percentage = 0.02
 [SCars: 0, NCars: 0]
-Number of failed hospitals = 2, Hospital Failure Percentage = 3%
+Number of failed hospitals = 2, Hospital Failure Percentage = 2%
 
 List of failed hospitals:
 HID	FT
 4	2
-5	15
+2	69
 
-Total number of cars that are out of service due to hospital failure = 14  [SCars: 5, NCars: 9]
+Total number of cars that are out of service due to hospital failure = 30  [SCars: 12, NCars: 18]
 
 ============== End of the Output File ==============

@@ -20,6 +20,7 @@ bool ModifiedQ::cancelRequest(int patientID)
 		this->frontPtr = this->frontPtr->getNext();
 		if (this->frontPtr == nullptr)
 			this->backPtr = nullptr;
+		delete nodeToDeletePtr->getItem();
 		delete nodeToDeletePtr;
 		this->count--;
 		return true;
@@ -38,6 +39,7 @@ bool ModifiedQ::cancelRequest(int patientID)
 		if (entryToDelete == this->backPtr)
 			this->backPtr = entryToDelete;
 		// deallocate the pointer
+		delete entryToDelete->getItem();
 		delete entryToDelete;
 		this->count--;
 		return true;

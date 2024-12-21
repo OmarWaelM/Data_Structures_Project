@@ -113,6 +113,19 @@ void Car::updateBack()
 			distToHospital -= speed;
 		}
 	}
+	else if (!assignedPatient)
+	{
+		if (distToHospital < speed)
+		{
+			distToPatient += distToHospital;
+			distToHospital = 0;
+		}
+		else
+		{
+			distToPatient += speed;
+			distToHospital -= speed;
+		}
+	}
 	busyTime++;
 }
 
