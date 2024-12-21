@@ -54,6 +54,7 @@ public:
 	// For the hospital failure feature
 	bool isFailed() { return failed; }
 	void setFailed(bool status) { failed = status; }
+	void setFailedTime(int ts) { failureTimeStep = ts; }
 
 	LinkedQueue<Patient*> transferSPList()
 	{
@@ -173,24 +174,21 @@ bool Hospital::assignPatients(Car*& ambulance)
 
 	if (!EPList.isEmpty())
 	{
-		EPList.peek(p, pri);
-		if (p && assignPatientToCar(p, ambulance))
+		if (EPList.peek(p, pri) && assignPatientToCar(p, ambulance))
 		{
 			return true;
 		}
 	}
 	if (!SPList.isEmpty())
 	{
-		SPList.peek(p);
-		if (p && assignPatientToCar(p, ambulance))
+		if (SPList.peek(p) && assignPatientToCar(p, ambulance))
 		{
 			return true;
 		}
 	}
 	if (!NPList.isEmpty())
 	{
-		NPList.peek(p);
-		if (p && assignPatientToCar(p, ambulance))
+		if (NPList.peek(p) && assignPatientToCar(p, ambulance))
 		{
 			return true;
 		}
@@ -201,32 +199,28 @@ bool Hospital::assignPatients(Car*& ambulance)
 bool Hospital::assignPatientToCar(Patient* p, Car*& ambulance)
 {
 	int x;
-	if (p->getPatientType() == NP && !NCList.isEmpty())
+	if (p->getPatientType() == NP && NCList.dequeue(ambulance))
 	{
 		NPList.dequeue(p);
-		NCList.dequeue(ambulance);
 		ambulance->AssignPatient(p);
 		return true;
 	}
-	else if (p->getPatientType() == SP && !SCList.isEmpty())
+	else if (p->getPatientType() == SP && SCList.dequeue(ambulance))
 	{
 		SPList.dequeue(p);
-		SCList.dequeue(ambulance);
 		ambulance->AssignPatient(p);
 		return true;
 	}
 	else if (p->getPatientType() == EP)
 	{
-		if (!NCList.isEmpty())
+		if (NCList.dequeue(ambulance))
 		{
-			NCList.dequeue(ambulance);
 			EPList.dequeue(p, x);
 			ambulance->AssignPatient(p);
 			return true;
 		}
-		else if (!SCList.isEmpty())
+		else if (SCList.dequeue(ambulance))
 		{
-			SCList.dequeue(ambulance);
 			EPList.dequeue(p, x);
 			ambulance->AssignPatient(p);
 			return true;
@@ -279,10 +273,10 @@ ostream& operator <<(ostream& os, Hospital& h)
 	else
 	{
 		os << "==============	  Hospital #" << h.hospitalID << " data   ==============" << endl;
-		os << "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx" << endl;
-		os << "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx" << endl;
-		os << "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx" << endl;
-		os << "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx" << endl;
+		os << "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx" << endl;
+		os << "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx" << endl;
+		os << "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx" << endl;
+		os << "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx" << endl;
 		os << "==============	Hospital #" << h.hospitalID << " data end  =============" << endl;
 	}
 	return os;

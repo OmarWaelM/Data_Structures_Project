@@ -100,7 +100,7 @@ Patient* Car::deassignPatient()
 
 void Car::updateBack()
 {
-	if (!assignedPatient->getStopped())
+	if (assignedPatient && !assignedPatient->getStopped())
 	{
 		if (distToHospital < speed)
 		{
