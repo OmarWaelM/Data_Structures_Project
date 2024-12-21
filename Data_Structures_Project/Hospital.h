@@ -208,7 +208,6 @@ bool Hospital::assignPatientToCar(Patient* p, Car*& ambulance)
 	else if (p->getPatientType() == SP && SCList.dequeue(ambulance))
 	{
 		SPList.dequeue(p);
-		SCList.dequeue(ambulance);
 		ambulance->AssignPatient(p);
 		return true;
 	}
@@ -274,10 +273,10 @@ ostream& operator <<(ostream& os, Hospital& h)
 	else
 	{
 		os << "==============	  Hospital #" << h.hospitalID << " data   ==============" << endl;
-		os << "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx" << endl;
-		os << "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx" << endl;
-		os << "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx" << endl;
-		os << "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx" << endl;
+		os << "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx" << endl;
+		os << "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx" << endl;
+		os << "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx" << endl;
+		os << "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx" << endl;
 		os << "==============	Hospital #" << h.hospitalID << " data end  =============" << endl;
 	}
 	return os;
