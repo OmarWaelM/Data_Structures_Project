@@ -547,7 +547,7 @@ void Organizer::moveCarFromFreeToOut()
 void Organizer::handleCarMovements()
 {
 	Patient* p;
-	Car* car;
+	Car* car = nullptr;
 	int priority;
 	// Move cars from the OutCars queue to BackCars queue when they arrive at the patient's location (distance to the patient becomes 0)
 	while (!OutCars.isEmpty() && OutCars.peek(car, priority) && car->getDistToPatient() <= 0)
@@ -559,6 +559,7 @@ void Organizer::handleCarMovements()
          //Negative distance used to ensure cars closer to the hospital are prioritized (higher priority for shorter distances)	
 	}
 
+	car = nullptr;
 	// Process BackCars: return cars to hospitals if they have completed their task
 	while (!BackCars.isEmpty() && BackCars.peek(car, priority) && car->getDistToHospital() <= 0)
 	{
@@ -576,6 +577,7 @@ void Organizer::handleCarMovements()
 		}
 	}
 
+	car = nullptr;
 	// Process checkup list
 	while (!checkupList.isEmpty() && checkupList.peek(car, priority) && priority <= 0)
 	{
@@ -623,13 +625,20 @@ void Organizer::outCarFailure()
 
 void Organizer::outCarFailureAction(Car* car)
 {
-	car->setFailureOut(true);
-	HospitalList[car->getHospital()-1]->addFailurePatient(car->getAssignedPatient());
-	BackCars.enqueue(car, -car->getDistToHospital());
-	if (car->getCarType() == NC)
-		NCFailuresOut++;
+	if (!car->getAssignedPatient()->getStopped() && HospitalList[car->getHospital() - 1]->getNCarsCount() == 0 && HospitalList[car->getHospital() - 1]->getSCarsCount() == 0)
+	{
+		car->setFailureOut(true);
+		HospitalList[car->getHospital()-1]->addFailurePatient(car->getAssignedPatient());
+		BackCars.enqueue(car, -car->getDistToHospital());
+		if (car->getCarType() == NC)
+			NCFailuresOut++;
+		else
+			SCFailuresOut++;
+	}
 	else
-		SCFailuresOut++;
+	{
+		OutCars.enqueue(car, -car->getDistToPatient());
+	}
 }
 
 void Organizer::backCarFailure()
@@ -958,9 +967,13 @@ void Organizer::handleCancellations()
 void Organizer::addToFinishedList(Car* car)
 {
 	Patient* p = car->deassignPatient();
-	p->setFinished(timeStep);
-	FinishedList.enqueue(p);
-	HospitalList[car->getHospital() - 1]->addCarToList(car);
+	if (p)
+	{
+		p->setFinished(timeStep);
+		FinishedList.enqueue(p);
+		HospitalList[car->getHospital() - 1]->addCarToList(car);
+	}
+	
 }
 
 Organizer::~Organizer()
