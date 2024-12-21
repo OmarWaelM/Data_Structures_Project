@@ -105,6 +105,7 @@ public:
         priNode<T>* n = new priNode<T>(item, pri);
         n->setNext(head);
         head = n;
+        count++;
     }
 
     friend ostream& operator << <T>(ostream& os, priQueue<T>& q);
