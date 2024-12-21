@@ -344,6 +344,9 @@ void Organizer::generateOutputFile()
 	LinkedQueue<Patient*> tempList;
 	ModifiedQ temp;
 
+	OutputFile << "============== List of Finished Patients ==============" << '\n';
+	OutputFile << '\n';
+
 	// Writinf the Finished Patients List
 	int FT, PID, QT, WT;
 	OutputFile << "FT" << "\t" << "PID" << "\t" << "QT" << "\t" << "WT" << '\n';
