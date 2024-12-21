@@ -466,7 +466,7 @@ void Organizer::generateOutputFile()
 	OutputFile << "List of failed hospitals:" << '\n' << "HID" << "\t" << "FT" << '\n';
 	for (int i = 0; i < numOfFailedHospitals; i++)
 	{
-		OutputFile << failedHospitalsList[i]->getHospitalID() << "\t" << failedHospitalsList[i]->getFailureTimeStep() << "\t";
+		OutputFile << failedHospitalsList[i]->getHospitalID() << "\t" << failedHospitalsList[i]->getFailureTimeStep() << "\n";
 	}
 	OutputFile << '\n';
 
@@ -546,6 +546,7 @@ void Organizer::moveCarFromFreeToOut()
 
 void Organizer::handleCarMovements()
 {
+	Patient* p;
 	Car* car;
 	int priority;
 	// Move cars from the OutCars queue to BackCars queue when they arrive at the patient's location (distance to the patient becomes 0)
@@ -564,6 +565,7 @@ void Organizer::handleCarMovements()
 		BackCars.dequeue(car, priority);
 		if (car->getFailureBack() || car->getFailureOut())
 		{
+			p = car->deassignPatient();
 			car->setInCheckup(true);
 			addCarToCheckup(car);
 		}
@@ -664,15 +666,22 @@ void Organizer::backCarFailure()
 
 void Organizer::backCarFailureAction(Car* car)
 {
-	car->setFailureBack(true);
-	car->getAssignedPatient()->setDistanceToPickup(car->getDistToHospital());
-	car->getAssignedPatient()->setStopped(true);
-	HospitalList[car->getHospital() - 1]->addFailurePatient(car->getAssignedPatient());
-	BackCars.enqueue(car, -car->getDistToHospital());
-	if (car->getCarType() == NC)
-		NCFailuresBack++;
+	if (!car->getFailureBack() && !car->getFailureOut() && !car->getAssignedPatient()->getStopped() && HospitalList[car->getHospital()-1]->getNCarsCount() == 0 && HospitalList[car->getHospital() - 1]->getSCarsCount() == 0)
+	{
+		car->setFailureBack(true);
+		car->getAssignedPatient()->setDistanceToPickup(car->getDistToHospital());
+		car->getAssignedPatient()->setStopped(true);
+		HospitalList[car->getHospital() - 1]->addFailurePatient(car->getAssignedPatient());
+		BackCars.enqueue(car, -car->getDistToHospital());
+		if (car->getCarType() == NC)
+			NCFailuresBack++;
+		else
+			SCFailuresBack++;
+	}
 	else
-		SCFailuresBack++;
+	{
+		BackCars.enqueue(car, -car->getDistToHospital());
+	}
 }
 
 void Organizer::hospitalFaliure()
@@ -685,8 +694,6 @@ void Organizer::hospitalFaliure()
 		// Randomly select a hospital to fail
 		int failedHospitalID = rand() % numHospitals + 1;
 		Hospital* failedHospital = HospitalList[failedHospitalID - 1];
-		failedHospitalsList[numOfFailedHospitals] = failedHospital;
-		numOfFailedHospitals++;
 		hospitalFailureAction(failedHospital);
 	}
 }
@@ -694,6 +701,10 @@ void Organizer::hospitalFaliure()
 void Organizer::hospitalFailureAction(Hospital* failedHospital)
 {
 	if (!failedHospital || failedHospital->isFailed()) { return; }
+
+	failedHospitalsList[numOfFailedHospitals] = failedHospital;
+	numOfFailedHospitals++;
+	failedHospital->setFailedTime(timeStep);
 
 	// Mark the hospital as failed
 	failedHospital->setFailed(true);
