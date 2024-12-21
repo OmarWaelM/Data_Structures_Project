@@ -272,6 +272,7 @@ void LinkedQueue<T>::addToTop(T item)	//Adds entry to the start of the queue
 	Node<T>* n = new Node<T>(item);
 	n->setNext(frontPtr);
 	frontPtr = n;
+	count++;
 }
 
 template <typename T>

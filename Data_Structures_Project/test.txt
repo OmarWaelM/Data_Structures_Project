@@ -1,0 +1,57 @@
+FT	PID	QT	WT
+4	1	1	1
+8	2	3	2
+10	3	5	2
+13	5	10	1
+14	4	7	3
+17	6	12	2
+18	7	15	1
+25	8	20	2
+32	9	25	3
+34	11	31	1
+35	10	30	2
+38	12	33	2
+43	15	40	1
+44	13	35	4
+45	16	42	1
+50	17	45	2
+54	18	47	3
+56	23	53	1
+56	25	55	0
+57	19	48	4
+57	22	52	2
+60	24	53	3
+60	21	51	4
+61	20	50	5
+63	29	62	0
+65	28	60	2
+69	27	58	5
+70	30	65	2
+80	26	57	14
+
+============== System Statistics ==============
+
+Patients: 30	[NP: 11, SP: 10, EP: 9]
+Hospitals = 7
+Cars: 51	[SCars: 22, NCars: 29]
+Average waiting time = 2
+Percentage of EP who couldn't be served by home hospital = 0%
+Average busy time = 4
+Average Utilization Percentage = 5%
+
+============== Bonus Operations ==============
+
+Number of Out Cars failure = 1, Out Cars Failure Percentage = 0.01
+[SCars: 1, NCars: 0]
+Number of Back Cars failure = 0, Back Cars Failure Percentage = 0.02
+[SCars: 0, NCars: 0]
+Number of failed hospitals = 2, Hospital Failure Percentage = 3%
+
+List of failed hospitals:
+HID	FT
+4	2
+5	15
+
+Total number of cars that are out of service due to hospital failure = 14  [SCars: 5, NCars: 9]
+
+============== End of the Output File ==============

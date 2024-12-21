@@ -39,7 +39,6 @@ public:
 	int getNearestHospital() { return nearestHospital; }
 	int getFinishTime() { return finishTime; }
 	int getWaitTime() { return pickupTime - reqTime; }
-	int getBusyTime() { return finishTime - pickupTime; }
 	bool getStopped() { return stopped; }
 
 	//Setters
@@ -49,6 +48,7 @@ public:
 	void setDistanceToPickup(int dst) { distToHospital = dst; }
 	void setStopped(bool stp) { stopped = stp; }
 	bool hasArrived(bool state) { if (finishTime != -1) return true; }
+	void setNearestHospital(int hid) { nearestHospital = hid; }
 
 	//Output stream operator overloading
 	friend ostream& operator <<(ostream& os, Patient& patient);

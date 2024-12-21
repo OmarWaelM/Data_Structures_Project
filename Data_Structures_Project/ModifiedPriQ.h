@@ -22,6 +22,7 @@ public:
                     this->head = Current->getNext(); //If the Current node is the head, update the head pointer to skip this node:
                
                 c = Current->getItem(pri);
+                c->deassignPatient();
                 delete Current; // Free the memory of the removed node
                 count--;
                 return true; //item successfully removed
