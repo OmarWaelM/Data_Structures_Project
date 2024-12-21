@@ -344,6 +344,9 @@ void Organizer::generateOutputFile()
 	LinkedQueue<Patient*> tempList;
 	ModifiedQ temp;
 
+	OutputFile << "============== List of Finished Patients ==============" << '\n';
+	OutputFile << '\n';
+
 	// Writinf the Finished Patients List
 	int FT, PID, QT, WT;
 	OutputFile << "FT" << "\t" << "PID" << "\t" << "QT" << "\t" << "WT" << '\n';
@@ -695,6 +698,10 @@ void Organizer::backCarFailureAction(Car* car)
 
 void Organizer::hospitalFaliure()
 {
+	// Condition to stop hospital Failure action if the number of failed hospitals reaches
+	// half the total number of hospitals in the system, to avoid complete system failure.
+	if (numOfFailedHospitals == numHospitals / 2) { return; }
+
 	// Generate a random number to determine failure
 	double randomValue = (rand() % 100) / 100.0; // Random value between 0 and 1
 
