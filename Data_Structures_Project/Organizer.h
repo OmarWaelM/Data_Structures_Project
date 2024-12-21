@@ -466,7 +466,7 @@ void Organizer::generateOutputFile()
 	OutputFile << "List of failed hospitals:" << '\n' << "HID" << "\t" << "FT" << '\n';
 	for (int i = 0; i < numOfFailedHospitals; i++)
 	{
-		OutputFile << failedHospitalsList[i]->getHospitalID() << "\t" << failedHospitalsList[i]->getFailureTimeStep() << "\t";
+		OutputFile << failedHospitalsList[i]->getHospitalID() << "\t" << failedHospitalsList[i]->getFailureTimeStep() << "\n";
 	}
 	OutputFile << '\n';
 
@@ -546,7 +546,8 @@ void Organizer::moveCarFromFreeToOut()
 
 void Organizer::handleCarMovements()
 {
-	Car* car;
+	Patient* p;
+	Car* car = nullptr;
 	int priority;
 	// Move cars from the OutCars queue to BackCars queue when they arrive at the patient's location (distance to the patient becomes 0)
 	while (!OutCars.isEmpty() && OutCars.peek(car, priority) && car->getDistToPatient() <= 0)
@@ -558,12 +559,14 @@ void Organizer::handleCarMovements()
          //Negative distance used to ensure cars closer to the hospital are prioritized (higher priority for shorter distances)	
 	}
 
+	car = nullptr;
 	// Process BackCars: return cars to hospitals if they have completed their task
 	while (!BackCars.isEmpty() && BackCars.peek(car, priority) && car->getDistToHospital() <= 0)
 	{
 		BackCars.dequeue(car, priority);
 		if (car->getFailureBack() || car->getFailureOut())
 		{
+			p = car->deassignPatient();
 			car->setInCheckup(true);
 			addCarToCheckup(car);
 		}
@@ -574,6 +577,7 @@ void Organizer::handleCarMovements()
 		}
 	}
 
+	car = nullptr;
 	// Process checkup list
 	while (!checkupList.isEmpty() && checkupList.peek(car, priority) && priority <= 0)
 	{
@@ -621,13 +625,20 @@ void Organizer::outCarFailure()
 
 void Organizer::outCarFailureAction(Car* car)
 {
-	car->setFailureOut(true);
-	HospitalList[car->getHospital()-1]->addFailurePatient(car->getAssignedPatient());
-	BackCars.enqueue(car, -car->getDistToHospital());
-	if (car->getCarType() == NC)
-		NCFailuresOut++;
+	if (!car->getAssignedPatient()->getStopped() && HospitalList[car->getHospital() - 1]->getNCarsCount() == 0 && HospitalList[car->getHospital() - 1]->getSCarsCount() == 0)
+	{
+		car->setFailureOut(true);
+		HospitalList[car->getHospital()-1]->addFailurePatient(car->getAssignedPatient());
+		BackCars.enqueue(car, -car->getDistToHospital());
+		if (car->getCarType() == NC)
+			NCFailuresOut++;
+		else
+			SCFailuresOut++;
+	}
 	else
-		SCFailuresOut++;
+	{
+		OutCars.enqueue(car, -car->getDistToPatient());
+	}
 }
 
 void Organizer::backCarFailure()
@@ -664,15 +675,22 @@ void Organizer::backCarFailure()
 
 void Organizer::backCarFailureAction(Car* car)
 {
-	car->setFailureBack(true);
-	car->getAssignedPatient()->setDistanceToPickup(car->getDistToHospital());
-	car->getAssignedPatient()->setStopped(true);
-	HospitalList[car->getHospital() - 1]->addFailurePatient(car->getAssignedPatient());
-	BackCars.enqueue(car, -car->getDistToHospital());
-	if (car->getCarType() == NC)
-		NCFailuresBack++;
+	if (!car->getFailureBack() && !car->getFailureOut() && !car->getAssignedPatient()->getStopped() && HospitalList[car->getHospital()-1]->getNCarsCount() == 0 && HospitalList[car->getHospital() - 1]->getSCarsCount() == 0)
+	{
+		car->setFailureBack(true);
+		car->getAssignedPatient()->setDistanceToPickup(car->getDistToHospital());
+		car->getAssignedPatient()->setStopped(true);
+		HospitalList[car->getHospital() - 1]->addFailurePatient(car->getAssignedPatient());
+		BackCars.enqueue(car, -car->getDistToHospital());
+		if (car->getCarType() == NC)
+			NCFailuresBack++;
+		else
+			SCFailuresBack++;
+	}
 	else
-		SCFailuresBack++;
+	{
+		BackCars.enqueue(car, -car->getDistToHospital());
+	}
 }
 
 void Organizer::hospitalFaliure()
@@ -685,8 +703,6 @@ void Organizer::hospitalFaliure()
 		// Randomly select a hospital to fail
 		int failedHospitalID = rand() % numHospitals + 1;
 		Hospital* failedHospital = HospitalList[failedHospitalID - 1];
-		failedHospitalsList[numOfFailedHospitals] = failedHospital;
-		numOfFailedHospitals++;
 		hospitalFailureAction(failedHospital);
 	}
 }
@@ -694,6 +710,10 @@ void Organizer::hospitalFaliure()
 void Organizer::hospitalFailureAction(Hospital* failedHospital)
 {
 	if (!failedHospital || failedHospital->isFailed()) { return; }
+
+	failedHospitalsList[numOfFailedHospitals] = failedHospital;
+	numOfFailedHospitals++;
+	failedHospital->setFailedTime(timeStep);
 
 	// Mark the hospital as failed
 	failedHospital->setFailed(true);
@@ -947,9 +967,13 @@ void Organizer::handleCancellations()
 void Organizer::addToFinishedList(Car* car)
 {
 	Patient* p = car->deassignPatient();
-	p->setFinished(timeStep);
-	FinishedList.enqueue(p);
-	HospitalList[car->getHospital() - 1]->addCarToList(car);
+	if (p)
+	{
+		p->setFinished(timeStep);
+		FinishedList.enqueue(p);
+		HospitalList[car->getHospital() - 1]->addCarToList(car);
+	}
+	
 }
 
 Organizer::~Organizer()
