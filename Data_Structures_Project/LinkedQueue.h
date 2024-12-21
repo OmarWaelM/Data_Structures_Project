@@ -119,7 +119,9 @@ public :
 	bool dequeue(T& frntEntry);  
 	bool peek(T& frntEntry)  const;	
 	int getCount() { return count; }
+	void addToTop(T item);
 	~LinkedQueue();
+
 
 	friend ostream& operator << <T>(ostream& os, LinkedQueue& q);
 
@@ -262,6 +264,15 @@ LinkedQueue<T>::LinkedQueue(const LinkedQueue<T> & LQ)
 		NodePtr = NodePtr->getNext();
 		count++;
 	}	
+}
+
+template <typename T>
+void LinkedQueue<T>::addToTop(T item)	//Adds entry to the start of the queue
+{
+	Node<T>* n = new Node<T>(item);
+	n->setNext(frontPtr);
+	frontPtr = n;
+	count++;
 }
 
 template <typename T>

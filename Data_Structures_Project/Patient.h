@@ -24,6 +24,8 @@ private:
 	int nearestHospital;
 	int distToHospital;
 
+	bool stopped; // During back car failure
+
 public:
 	//Constructor
 	Patient(int id, int requestTime, int hospital, int dist, patientType type, int priority = -1);
@@ -37,10 +39,16 @@ public:
 	int getNearestHospital() { return nearestHospital; }
 	int getFinishTime() { return finishTime; }
 	int getWaitTime() { return pickupTime - reqTime; }
+	bool getStopped() { return stopped; }
 
-	//Time Setters
+	//Setters
+	void setPatientID(int id) { patientID = id; }
 	void setPickup(int pt) { pickupTime = pt; }
 	void setFinished(int ft) { finishTime = ft; }
+	void setDistanceToPickup(int dst) { distToHospital = dst; }
+	void setStopped(bool stp) { stopped = stp; }
+	bool hasArrived(bool state) { if (finishTime != -1) return true; }
+	void setNearestHospital(int hid) { nearestHospital = hid; }
 
 	//Output stream operator overloading
 	friend ostream& operator <<(ostream& os, Patient& patient);
@@ -55,7 +63,8 @@ Patient::Patient(int id, int requestTime, int hospital, int dist, patientType ty
 	 pType(type), 
 	 patientPri(priority), 
 	 pickupTime(-1), 
-	 finishTime(-1)
+	 finishTime(-1),
+	 stopped(false)
 {
 }
 

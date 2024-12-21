@@ -26,10 +26,10 @@ public:
 
 	//Filename getters
 	string getInputFileName() { return fileName; }
-	string getOutputFileNAme() { return outFileName; }
+	string getOutputFileName() { return outFileName; }
 
 	//Formatted output function
-	void Output(int timestep, Hospital** h, int nOfHosp, priQueue<Car*>* backCars, ModifiedPriQ* outCars, LinkedQueue<Patient*>* finished);
+	void Output(int timestep, Hospital** h, int nOfHosp, priQueue<Car*>* backCars, ModifiedPriQ* outCars, LinkedQueue<Patient*>* finished, priQueue<Car*>* checkup);
 	
 	~UI();
 };
@@ -103,11 +103,6 @@ void UI::Start()
 	cout << "Please enter the name of the file you would like to save to: " << endl;
 	cin >> outFileName;
 	printf("\033c");
-
-	if (mode == SILENT)
-	{
-		cout << "Silent Mode, Simulation Starts..." << endl;
-	}
 }
 
 //Checks whether the filename inserted by the user exists or not
@@ -119,7 +114,7 @@ bool UI::fileExists(string& filename)
 }
 
 //Prints lists with proper formatting
-void UI::Output(int timestep, Hospital** h, int nOfHosp, priQueue<Car*>* backCars, ModifiedPriQ* outCars, LinkedQueue<Patient*>* finished)
+void UI::Output(int timestep, Hospital** h, int nOfHosp, priQueue<Car*>* backCars, ModifiedPriQ* outCars, LinkedQueue<Patient*>* finished, priQueue<Car*>* checkup)
 {
 	if (mode == INTERACTIVE)
 	{
@@ -131,6 +126,7 @@ void UI::Output(int timestep, Hospital** h, int nOfHosp, priQueue<Car*>* backCar
 			cout << "-------------------------------------------------" << endl;
 			cout << outCars->getCount() << " ==> Out cars: " << *outCars << endl;
 			cout << backCars->getCount() << " <== Back cars: " << *backCars << endl;
+			cout << checkup->getCount() << " Checkup cars: " << *checkup << endl;
 			cout << "-------------------------------------------------" << endl;
 			cout << finished->getCount() << " finished patients: " << *finished << endl;
 			cout << "Press any key to display next hospital" << endl;
